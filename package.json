@@ -1,0 +1,14 @@
+{
+  "name": "hermes-reception",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm run --parallel --filter @hermes/backend --filter @hermes/admin dev",
+    "dev:backend": "pnpm --filter @hermes/backend dev",
+    "dev:admin": "pnpm --filter @hermes/admin dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "start": "pnpm --parallel --filter @hermes/backend --filter @hermes/admin start"
+  }
+}

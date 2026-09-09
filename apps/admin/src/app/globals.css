@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* radius 3px ทั้งระบบ (spec §4.2) */
+  --rounded-btn: 3px;
+  --rounded-box: 3px;
+  --rounded-badge: 3px;
+  --rounded-field: 3px;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  background-color: #f4f6f8;
+  color: #1b2432;
+  line-height: 1.62;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.42;
+}
+
+/* ค่าตัวเลขที่วัดได้ — tabular numbers (spec §4.2) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* สถานะ stale — ค่าอำพัน */
+.value-stale {
+  color: #8a5a00;
+}
+/* สถานะ dead — ค่าถูกขีดฆ่า (spec §5.3) */
+.value-dead {
+  color: #aab4c2;
+  text-decoration: line-through;
+}

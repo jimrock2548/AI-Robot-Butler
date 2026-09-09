@@ -1,0 +1,231 @@
+// Database schema ตาม spec.md §7 — ใช้เมื่อ DB_MODE=pg
+// (ปัจจุบันรันโหมด memory อยู่; schema นี้พร้อมสำหรับ prisma migrate)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum user_role {
+  viewer
+  operator
+  admin
+}
+
+enum map_status {
+  draft
+  published
+  archived
+}
+
+enum job_source {
+  operator
+  kiosk_touch
+  kiosk_voice
+  auto
+}
+
+enum job_status {
+  queued
+  navigating
+  arrived
+  cancelled
+  failed
+  stopped
+}
+
+model users {
+  id            BigInt      @id @default(autoincrement())
+  username      String      @unique
+  display_name  String
+  email         String?     @unique
+  password_hash String      @map("password_hash")
+  role          user_role   @default(viewer)
+  is_active     Boolean     @default(true)
+  last_login_at DateTime?   @map("last_login_at")
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now()) @updatedAt
+
+  @@map("users")
+}
+
+model sessions {
+  sid    String   @id
+  sess   Json
+  expire DateTime
+  @@map("sessions")
+}
+
+model robots {
+  id         BigInt   @id @default(autoincrement())
+  code       String   @unique
+  model      String   @default("SLAMTEC Hermes Pro Max")
+  base_url   String
+  is_enabled Boolean  @default(true)
+  created_at DateTime @default(now())
+
+  maps        maps[]
+  jobs        jobs[]
+  telemetry   telemetry_samples[]
+  controlLock control_lock?
+
+  @@map("robots")
+}
+
+model maps {
+  id           BigInt      @id @default(autoincrement())
+  robot_id     BigInt      @map("robot_id")
+  version      Int
+  status       map_status  @default(draft)
+  name         String
+  width_m      Decimal     @db.Decimal(6, 2)
+  height_m     Decimal     @db.Decimal(6, 2)
+  geometry     Json
+  slam_map_ref String?     @map("slam_map_ref")
+  created_by   BigInt?
+  published_by BigInt?
+  published_at DateTime?
+  created_at   DateTime    @default(now())
+
+  robot    robots        @relation(fields: [robot_id], references: [id])
+  pois     pois[]
+  keepouts keepout_zones[]
+
+  @@unique([robot_id, version])
+  @@index([robot_id, status])
+  @@map("maps")
+}
+
+model pois {
+  id          BigInt   @id @default(autoincrement())
+  map_id      BigInt   @map("map_id")
+  code        String
+  name_th     String
+  name_en     String
+  x           Decimal  @db.Decimal(8, 3)
+  y           Decimal  @db.Decimal(8, 3)
+  heading_deg Decimal? @db.Decimal(5, 1)
+  zone        String?
+  is_public   Boolean  @default(true)
+  is_dock     Boolean  @default(false)
+  sort_order  Int      @default(0)
+
+  map maps @relation(fields: [map_id], references: [id], onDelete: Cascade)
+
+  @@unique([map_id, code])
+  @@map("pois")
+}
+
+model keepout_zones {
+  id     BigInt @id @default(autoincrement())
+  map_id BigInt @map("map_id")
+  name   String
+  polygon Json
+
+  map maps @relation(fields: [map_id], references: [id], onDelete: Cascade)
+
+  @@map("keepout_zones")
+}
+
+model jobs {
+  id            BigInt      @id @default(autoincrement())
+  ref           String      @unique
+  robot_id      BigInt      @map("robot_id")
+  map_version   Int
+  dest_poi_code String      @map("dest_poi_code")
+  dest_name     String
+  source        job_source
+  requested_by  BigInt?
+  status        job_status  @default(queued)
+  distance_m    Decimal?    @db.Decimal(8, 2)
+  departed_at   DateTime?
+  arrived_at    DateTime?
+  cancel_reason String?
+  created_at    DateTime    @default(now())
+
+  robot  robots      @relation(fields: [robot_id], references: [id])
+  events job_events[]
+
+  @@index([robot_id, created_at(sort: Desc)])
+  @@map("jobs")
+}
+
+model job_events {
+  id     BigInt   @id @default(autoincrement())
+  job_id BigInt   @map("job_id")
+  at     DateTime @default(now())
+  kind   String
+  detail Json?
+
+  job jobs @relation(fields: [job_id], references: [id], onDelete: Cascade)
+
+  @@map("job_events")
+}
+
+model telemetry_samples {
+  robot_id    BigInt
+  at          DateTime
+  battery_pct Decimal? @db.Decimal(5, 2)
+  x           Decimal? @db.Decimal(8, 3)
+  y           Decimal? @db.Decimal(8, 3)
+  heading_deg Decimal? @db.Decimal(5, 1)
+  speed_mps   Decimal? @db.Decimal(5, 2)
+  wifi_dbm    Int?
+  cpu_pct     Int?
+
+  robot robots @relation(fields: [robot_id], references: [id])
+
+  @@id([robot_id, at])
+  @@map("telemetry_samples")
+}
+
+model control_lock {
+  robot_id    BigInt
+  held_by     BigInt
+  mode        String
+  acquired_at DateTime  @default(now())
+  expires_at  DateTime
+
+  robot robots @relation(fields: [robot_id], references: [id])
+
+  @@map("control_lock")
+}
+
+model audit_log {
+  id     BigInt   @id @default(autoincrement())
+  at     DateTime @default(now())
+  user_id BigInt?
+  action String
+  target String?
+  detail Json?
+  ip     String?
+
+  @@map("audit_log")
+}
+
+model ai_conversations {
+  id         BigInt   @id @default(autoincrement())
+  at         DateTime @default(now())
+  lang       String
+  transcript String
+  intent     String?
+  confidence Decimal? @db.Decimal(4, 3)
+  job_id     BigInt?
+  latency_ms Int?
+
+  @@map("ai_conversations")
+}
+
+model ai_rejections {
+  id         BigInt   @id @default(autoincrement())
+  at         DateTime @default(now())
+  transcript String
+  reason     String
+  detail     Json?
+
+  @@map("ai_rejections")
+}

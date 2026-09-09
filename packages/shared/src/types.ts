@@ -1,0 +1,179 @@
+/**
+ * Types ที่ frontend/backend แชร์กัน — ต้องตรงกับ schema ใน spec.md §7 และ §8
+ */
+
+export type UserRole = 'viewer' | 'operator' | 'admin';
+export type LinkStatus = 'ok' | 'stale' | 'dead';
+export type RobotMode = 'idle' | 'manual' | 'navigating' | 'docking' | 'stopped';
+export type JobStatus = 'queued' | 'navigating' | 'arrived' | 'cancelled' | 'failed' | 'stopped';
+export type JobSource = 'operator' | 'kiosk_touch' | 'kiosk_voice' | 'auto';
+export type MapStatus = 'draft' | 'published' | 'archived';
+export type Lang = 'th' | 'en';
+
+export interface Telemetry {
+  batteryPct: number;
+  /** เมตร ในกรอบพิกัดของ SLAM */
+  x: number;
+  y: number;
+  headingDeg: number;
+  speedMps: number;
+  wifiDbm: number;
+  cpuPct: number;
+  uptimeSec: number;
+  lidar: 'ok' | 'warn' | 'fault';
+  /** ISO timestamp ที่หุ่นรายงานค่าชุดนี้ (ใช้เทียบ NFR-02) */
+  capturedAt: string;
+}
+
+export interface LockInfo {
+  heldBy: number | null;
+  userName: string | null;
+  mode: 'manual' | 'auto' | null;
+  expiresAt: string | null;
+}
+
+export interface JobSummary {
+  id: number;
+  ref: string;
+  destPoiCode: string;
+  destName: string;
+  source: JobSource;
+  status: JobStatus;
+  mapVersion: number;
+  distanceM: number | null;
+  remainingM: number | null;
+  etaSec: number | null;
+  /** 0..1 */
+  progress: number;
+  requestedByName: string | null;
+  createdAt: string;
+}
+
+export interface JobEvent {
+  id: number;
+  at: string;
+  kind: string;
+  detail?: Record<string, unknown> | null;
+}
+
+export interface JobDetail extends JobSummary {
+  events: JobEvent[];
+  cancelReason?: string | null;
+  departedAt?: string | null;
+  arrivedAt?: string | null;
+}
+
+export interface Poi {
+  code: string;
+  nameTh: string;
+  nameEn: string;
+  x: number;
+  y: number;
+  headingDeg: number | null;
+  zone?: string | null;
+  isPublic: boolean;
+  isDock: boolean;
+  sortOrder: number;
+}
+
+export interface RoomShape {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  nameTh?: string;
+  nameEn?: string;
+  kind?: 'lobby' | 'room' | 'corridor';
+}
+
+export interface KeepoutZone {
+  id: number;
+  name: string;
+  polygon: [number, number][];
+}
+
+export interface MapVersionSummary {
+  id: number;
+  version: number;
+  status: MapStatus;
+  name: string;
+  widthM: number;
+  heightM: number;
+  publishedBy?: string | null;
+  publishedAt?: string | null;
+  createdAt: string;
+}
+
+export interface MapFull extends MapVersionSummary {
+  rooms: RoomShape[];
+  pois: Poi[];
+  keepouts: KeepoutZone[];
+}
+
+export interface RobotState {
+  robotCode: string;
+  linkStatus: LinkStatus;
+  lastSeenAt: string | null;
+  mode: RobotMode;
+  /** null เมื่อ link dead */
+  telemetry: Telemetry | null;
+  lock: LockInfo;
+  currentJob: JobSummary | null;
+  /** true เมื่อ backend ใช้ข้อมูลจำลอง (ยังไม่ได้ต่อ Hermes จริง) */
+  simulated: boolean;
+}
+
+export interface User {
+  id: number;
+  username: string;
+  displayName: string;
+  email: string | null;
+  role: UserRole;
+  isActive: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
+export interface SessionUser {
+  id: number;
+  username: string;
+  displayName: string;
+  role: UserRole;
+}
+
+export interface AiRejection {
+  id: number;
+  at: string;
+  transcript: string;
+  reason: string;
+  detail?: Record<string, unknown> | null;
+}
+
+export interface AiConversation {
+  id: number;
+  at: string;
+  lang: string;
+  transcript: string;
+  intent: string | null;
+  confidence: number | null;
+  jobId: number | null;
+  latencyMs: number | null;
+}
+
+export interface AuditEntry {
+  id: number;
+  at: string;
+  userName: string | null;
+  action: string;
+  target: string | null;
+  detail?: Record<string, unknown> | null;
+  ip: string | null;
+}
+
+export interface KioskDestination {
+  code: string;
+  nameTh: string;
+  nameEn: string;
+  isDock: boolean;
+}
