@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
-  ArrowLeftRightIcon,
+  ArrowsRightLeftIcon,
   ClipboardDocumentListIcon,
   MapIcon,
   UsersIcon,
@@ -13,7 +13,7 @@ import {
 
 const items = [
   { href: '/', label: 'แดชบอร์ด', icon: HomeIcon, adminOnly: false },
-  { href: '/control', label: 'ควบคุม', icon: ArrowLeftRightIcon, adminOnly: false },
+  { href: '/control', label: 'ควบคุม', icon: ArrowsRightLeftIcon, adminOnly: false },
   { href: '/jobs', label: 'งาน (Jobs)', icon: ClipboardDocumentListIcon, adminOnly: false },
   { href: '/map', label: 'แผนที่', icon: MapIcon, adminOnly: false },
   { href: '/users', label: 'ผู้ใช้', icon: UsersIcon, adminOnly: true },

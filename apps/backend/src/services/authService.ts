@@ -23,9 +23,8 @@ function checkLoginRateLimit(ip: string): void {
 }
 
 async function hashPassword(pw: string): Promise<string> {
-  return String(
-    await argon2.hash(pw, { memoryCost: 19456, timeCost: 2, outputLen: 32, type: argon2.argon2id }),
-  );
+  // Argon2id (NFR-04) — Algorithm.Argon2id = 2 (ใช้ค่าตัวเลขตรงเพื่อเข้ากันได้กับ tsx/esbuild)
+  return String(await argon2.hash(pw, { memoryCost: 19456, timeCost: 2, outputLen: 32, algorithm: 2 }));
 }
 
 export async function register(input: RegisterInput, ip?: string): Promise<UserRow> {
@@ -55,7 +54,7 @@ export async function register(input: RegisterInput, ip?: string): Promise<UserR
 }
 
 export async function login(username: string, password: string, ip?: string): Promise<UserRow> {
-  checkLoginRateLimit(ip);
+  checkLoginRateLimit(ip ?? 'unknown');
   const w = getWorld();
   const user = w.getUserByName(username);
   if (!user || !user.isActive) {

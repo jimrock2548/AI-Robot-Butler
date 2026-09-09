@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #12285a;
+  color: #1b2432;
+  font-family: var(--font-anuphan), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  touch-action: manipulation; /* จอด้านหน้า — ปิด double-tap zoom */
+}
+
+/*
+ * Kiosk scaling (spec §9.2, NFR-10) — ห้ามผูกพิกเซล
+ * .kiosk = container ที่ know ขนาดของตัวเอง
+ * --u = หน่วยฐาน: จำกัดทั้งกว้างและสูง (9:16) — จอที่กว้าง/แคบกว่าจะสเกลตามด้านที่จำกัด
+ * ทุกขนาดในหน้า kiosk เขียนเป็น calc(N * var(--u))
+ */
+.kiosk {
+  container-type: size;
+  --u: min(1cqi, 0.5625cqh);
+}
+
+/* ตัวเลขเท่ากันทุกหลัก (spec §12) */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

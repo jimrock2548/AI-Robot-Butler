@@ -7,5 +7,6 @@ out/
 .env.local
 .DS_Store
 coverage/
+*.tsbuildinfo
 prisma/*.db
 pgdata/

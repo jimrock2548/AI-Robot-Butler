@@ -4,11 +4,12 @@
   "private": true,
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "dev": "pnpm run --parallel --filter @hermes/backend --filter @hermes/admin dev",
+    "dev": "pnpm run --parallel --filter @hermes/backend --filter @hermes/admin --filter @hermes/kiosk dev",
     "dev:backend": "pnpm --filter @hermes/backend dev",
     "dev:admin": "pnpm --filter @hermes/admin dev",
+    "dev:kiosk": "pnpm --filter @hermes/kiosk dev",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "start": "pnpm --parallel --filter @hermes/backend --filter @hermes/admin start"
+    "start": "pnpm --parallel --filter @hermes/backend --filter @hermes/admin --filter @hermes/kiosk start"
   }
 }

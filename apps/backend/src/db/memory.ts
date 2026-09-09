@@ -151,7 +151,8 @@ export class World {
   aiRejections: AiRejection[] = [];
   aiConversations: AiConversation[] = [];
 
-  private seq = { user: 0, map: 0, poi: 0, keepout: 0, job: 0, event: 0, audit: 0, jobRef: 0 };
+  /** ลำดับ ID ในหน่วยความจำ (แทน AUTOINCREMENT ของ PostgreSQL) */
+  seq = { user: 0, map: 0, poi: 0, keepout: 0, job: 0, event: 0, audit: 0, jobRef: 0 };
 
   // ── lookups ──────────────────────────────────────────────
   getUser(id: number): UserRow | undefined {
@@ -185,7 +186,7 @@ export class World {
   }
 
   // ── mutations ────────────────────────────────────────────
-  addAudit(userId: number | null, action: string, target: string | null, detail?: Record<string, unknown>, ip?: string): void {
+  addAudit(userId: number | null, action: string, target: string | null, detail?: Record<string, unknown> | null, ip?: string): void {
     this.audit.push({
       id: ++this.seq.audit,
       at: new Date().toISOString(),
@@ -197,7 +198,7 @@ export class World {
     });
   }
 
-  addJobEvent(jobId: number, kind: string, detail?: Record<string, unknown>): void {
+  addJobEvent(jobId: number, kind: string, detail?: Record<string, unknown> | null): void {
     this.jobEvents.push({ id: ++this.seq.event, jobId, at: new Date().toISOString(), kind, detail: detail ?? null });
   }
 
@@ -281,7 +282,8 @@ export async function initWorld(): Promise<World> {
   const now = new Date().toISOString();
 
   const hash = async (pw: string) =>
-    argon2.hash(pw, { memoryCost: 19456, timeCost: 2, outputLen: 32, type: argon2.argon2id }).then(String);
+    // Argon2id (NFR-04) — Algorithm.Argon2id = 2 (ใช้ค่าตัวเลขตรงเพื่อเข้ากันได้กับ tsx/esbuild)
+    argon2.hash(pw, { memoryCost: 19456, timeCost: 2, outputLen: 32, algorithm: 2 }).then(String);
 
   const mkUser = (
     username: string,

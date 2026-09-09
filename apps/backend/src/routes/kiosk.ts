@@ -63,7 +63,8 @@ kioskRouter.post('/cancel', (req, res, next) => {
       res.json({ job: null });
       return;
     }
-    const summary: JobSummary = jobSummary(cancelJob(job.id, KIOSK_CANCELLER, 'ยกเลิกจากจอหุ่น'));
+    // cancelJob() คืนค่า JobSummary มาแล้ว (ไม่ต้องผ่าน jobSummary() ซ้ำ)
+    const summary: JobSummary = cancelJob(job.id, KIOSK_CANCELLER, 'ยกเลิกจากจอหุ่น');
     res.json({ job: summary });
   } catch (e) {
     next(e);
