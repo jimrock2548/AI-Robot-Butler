@@ -31,3 +31,17 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+.voice-wave > span {
+  animation: voice-level 900ms ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes voice-level {
+  from { transform: scaleY(0.45); }
+  to { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-wave > span { animation: none; }
+}

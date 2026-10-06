@@ -1,6 +1,8 @@
 import type { JobSummary, RobotState, Telemetry } from '@hermes/shared';
 import { config } from '../config';
+import { ApiError } from '../errors';
 import { getWorld, type JobRow, type UserRow } from '../db/memory';
+import { hermes, hermesUptimeAvailable } from '../hermes/driver';
 
 /**
  * ประกอบ RobotState — แหล่งความจริงเดียวของสถานะหุ่น (spec §6, §5.3)
@@ -17,10 +19,10 @@ export function buildTelemetry(): Telemetry | null {
     y: Math.round(s.y * 100) / 100,
     headingDeg: Math.round(s.headingDeg),
     speedMps: Math.round(s.speed * 100) / 100,
-    wifiDbm: s.wifiDbm,
-    cpuPct: s.cpuPct,
-    uptimeSec: Math.round(s.uptimeSec),
-    lidar: s.lidar,
+    wifiDbm: hermes ? null : s.wifiDbm,
+    cpuPct: hermes ? null : s.cpuPct,
+    uptimeSec: hermes && !hermesUptimeAvailable ? null : Math.round(s.uptimeSec),
+    lidar: hermes ? null : s.lidar,
     capturedAt: new Date(s.lastTelemetryAt).toISOString(),
   };
 }
@@ -30,6 +32,15 @@ export function linkStatus(): 'ok' | 'stale' | 'dead' {
   if (age < config.telemetry.staleMs) return 'ok';
   if (age < config.telemetry.deadMs) return 'stale';
   return 'dead';
+}
+
+export function requireRobotLink(): void {
+  if (linkStatus() === 'dead') {
+    throw new ApiError(503, 'robot_offline', 'ขาดการเชื่อมต่อกับหุ่นยนต์');
+  }
+  if (getWorld().sim.mode === 'stopped') {
+    throw new ApiError(409, 'estop_active', 'หุ่นยนต์อยู่ในสถานะหยุดฉุกเฉิน ต้องปลดจากตัวหุ่นก่อน');
+  }
 }
 
 export function buildRobotState(): RobotState {
@@ -44,12 +55,16 @@ export function buildRobotState(): RobotState {
     telemetry: buildTelemetry(),
     lock: {
       heldBy: lock?.heldBy ?? null,
-      userName: lock ? w.userName(lock.heldBy) : null,
+      userName: lock
+        ? lock.heldBy === null
+          ? job?.source === 'auto' ? 'ระบบอัตโนมัติ' : 'จอหุ่น'
+          : w.userName(lock.heldBy)
+        : null,
       mode: lock?.mode ?? null,
       expiresAt: lock?.expiresAt ?? null,
     },
     currentJob: job ? jobSummary(job) : null,
-    simulated: true,
+    simulated: !hermes,
   };
 }
 
@@ -85,7 +100,9 @@ export function jobSummary(job: JobRow): JobSummary {
     remainingM,
     etaSec,
     progress: Math.round(progress * 1000) / 1000,
-    requestedByName: w.userName(job.requestedBy),
+    requestedByName: job.requestedBy === null
+      ? job.source === 'auto' ? 'ระบบอัตโนมัติ' : 'จอหุ่น'
+      : w.userName(job.requestedBy),
     createdAt: job.createdAt,
   };
 }

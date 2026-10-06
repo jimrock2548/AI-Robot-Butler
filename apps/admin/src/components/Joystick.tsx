@@ -26,6 +26,20 @@ export function Joystick({
   const [focused, setFocused] = useState(false);
   const pressedRef = useRef(pressed);
   pressedRef.current = pressed;
+  const onMoveRef = useRef(onMove);
+  onMoveRef.current = onMove;
+
+  // ส่งคำสั่งซ้ำขณะกดค้าง เพื่อให้ dead-man switch ฝั่งหุ่นหยุดเมื่อจอหลุด
+  useEffect(() => {
+    if (disabled || !Object.values(pressed).some(Boolean)) return;
+    const timer = window.setInterval(() => {
+      const p = pressedRef.current;
+      const vx = p.up ? 1 : p.down ? -1 : 0;
+      const vyaw = p.left ? 1 : p.right ? -1 : 0;
+      onMoveRef.current(vx, vyaw);
+    }, 100);
+    return () => window.clearInterval(timer);
+  }, [pressed, disabled]);
 
   const emit = (p: Pressed) => {
     const vx = p.up ? 1 : p.down ? -1 : 0;

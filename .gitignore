@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .next/
+.next-ai*/
 out/
 *.log
 .env
@@ -10,3 +11,4 @@ coverage/
 *.tsbuildinfo
 prisma/*.db
 pgdata/
+.models/

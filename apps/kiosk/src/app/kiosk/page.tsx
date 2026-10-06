@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import type { JobSummary, KioskDestination, Lang } from '@hermes/shared';
+import type { JobSummary, KioskDestination, KioskSession, Lang } from '@hermes/shared';
 import {
   KioskApiError,
   kioskCancel,
@@ -9,6 +9,7 @@ import {
   kioskEscort,
   kioskSession,
 } from '../../lib/api';
+import { ChatFlow } from './ChatFlow';
 
 /**
  * จอหุ่น (spec §9.2) — /kiosk หน้าเดียว 7 ฉาก (Phase 1: idle / menu / escort / arrived)
@@ -17,7 +18,7 @@ import {
  * - สเกลด้วย container query — ห้ามผูกพิกเซล (NFR-10)
  */
 
-type Scene = 'idle' | 'menu' | 'escort' | 'arrived';
+type Scene = 'idle' | 'menu' | 'escort' | 'arrived' | 'voice';
 
 const u = (n: number) => `calc(${n} * var(--u))`;
 
@@ -26,6 +27,7 @@ export default function KioskPage() {
   const [scene, setScene] = useState<Scene>('idle');
   const [dests, setDests] = useState<KioskDestination[] | null>(null);
   const [job, setJob] = useState<JobSummary | null>(null);
+  const [session, setSession] = useState<KioskSession | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [authError, setAuthError] = useState(false);
@@ -33,10 +35,28 @@ export default function KioskPage() {
 
   const t = useCallback((th: string, en: string) => (lang === 'th' ? th : en), [lang]);
 
+  useEffect(() => {
+    const id = Number(window.sessionStorage.getItem('hermes.kioskJobId'));
+    if (!Number.isSafeInteger(id) || id <= 0) return;
+    kioskSession(id, 'th').then((restored) => {
+      if (restored.job.status === 'navigating' || restored.job.status === 'queued') {
+        setJob(restored.job);
+        setSession(restored);
+        setScene('escort');
+      } else if (restored.job.status === 'arrived') {
+        setJob(restored.job);
+        setSession(restored);
+        setScene('arrived');
+      } else {
+        window.sessionStorage.removeItem('hermes.kioskJobId');
+      }
+    }).catch(() => {});
+  }, []);
+
   /** 401 = token ไม่ตรง — แสดงหน้า error แยก */
   const fail = useCallback(
     (e: unknown): boolean => {
-      if (e instanceof KioskApiError && e.code === 'http_401') {
+      if (e instanceof KioskApiError && ['http_401', 'unauthorized', 'unconfigured'].includes(e.code)) {
         setAuthError(true);
         return true;
       }
@@ -64,6 +84,7 @@ export default function KioskPage() {
       setError(null);
       try {
         const j = await kioskEscort(d.code, lang);
+        window.sessionStorage.setItem('hermes.kioskJobId', String(j.id));
         setJob(j);
         setScene('escort');
       } catch (e) {
@@ -85,7 +106,9 @@ export default function KioskPage() {
     setBusy(true);
     try {
       await kioskCancel();
+      window.sessionStorage.removeItem('hermes.kioskJobId');
       setJob(null);
+      setSession(null);
       setScene('idle');
       setNotice(t('ยกเลิกแล้ว — ผมพร้อมพาไปอีกครั้ง', 'Cancelled — ready to go again'));
     } catch (e) {
@@ -96,10 +119,19 @@ export default function KioskPage() {
   }, [fail, t]);
 
   const goHome = useCallback(() => {
+    window.sessionStorage.removeItem('hermes.kioskJobId');
     setJob(null);
+    setSession(null);
     setError(null);
     setNotice(null);
     setScene('idle');
+  }, []);
+
+  const voiceJob = useCallback((nextJob: JobSummary) => {
+    window.sessionStorage.setItem('hermes.kioskJobId', String(nextJob.id));
+    setJob(nextJob);
+    setSession(null);
+    setScene('escort');
   }, []);
 
   // escort: poll /kiosk/session/:jobId ทุก 2 วินาที (spec §8.2 REST fallback)
@@ -112,10 +144,13 @@ export default function KioskPage() {
         if (!live) return;
         const j = r.job;
         setJob(j);
+        setSession(r);
         if (j.status === 'arrived') {
           setScene('arrived');
         } else if (j.status === 'cancelled' || j.status === 'stopped' || j.status === 'failed') {
           setJob(null);
+          setSession(null);
+          window.sessionStorage.removeItem('hermes.kioskJobId');
           setScene('idle');
           setNotice(
             j.status === 'cancelled'
@@ -127,6 +162,8 @@ export default function KioskPage() {
         if (!live) return;
         if (e instanceof KioskApiError && e.code === 'not_found') {
           setJob(null);
+          setSession(null);
+          window.sessionStorage.removeItem('hermes.kioskJobId');
           setScene('idle');
         } else if (!fail(e)) {
           // ลิงก์หลุด — poll รอบถัดไปจะลองใหม่ (ไม่แสดง error รุนแรง)
@@ -199,6 +236,7 @@ export default function KioskPage() {
           <IdleScene
             t={t}
             onChoose={() => void openMenu()}
+            onVoice={() => { setError(null); setNotice(null); setScene('voice'); }}
             busy={busy}
             notice={notice}
             error={error}
@@ -215,11 +253,12 @@ export default function KioskPage() {
           />
         )}
         {scene === 'escort' && job && (
-          <EscortScene t={t} job={job} onStop={() => void stop()} busy={busy} />
+          <EscortScene t={t} job={job} session={session} onStop={() => void stop()} busy={busy} />
         )}
         {scene === 'arrived' && (
           <ArrivedScene t={t} destName={job?.destName ?? ''} onHome={goHome} />
         )}
+        {scene === 'voice' && <ChatFlow lang={lang} onClose={goHome} onJob={voiceJob} />}
       </main>
     </div>
   );
@@ -230,12 +269,14 @@ type T = (th: string, en: string) => string;
 function IdleScene({
   t,
   onChoose,
+  onVoice,
   busy,
   notice,
   error,
 }: {
   t: T;
   onChoose: () => void;
+  onVoice: () => void;
   busy: boolean;
   notice: string | null;
   error: string | null;
@@ -284,6 +325,17 @@ function IdleScene({
         style={{ width: '80%', height: u(11), fontSize: u(3.4) }}
       >
         {t('เลือกห้อง', 'Choose a room')}
+      </button>
+      <button type="button" onClick={onVoice} disabled={busy}
+        className="bg-surface-2 text-navy border border-line-2 font-display font-bold rounded flex items-center justify-between disabled:opacity-60 active:bg-surface-3"
+        style={{ width: '80%', height: u(9), padding: `0 ${u(2.5)}`, fontSize: u(2.8) }}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+          style={{ width: u(3.6), height: u(3.6) }} aria-hidden>
+          <rect x="9" y="2" width="6" height="12" rx="3" />
+          <path d="M5 10a7 7 0 0 0 14 0M12 17v5m-4 0h8" />
+        </svg>
+        <span>{t('คุยกับผู้ช่วย AI', 'Chat with AI assistant')}</span>
+        <span className="text-ink-3" aria-hidden>→</span>
       </button>
     </div>
   );
@@ -366,8 +418,9 @@ function MenuScene({
   );
 }
 
-function EscortScene({ t, job, onStop, busy }: { t: T; job: JobSummary; onStop: () => void; busy: boolean }) {
+function EscortScene({ t, job, session, onStop, busy }: { t: T; job: JobSummary; session: KioskSession | null; onStop: () => void; busy: boolean }) {
   const pct = Math.round(job.progress * 100);
+  const destination = session?.map?.pois.find((p) => p.code === job.destPoiCode);
   return (
     <div className="flex-1 flex flex-col items-center justify-between min-h-0">
       <div className="text-center w-full">
@@ -375,7 +428,7 @@ function EscortScene({ t, job, onStop, busy }: { t: T; job: JobSummary; onStop: 
           {t('กำลังพาไป…', 'On the way to')}
         </p>
         <h2 className="font-display font-bold text-navy m-0 mt-2" style={{ fontSize: u(5.5) }}>
-          {job.destName}
+          {destination ? t(destination.nameTh, destination.nameEn) : job.destName}
         </h2>
 
         <div className="w-full mt-6" style={{ height: u(3) }}>
@@ -405,6 +458,33 @@ function EscortScene({ t, job, onStop, busy }: { t: T; job: JobSummary; onStop: 
           {t('ระยะที่เหลือ', 'remaining')}
         </p>
       </div>
+
+      {session?.map && session.robot && destination && (
+        <div className="w-full flex-1 min-h-0 mt-4 mb-4">
+          <svg
+            viewBox={`0 0 ${session.map.widthM} ${session.map.heightM}`}
+            preserveAspectRatio="xMidYMid meet"
+            className="w-full h-full bg-surface-2 border border-line rounded"
+            role="img"
+            aria-label={t('แผนที่และตำแหน่งหุ่นระหว่างเดินทาง', 'Map and robot position during escort')}
+          >
+            {session.map.rooms.map((room) => (
+              <rect key={room.id} x={room.x} y={session.map!.heightM - room.y - room.h}
+                width={room.w} height={room.h} fill="#EEF1F5" stroke="#CBD2DC" strokeWidth="0.12" />
+            ))}
+            {session.map.keepouts.map((zone) => (
+              <polygon key={zone.id}
+                points={zone.polygon.map(([x, y]) => `${x},${session.map!.heightM - y}`).join(' ')}
+                fill="#FDF2F3" stroke="#C0182C" strokeWidth="0.12" />
+            ))}
+            <line x1={session.robot.x} y1={session.map.heightM - session.robot.y}
+              x2={destination.x} y2={session.map.heightM - destination.y}
+              stroke="#12285A" strokeWidth="0.2" strokeDasharray="0.5 0.35" />
+            <circle cx={destination.x} cy={session.map.heightM - destination.y} r="0.6" fill="#157347" />
+            <circle cx={session.robot.x} cy={session.map.heightM - session.robot.y} r="0.65" fill="#12285A" />
+          </svg>
+        </div>
+      )}
 
       {/* RBT-06: ปุ่มหยุดเข้าถึงได้โดยไม่ต้องเลื่อน */}
       <button

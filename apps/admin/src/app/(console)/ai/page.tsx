@@ -7,35 +7,48 @@ import { fmtDateTime } from '../../../lib/format';
 
 /**
  * AI (Phase 2 — Qwen บน Jetson) — spec §8.7
- * Phase 1: contract พร้อมแล้ว, POST /ai/intent คืน 501
- * หน้านี้แสดงสถานะ + log rejections / conversations (ว่างใน Phase 1)
+ * Local Phase 2 demo: status + live rejection/conversation log.
  */
 export default function AiPage() {
   const [rejections, setRejections] = useState<AiRejection[] | null>(null);
   const [conversations, setConversations] = useState<AiConversation[] | null>(null);
+  const [status, setStatus] = useState<{ mode: 'off' | 'local'; simulated: boolean; model: string | null } | null>(null);
 
   useEffect(() => {
-    api<AiRejection[]>('/ai/rejections').then(setRejections).catch(() => {});
-    api<AiConversation[]>('/ai/conversations').then(setConversations).catch(() => {});
+    let live = true;
+    const load = () => {
+      api<AiRejection[]>('/ai/rejections').then((items) => { if (live) setRejections(items); }).catch(() => {});
+      api<AiConversation[]>('/ai/conversations').then((items) => { if (live) setConversations(items); }).catch(() => {});
+      api<{ mode: 'off' | 'local'; simulated: boolean; model: string | null }>('/ai/status')
+        .then((next) => { if (live) setStatus(next); }).catch(() => {});
+    };
+    load();
+    const timer = window.setInterval(load, 5000);
+    return () => { live = false; window.clearInterval(timer); };
   }, []);
+
+  const demoReady = status?.mode === 'local' && status.simulated;
 
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="font-sans font-semibold text-ink leading-heading">AI (Phase 2)</h1>
+        <h1 className="font-sans font-semibold text-ink leading-heading">AI · Phase 2</h1>
         <p className="text-sm text-ink-2 mt-1">
-          ระบบสั่งงานด้วยเสียงจะเชื่อมต่อ Qwen บน Jetson ใน Phase 2
+          สถานะโมเดลและประวัติคำขอจาก Kiosk
         </p>
       </div>
 
-      <section className="bg-amber-bg border border-amber rounded-[3px] p-4 text-sm text-ink">
+      <section className={`${demoReady ? 'bg-green-bg border-green' : 'bg-amber-bg border-amber'} border rounded-[3px] p-4 text-sm text-ink`}>
         <div className="flex items-center gap-2 mb-1">
-          <span className="badge bg-amber text-white border-transparent">ยังไม่เชื่อมต่อ</span>
-          <span className="font-semibold">POST /api/ai/intent → 501 not_implemented</span>
+          <span className={`badge ${demoReady ? 'bg-green' : 'bg-amber'} text-white border-transparent`}>
+            {demoReady ? 'ทดลองบนเครื่อง' : 'ยังไม่เปิดใช้งาน'}
+          </span>
+          <span className="font-semibold">{demoReady ? status.model : 'AI_MODE=off หรือไม่ได้ใช้หุ่นจำลอง'}</span>
         </div>
         <p className="text-ink-2 leading-body">
-          Contract ตาม spec §8.7 พร้อมแล้ว — เมื่อ Phase 2 เชื่อม Qwen เสร็จ ระบบจะจำแนก intent
-          (ไปจุด / สถานะ / ยกเลิก) และบันทึกทุกบทสนทนา + ทุกคำสั่งที่ถูกปฏิเสธไว้ที่หน้านี้
+          {demoReady
+            ? 'ข้อความจาก Kiosk ใช้โมเดลในเครื่องกับหุ่นจำลองได้แล้ว ระบบเสียง STT/TTS และหุ่นจริงยังไม่เชื่อมต่อ'
+            : 'เปิดชุดทดลองด้วย AI_MODE=local และ ROBOT_MODE=sim ตามคู่มือ Phase 2 เพื่อทดสอบข้อความ'}
         </p>
       </section>
 
@@ -45,7 +58,7 @@ export default function AiPage() {
         </h2>
         {rejections ? (
           rejections.length === 0 ? (
-            <p className="text-sm text-ink-3">ยังไม่มีการปฏิเสธคำสั่ง (Phase 1 — AI ยังไม่ทำงาน)</p>
+            <p className="text-sm text-ink-3">ยังไม่มีคำสั่งที่ถูกปฏิเสธ</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
@@ -77,7 +90,7 @@ export default function AiPage() {
         </h2>
         {conversations ? (
           conversations.length === 0 ? (
-            <p className="text-sm text-ink-3">ยังไม่มีบทสนทนา (Phase 1 — AI ยังไม่ทำงาน)</p>
+            <p className="text-sm text-ink-3">ยังไม่มีบทสนทนา</p>
           ) : (
             <table className="w-full text-sm">
               <thead>

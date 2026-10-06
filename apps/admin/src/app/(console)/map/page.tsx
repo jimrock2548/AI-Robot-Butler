@@ -86,6 +86,21 @@ export default function MapPage() {
       loadVersions();
     });
 
+  const importMap = async (file: File) => {
+    try {
+      const body = JSON.parse(await file.text()) as unknown;
+      const result = await act('import', () => api('/maps/import', {
+        method: 'POST', body: JSON.stringify(body),
+      }), 'นำเข้าแผนที่เป็นฉบับร่างแล้ว');
+      if (result) {
+        loadDraft();
+        loadVersions();
+      }
+    } catch {
+      setError('อ่านไฟล์แผนที่ JSON ไม่สำเร็จ');
+    }
+  };
+
   const savePoi = (f: PoiForm, code: string) =>
     act('poi', () =>
       api(`/maps/draft/pois/${encodeURIComponent(code)}`, {
@@ -200,13 +215,24 @@ export default function MapPage() {
             robot={t ? { x: t.x, y: t.y, headingDeg: t.headingDeg } : null}
           />
         ) : (
-          <p className="text-sm text-ink-3">กำลังโหลด…</p>
+          <p className="text-sm text-ink-3">ยังไม่มีแผนที่ที่เผยแพร่</p>
         )}
       </section>
 
       {/* ฉบับร่าง (admin, CON-09) */}
       {isAdmin && (
         <section className="bg-surface border border-line rounded-[3px] p-4">
+          {!draft && (
+            <label className="flex flex-col gap-2 mb-4 text-sm text-ink-2">
+              <span>นำเข้าแผนที่อาคารจากไฟล์ JSON เพื่อสร้างฉบับร่าง</span>
+              <input type="file" accept=".json,application/json" disabled={busy !== null}
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void importMap(file);
+                  event.target.value = '';
+                }} className="file-input file-input-bordered w-full max-w-md" />
+            </label>
+          )}
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-ink-2">
               ฉบับร่าง{' '}
@@ -230,7 +256,7 @@ export default function MapPage() {
               <button
                 type="button"
                 onClick={() => createDraft()}
-                disabled={busy !== null}
+                disabled={busy !== null || !published}
                 className="btn btn-primary btn-sm disabled:opacity-60"
               >
                 {busy === 'draft' ? 'กำลังสร้าง…' : 'สร้างร่างจากเวอร์ชันปัจจุบัน'}

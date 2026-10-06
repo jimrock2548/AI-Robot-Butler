@@ -1,21 +1,32 @@
 import http from 'node:http';
 import { Server } from 'socket.io';
 import { config } from './config';
-import { initWorld } from './db/memory';
-import { createApp } from './app';
+import { getWorld, initWorld } from './db/memory';
+import { createApp, sessionMiddleware } from './app';
 import { setupSockets } from './ws/socket';
 import { startTelemetryPoller } from './services/telemetryPoller';
 import { setMapIo } from './routes/maps';
+import { initPostgresWorld } from './db/postgres';
+import { hermes } from './hermes/driver';
 
 async function main(): Promise<void> {
-  if (config.dbMode !== 'memory') {
-    throw new Error('DB_MODE=pg ยังไม่รองรับ — รันด้วย DB_MODE=memory ก่อน (เตรียม schema ไว้ที่ prisma/schema.prisma)');
+  if (config.robotMode === 'hermes' && config.dbMode !== 'pg') throw new Error('ROBOT_MODE=hermes requires DB_MODE=pg');
+  if (process.env.NODE_ENV === 'production') {
+    if (config.dbMode !== 'pg') throw new Error('Production requires DB_MODE=pg');
+    if (config.sessionSecret.length < 32 || config.sessionSecret === 'dev-only-secret-change-me') {
+      throw new Error('Production requires a random SESSION_SECRET of at least 32 characters');
+    }
+    if (config.kioskToken.length < 32 || config.kioskToken === 'dev-kiosk-token') {
+      throw new Error('Production requires a random KIOSK_TOKEN of at least 32 characters');
+    }
   }
-
-  const world = await initWorld();
+  if (config.dbMode === 'pg') await initPostgresWorld();
+  else await initWorld();
+  const world = getWorld();
+  if (hermes) world.sim.lastTelemetryAt = 0;
   console.log(
     `[hermes] ready — ${world.users.length} users, ${world.robots[0].code}, ` +
-      `${world.publishedPois().length} POIs, simulated robot`,
+      `${world.publishedPois().length} POIs, ${hermes ? 'Hermes REST' : 'simulated robot'}`,
   );
 
   const app = createApp();
@@ -23,6 +34,7 @@ async function main(): Promise<void> {
   const io = new Server(server, {
     cors: { origin: config.corsOrigin, credentials: true },
   });
+  io.engine.use(sessionMiddleware);
 
   setMapIo(io);
   setupSockets(io);

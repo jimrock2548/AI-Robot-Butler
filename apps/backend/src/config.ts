@@ -1,7 +1,13 @@
+import { config as loadEnv } from 'dotenv';
+import { fileURLToPath } from 'node:url';
+
+loadEnv({ path: fileURLToPath(new URL('../../../.env', import.meta.url)) });
+
 export const config = {
   port: Number(process.env.PORT ?? 4000),
   /** memory = ข้อมูลในหน่วยความจำ + หุ่นจำลอง (ไม่ต้องการ PostgreSQL) */
   dbMode: (process.env.DB_MODE ?? 'memory') as 'memory' | 'pg',
+  robotMode: (process.env.ROBOT_MODE ?? (process.env.DB_MODE === 'pg' ? 'hermes' : 'sim')) as 'sim' | 'hermes',
   databaseUrl: process.env.DATABASE_URL ?? 'postgresql://hermes:hermes@localhost:5432/hermes',
   sessionSecret: process.env.SESSION_SECRET ?? 'dev-only-secret-change-me',
   corsOrigin: (process.env.CORS_ORIGIN ?? 'http://localhost:3000')
@@ -12,6 +18,13 @@ export const config = {
     baseUrl: process.env.HERMES_BASE_URL ?? 'http://192.168.1.50:1448',
   },
   kioskToken: process.env.KIOSK_TOKEN ?? 'dev-kiosk-token',
+  ai: {
+    mode: (process.env.AI_MODE ?? 'off') as 'off' | 'local',
+    baseUrl: process.env.AI_BASE_URL ?? 'http://127.0.0.1:8080',
+    model: process.env.AI_MODEL ?? 'qwen3.5-2b',
+    minConfidence: Number(process.env.AI_MIN_CONFIDENCE ?? 0.8),
+    searxngUrl: process.env.SEARXNG_URL ?? 'http://127.0.0.1:8888',
+  },
   telemetry: {
     /** poll Hermes ทุก 500 ms (spec §5.1) */
     pollMs: 500,

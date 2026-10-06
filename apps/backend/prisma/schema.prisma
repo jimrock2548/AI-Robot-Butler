@@ -1,5 +1,5 @@
 // Database schema ตาม spec.md §7 — ใช้เมื่อ DB_MODE=pg
-// (ปัจจุบันรันโหมด memory อยู่; schema นี้พร้อมสำหรับ prisma migrate)
+// ใช้เมื่อ DB_MODE=pg; migration อยู่ใน prisma/migrations
 
 generator client {
   provider = "prisma-client-js"
@@ -184,11 +184,11 @@ model telemetry_samples {
 }
 
 model control_lock {
-  robot_id    BigInt
-  held_by     BigInt
+  robot_id    BigInt    @id
+  held_by     BigInt?
   mode        String
   acquired_at DateTime  @default(now())
-  expires_at  DateTime
+  expires_at  DateTime?
 
   robot robots @relation(fields: [robot_id], references: [id])
 

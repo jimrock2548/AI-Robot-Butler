@@ -1,7 +1,7 @@
 import { config } from '../config';
 import { ApiError } from '../errors';
 import { getWorld, type UserRow } from '../db/memory';
-import { jobSummary } from './robotService';
+import { jobSummary, requireRobotLink } from './robotService';
 
 /**
  * Control lock — บังคับฝั่ง server ทั้งหมด (spec §6.2)
@@ -12,7 +12,8 @@ import { jobSummary } from './robotService';
  *  - E-Stop ปลด lock ทันที
  */
 
-export function acquireLock(user: UserRow, mode: 'manual' | 'auto', ip?: string): void {
+export function acquireLock(user: UserRow, mode: 'manual', ip?: string): void {
+  requireRobotLink();
   const w = getWorld();
   const active = w.activeJob();
 
@@ -59,6 +60,7 @@ export function heartbeatLock(user: UserRow, ip?: string): void {
   const w = getWorld();
   const lock = w.lock;
   if (!lock) throw new ApiError(409, 'no_lock', 'ยังไม่มีการถือ lock');
+  if (lock.mode !== 'manual') throw new ApiError(409, 'job_in_progress', 'ล็อกของงานนำทางต้องจัดการผ่านงาน');
   if (lock.heldBy !== user.id && user.role !== 'admin') {
     throw new ApiError(403, 'forbidden', 'คุณไม่ได้ถือ lock นี้');
   }
@@ -70,6 +72,7 @@ export function releaseLock(user: UserRow, ip?: string): void {
   const w = getWorld();
   const lock = w.lock;
   if (!lock) return;
+  if (lock.mode !== 'manual') throw new ApiError(409, 'job_in_progress', 'ยกเลิกงานก่อนปล่อยล็อก');
   if (lock.heldBy !== user.id && user.role !== 'admin') {
     throw new ApiError(403, 'forbidden', 'คุณไม่ได้ถือ lock นี้');
   }

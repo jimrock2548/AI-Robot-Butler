@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth';
 import { getWorld } from '../db/memory';
+import { classifyTranscript } from '../services/aiService';
+import { config } from '../config';
 
 /**
  * AI — Phase 2 (Qwen บน Jetson)
@@ -9,14 +11,14 @@ import { getWorld } from '../db/memory';
 export const aiRouter = Router();
 aiRouter.use(requireAuth);
 
-aiRouter.post('/intent', (req, res, next) => {
+aiRouter.get('/status', (_req, res) => {
+  res.json({ mode: config.ai.mode, simulated: config.robotMode === 'sim', model: config.ai.mode === 'local' ? config.ai.model : null });
+});
+
+aiRouter.post('/intent', async (req, res, next) => {
   try {
-    res.status(501).json({
-      error: {
-        code: 'not_implemented',
-        message: 'ระบบ AI ยังไม่เชื่อมต่อ (Phase 2)',
-      },
-    });
+    const decision = await classifyTranscript(req.body);
+    res.json({ intent: decision.intent, confidence: decision.confidence, args: { poiCode: decision.poiCode ?? null } });
   } catch (e) {
     next(e);
   }

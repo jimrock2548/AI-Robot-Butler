@@ -17,11 +17,11 @@ export interface Telemetry {
   y: number;
   headingDeg: number;
   speedMps: number;
-  wifiDbm: number;
-  cpuPct: number;
-  uptimeSec: number;
-  lidar: 'ok' | 'warn' | 'fault';
-  /** ISO timestamp ที่หุ่นรายงานค่าชุดนี้ (ใช้เทียบ NFR-02) */
+  wifiDbm: number | null;
+  cpuPct: number | null;
+  uptimeSec: number | null;
+  lidar: 'ok' | 'warn' | 'fault' | null;
+  /** เวลา Backend รับค่าชุดนี้; REST API ชุดนี้ไม่ได้ส่ง timestamp จากหุ่น */
   capturedAt: string;
 }
 
@@ -176,4 +176,17 @@ export interface KioskDestination {
   nameTh: string;
   nameEn: string;
   isDock: boolean;
+}
+
+export interface KioskSession {
+  job: JobSummary;
+  lang: Lang;
+  map: {
+    widthM: number;
+    heightM: number;
+    rooms: RoomShape[];
+    pois: Poi[];
+    keepouts: KeepoutZone[];
+  } | null;
+  robot: { x: number; y: number; headingDeg: number } | null;
 }

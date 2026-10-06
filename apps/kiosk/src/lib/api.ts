@@ -1,12 +1,9 @@
-import type { JobSummary, KioskDestination, Lang } from '@hermes/shared';
+import type { JobSummary, KioskDestination, KioskSession, Lang } from '@hermes/shared';
 
 /**
  * Kiosk API client — device token (spec §8.6)
- * เข้าถึงได้เฉพาะ 4 endpoint: destinations / escort / session / cancel
+ * คำขอเสียงและข้อความผ่าน Kiosk proxy; เสียงยังคืน 501 จนกว่า STT พร้อม
  */
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
-const TOKEN = process.env.NEXT_PUBLIC_KIOSK_TOKEN ?? 'dev-kiosk-token';
-
 export class KioskApiError extends Error {
   constructor(
     message: string,
@@ -17,11 +14,10 @@ export class KioskApiError extends Error {
 }
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}/api${path}`, {
+  const res = await fetch(`/api${path}`, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${TOKEN}`,
       ...(init?.headers ?? {}),
     },
     cache: 'no-store',
@@ -53,9 +49,88 @@ export function kioskEscort(destPoiCode: string, lang: Lang) {
 }
 
 export function kioskSession(jobId: number, lang: Lang) {
-  return req<{ job: JobSummary; lang: Lang }>(`/kiosk/session/${jobId}?lang=${lang}`);
+  return req<KioskSession>(`/kiosk/session/${jobId}?lang=${lang}`);
 }
 
 export function kioskCancel() {
   return req<{ job: JobSummary | null }>('/kiosk/cancel', { method: 'POST', body: '{}' });
+}
+
+export function kioskAiStatus() {
+  return req<{ textReady: boolean; voiceReady: boolean; webReady: boolean; simulated: boolean }>('/kiosk/ai-status');
+}
+
+export interface KioskChatMessage { role: 'user' | 'assistant'; content: string }
+export interface KioskChatSource { title: string; url: string; snippet: string; retrievedAt: string }
+export type KioskChatEvent =
+  | { type: 'route'; route: 'chat' | 'database' | 'web' | 'action' }
+  | { type: 'delta'; text: string }
+  | { type: 'done'; sources?: KioskChatSource[]; job?: JobSummary | null }
+  | { type: 'error'; message: string };
+
+export async function* kioskChat(messages: KioskChatMessage[], lang: Lang, signal: AbortSignal): AsyncGenerator<KioskChatEvent> {
+  const res = await fetch('/api/kiosk/chat', { method: 'POST', cache: 'no-store',
+    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages, lang }), signal });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null) as { error?: { code?: string; message?: string } } | null;
+    throw new KioskApiError(body?.error?.message ?? `HTTP ${res.status}`, body?.error?.code ?? `http_${res.status}`);
+  }
+  if (!res.body) throw new KioskApiError('ไม่ได้รับคำตอบจากระบบ', 'empty_stream');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let completed = false;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let end: number;
+      while ((end = buffer.indexOf('\n')) !== -1) {
+        const line = buffer.slice(0, end).trim();
+        buffer = buffer.slice(end + 1);
+        if (!line) continue;
+        const event = JSON.parse(line) as KioskChatEvent;
+        if (event.type === 'error') throw new KioskApiError(event.message, 'chat_failed');
+        if (event.type === 'done') completed = true;
+        yield event;
+      }
+    }
+    if (!completed) throw new KioskApiError('การเชื่อมต่อถูกตัดก่อนตอบเสร็จ', 'chat_incomplete');
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+export interface KioskVoiceResult {
+  transcript: string;
+  replyText: string;
+  job?: JobSummary | null;
+  rejected?: boolean;
+}
+
+export function kioskIntent(transcript: string, lang: Lang, signal?: AbortSignal) {
+  return req<KioskVoiceResult>('/kiosk/intent', {
+    method: 'POST',
+    body: JSON.stringify({ transcript, lang }),
+    signal,
+  });
+}
+
+export async function kioskVoice(audio: Blob, lang: Lang): Promise<KioskVoiceResult> {
+  const body = new FormData();
+  body.append('audio', audio, audio.type.includes('mp4') ? 'speech.mp4' : 'speech.webm');
+  body.append('lang', lang);
+  const res = await fetch('/api/kiosk/voice', { method: 'POST', body, cache: 'no-store' });
+  if (!res.ok) {
+    let code = `http_${res.status}`;
+    let message = `HTTP ${res.status}`;
+    try {
+      const data = (await res.json()) as { error?: { code?: string; message?: string } };
+      code = data.error?.code ?? code;
+      message = data.error?.message ?? message;
+    } catch { /* ใช้ HTTP status */ }
+    throw new KioskApiError(message, code);
+  }
+  return (await res.json()) as KioskVoiceResult;
 }

@@ -25,11 +25,12 @@ export default function ControlPage() {
   const me = useMe();
   const now = useNow();
   const [map, setMap] = useState<MapFull | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [destCode, setDestCode] = useState('');
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const manualRef = useRef<number | null>(null);
+  const lastManualAt = useRef(0);
 
   const t = state?.telemetry ?? null;
   const lock = state?.lock ?? null;
@@ -45,7 +46,8 @@ export default function ControlPage() {
       .then((m) => {
         if (live) setMap(m);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (live) setMapLoaded(true); });
     return () => {
       live = false;
     };
@@ -80,13 +82,13 @@ export default function ControlPage() {
   /** joystick → REST fallback (throttle 100 ms = 10 Hz ตาม spec §5.2) */
   const onMove = (vx: number, vyaw: number) => {
     if (!iHold || lock?.mode !== 'manual' || linkDead) return;
-    if (manualRef.current) window.clearTimeout(manualRef.current);
-    manualRef.current = window.setTimeout(() => {
-      api('/robot/manual', {
-        method: 'POST',
-        body: JSON.stringify({ vx, vyaw: Math.round(vyaw * 300) / 100 }),
-      }).catch(() => {});
-    }, 100);
+    const now = Date.now();
+    if ((vx !== 0 || vyaw !== 0) && now - lastManualAt.current < 90) return;
+    lastManualAt.current = now;
+    api('/robot/manual', {
+      method: 'POST',
+      body: JSON.stringify({ vx, vyaw: Math.round(vyaw * 300) / 100 }),
+    }).catch(() => {});
   };
 
   const acquire = () =>
@@ -127,7 +129,9 @@ export default function ControlPage() {
               highlightPoiCode={job?.destPoiCode ?? null}
             />
           ) : (
-            <div className="h-64 grid place-items-center text-sm text-ink-3">กำลังโหลดแผนที่…</div>
+            <div className="h-64 grid place-items-center text-sm text-ink-3">
+              {mapLoaded ? 'ยังไม่มีแผนที่เผยแพร่ — ให้ผู้ดูแลนำเข้าแผนที่' : 'กำลังโหลดแผนที่…'}
+            </div>
           )}
           {t && (
             <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm mt-3">
@@ -176,7 +180,7 @@ export default function ControlPage() {
               )}
             </div>
           )}
-          {!lock?.heldBy && canControl && !job && (
+          {!lock?.mode && canControl && !job && (
             <div className="mb-3 flex items-center gap-3 text-sm text-ink-2">
               <span>ยังไม่มีใครถือ lock</span>
               <button
@@ -189,7 +193,7 @@ export default function ControlPage() {
               </button>
             </div>
           )}
-          {iHold && (
+          {iHold && lock?.mode === 'manual' && (
             <div className="mb-3 flex items-center gap-3 text-sm text-ink-2">
               <span>
                 lock ของคุณ หมดอายุใน{' '}
@@ -216,7 +220,7 @@ export default function ControlPage() {
 
           <Joystick onMove={onMove} disabled={!iHold || linkDead} />
 
-          {iHold && (
+          {iHold && lock?.mode === 'manual' && (
             <div className="mt-3 flex justify-center">
               <button
                 type="button"

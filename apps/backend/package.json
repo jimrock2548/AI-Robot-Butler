@@ -5,15 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --external:express --external:express-session --external:socket.io --external:cors --external:zod --external:@node-rs/argon2 --outfile=dist/index.js",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --external:express --external:express-session --external:socket.io --external:cors --external:zod --external:@node-rs/argon2 --external:@prisma/client --external:dotenv --outfile=dist/index.js",
     "start": "node dist/index.js",
-    "test": "node --import tsx --test \"test/**/*.test.ts\"",
-    "typecheck": "tsc --noEmit"
+    "test": "node --import ./test/setup-memory.mjs --import tsx --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate --schema prisma/schema.prisma",
+    "db:migrate": "prisma migrate deploy --schema prisma/schema.prisma"
   },
   "dependencies": {
     "@hermes/shared": "workspace:*",
     "@node-rs/argon2": "^1.8.3",
+    "@prisma/client": "5.22.0",
     "cors": "^2.8.5",
+    "dotenv": "16.4.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "socket.io": "^4.7.5",
@@ -25,7 +29,8 @@
     "@types/express-session": "^1.18.0",
     "@types/node": "^20.14.0",
     "esbuild": "^0.28.2",
-    "prisma": "^5.16.0",
+    "prisma": "^5.22.0",
+    "socket.io-client": "4.8.3",
     "tsx": "^4.16.0",
     "typescript": "^5.5.4"
   }

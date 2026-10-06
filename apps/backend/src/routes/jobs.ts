@@ -10,10 +10,10 @@ export const jobsRouter = Router();
 jobsRouter.use(requireAuth);
 
 /** POST /api/jobs — สั่งไป POI (CON-04) — 409 ถ้ามี job ทำงานอยู่ */
-jobsRouter.post('/', requireRole('operator', 'admin'), (req, res, next) => {
+jobsRouter.post('/', requireRole('operator', 'admin'), async (req, res, next) => {
   try {
     const { destPoiCode, source } = jobCreateSchema.parse(req.body);
-    const job = createJob(destPoiCode, source, {
+    const job = await createJob(destPoiCode, source, {
       id: req.user!.id,
       name: req.user!.displayName,
       ip: req.ip,
@@ -35,10 +35,10 @@ jobsRouter.get('/current', (req, res, next) => {
 });
 
 /** POST /api/jobs/:id/cancel */
-jobsRouter.post('/:id/cancel', requireRole('operator', 'admin'), (req, res, next) => {
+jobsRouter.post('/:id/cancel', requireRole('operator', 'admin'), async (req, res, next) => {
   try {
     const { reason } = jobCancelSchema.parse(req.body ?? {});
-    const job = cancelJob(Number(req.params.id), req.user!, reason, req.ip);
+    const job = await cancelJob(Number(req.params.id), req.user!, reason, req.ip);
     res.json(job);
   } catch (e) {
     next(e);

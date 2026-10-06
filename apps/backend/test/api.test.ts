@@ -92,6 +92,22 @@ test('kiosk: 401 โดยไม่มี token', async () => {
   assert.equal(res.status, 401);
 });
 
+test('kiosk: AI ingress ต้องใช้ device token และยังไม่สั่งหุ่นใน Phase 1', async () => {
+  const before = getWorld().jobs.length;
+  const anonymous = await fetch(`${base}/api/kiosk/intent`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ transcript: 'พาไปห้องประชุม', lang: 'th' }),
+  });
+  assert.equal(anonymous.status, 401);
+
+  const allowed = await fetch(`${base}/api/kiosk/intent`, {
+    method: 'POST', headers: kioskHeaders,
+    body: JSON.stringify({ transcript: 'พาไปห้องประชุม', lang: 'th' }),
+  });
+  assert.equal(allowed.status, 501);
+  assert.equal(getWorld().jobs.length, before);
+});
+
 test('kiosk: destinations มีเฉพาะ POI สาธารณะ (RBT-01)', async () => {
   const res = await fetch(`${base}/api/kiosk/destinations?lang=th`, {
     headers: { Authorization: `Bearer ${KIOSK_TOKEN}` },
@@ -175,6 +191,19 @@ test('RBAC: viewer สั่งงานไม่ได้ (403)', async () => {
   assert.equal(res.status, 403);
 });
 
+test('kiosk cannot cancel an operator job', async () => {
+  const current = getWorld().activeJob();
+  assert.equal(current?.source, 'operator');
+  const res = await fetch(`${base}/api/kiosk/cancel`, {
+    method: 'POST',
+    headers: kioskHeaders,
+    body: '{}',
+  });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json() as { job: unknown }).job, null);
+  assert.equal(getWorld().activeJob()?.id, current.id);
+});
+
 test('E-Stop: ยกเลิก job + ปลด lock + mode stopped (spec §6.2 ข้อ 3)', async () => {
   // ใครที่ล็อกอินแล้วกดได้ — viewer ก็กดได้ (NFR-08)
   const res = await users.viewer.api<{ mode: string; currentJob: unknown; lock: { heldBy: number | null } }>(
@@ -185,6 +214,8 @@ test('E-Stop: ยกเลิก job + ปลด lock + mode stopped (spec §6.2
   assert.equal(res.body.mode, 'stopped');
   assert.equal(res.body.currentJob, null);
   assert.equal(res.body.lock.heldBy, null);
+  // เริ่มกรณีถัดไปหลังช่วงหยุดฉุกเฉินของหุ่นจำลองผ่านไปแล้ว
+  getWorld().sim.releaseToIdle();
 });
 
 test('lock: ถือ/heartbeat/ปล่อย เมื่อไม่มี job (spec §6.2)', async () => {
@@ -394,10 +425,39 @@ test('kiosk: ห้ามสั่ง POI ไม่สาธารณะ (requir
 });
 
 test('ai: intent คืน 501 (Phase 2) + log ว่าง', async () => {
+  const status = await users.admin.api<{ mode: string }>('/api/ai/status');
+  assert.equal(status.status, 200);
+  assert.equal(status.body.mode, 'off');
   const intent = await users.admin.api('/api/ai/intent', { method: 'POST', body: '{}' });
   assert.equal(intent.status, 501);
 
   const rej = await users.admin.api<unknown[]>('/api/ai/rejections');
   assert.equal(rej.status, 200);
   assert.ok(Array.isArray(rej.body));
+});
+
+test('offline robot rejects new movement while emergency stop stays available', async () => {
+  const sim = getWorld().sim;
+  const saved = sim.lastTelemetryAt;
+  sim.linkDropUntil = Date.now() + 2_000;
+  sim.lastTelemetryAt = Date.now() - 6_000;
+  try {
+    const lock = await users.op.api<{ error: { code: string } }>('/api/robot/lock', {
+      method: 'POST', body: JSON.stringify({ mode: 'manual' }),
+    });
+    assert.equal(lock.status, 503);
+    assert.equal(lock.body.error.code, 'robot_offline');
+
+    const job = await users.op.api<{ error: { code: string } }>('/api/jobs', {
+      method: 'POST', body: JSON.stringify({ destPoiCode: '101' }),
+    });
+    assert.equal(job.status, 503);
+    assert.equal(job.body.error.code, 'robot_offline');
+
+    const stop = await users.op.api('/api/robot/estop', { method: 'POST', body: '{}' });
+    assert.equal(stop.status, 200);
+  } finally {
+    sim.linkDropUntil = 0;
+    sim.lastTelemetryAt = saved;
+  }
 });

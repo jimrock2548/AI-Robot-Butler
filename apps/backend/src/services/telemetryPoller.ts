@@ -2,6 +2,9 @@ import type { Server } from 'socket.io';
 import { config } from '../config';
 import { getWorld } from '../db/memory';
 import { buildRobotState, linkStatus } from './robotService';
+import { persistWorld } from '../db/postgres';
+import { maybeAutoDock } from './jobService';
+import { hermes, pollHermes } from '../hermes/driver';
 
 /**
  * Telemetry poller ตัวเดียว (spec §5.1) — poll ทุก 500 ms, broadcast ทุก 1000 ms
@@ -14,14 +17,17 @@ export function startTelemetryPoller(io: Server): void {
   let lastLockSig = '';
   let lastJobSig = '';
 
-  setInterval(() => {
+  setInterval(async () => {
     const w = getWorld();
-    w.sim.tick();
+    if (hermes) await pollHermes();
+    else w.sim.tick();
     w.tick();
+    await maybeAutoDock();
 
     const now = Date.now();
     if (now - lastSample >= 5000) {
       w.addTelemetrySample();
+      if (config.dbMode === 'pg') void persistWorld().catch((e) => console.error('[hermes] telemetry save failed:', e));
       lastSample = now;
     }
 

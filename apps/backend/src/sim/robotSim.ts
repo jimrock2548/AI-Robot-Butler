@@ -41,6 +41,7 @@ export class RobotSim {
 
   private commandedVx = 0;
   private commandedVyaw = 0;
+  private lastManualCommandAt = 0;
   private lastTick = Date.now();
   private stoppedSince: number | null = null;
 
@@ -49,6 +50,7 @@ export class RobotSim {
     this.paused = false;
     this.commandedVx = clamp(vx, -1, 1);
     this.commandedVyaw = clamp(vyaw, -3, 3);
+    this.lastManualCommandAt = Date.now();
   }
 
   startNavigation(target: SimTarget): void {
@@ -72,6 +74,7 @@ export class RobotSim {
     this.paused = true;
     this.commandedVx = 0;
     this.commandedVyaw = 0;
+    this.speed = 0;
   }
 
   /** E-Stop — หยุดทุกอย่างเป็นศูนย์ (spec §6.2 ข้อ 3) */
@@ -81,18 +84,19 @@ export class RobotSim {
     this.target = null;
     this.commandedVx = 0;
     this.commandedVyaw = 0;
+    this.speed = 0;
     this.stoppedSince = Date.now();
   }
 
-  /** ปล่อยกลับ idle (หลัง estop ครบ 5 วิ หรือ operator ปล่อย lock) */
+  /** หยุด action ปัจจุบันและกลับ idle (ใช้เมื่อยกเลิกงานหรือปล่อย lock) */
   releaseToIdle(): void {
-    if (this.mode === 'manual' || this.mode === 'stopped') {
-      this.mode = 'idle';
-      this.stoppedSince = null;
-      this.paused = false;
-      this.commandedVx = 0;
-      this.commandedVyaw = 0;
-    }
+    this.mode = 'idle';
+    this.stoppedSince = null;
+    this.paused = false;
+    this.target = null;
+    this.speed = 0;
+    this.commandedVx = 0;
+    this.commandedVyaw = 0;
   }
 
   distanceToTarget(): number | null {
@@ -109,10 +113,18 @@ export class RobotSim {
     // link drop จำลอง: หยุดอัปเดต lastTelemetryAt เพื่อทดสอบ stale/dead
     const dropping = now < this.linkDropUntil;
 
+    // Dead-man switch: หยุดเมื่อคำสั่งควบคุมหายไปเกิน 300 ms
+    if (this.mode === 'manual' && now - this.lastManualCommandAt > 300) {
+      this.commandedVx = 0;
+      this.commandedVyaw = 0;
+    }
+
     const moving = !this.paused && (this.mode === 'manual' || this.mode === 'navigating' || this.mode === 'docking');
 
     if (!dropping) {
-      if (this.mode === 'manual') {
+      if (this.paused) {
+        this.speed = 0;
+      } else if (this.mode === 'manual') {
         this.headingDeg = normDeg(this.headingDeg + (this.commandedVyaw * JOY_MAX_YAW * (180 / Math.PI)) * dt);
         this.speed = this.commandedVx * JOY_MAX_SPEED;
         this.x = clamp(this.x + Math.cos((this.headingDeg * Math.PI) / 180) * this.speed * dt, 0.3, 29.7);

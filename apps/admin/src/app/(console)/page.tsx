@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const user = useMe();
   const now = useNow();
   const [map, setMap] = useState<MapFull | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
@@ -34,7 +35,8 @@ export default function DashboardPage() {
       .then((m) => {
         if (live) setMap(m);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (live) setMapLoaded(true); });
     return () => {
       live = false;
     };
@@ -85,7 +87,7 @@ export default function DashboardPage() {
           />
         ) : (
           <div className="h-64 grid place-items-center text-sm text-ink-3">
-            กำลังโหลดแผนที่…
+            {mapLoaded ? 'ยังไม่มีแผนที่เผยแพร่ — ให้ผู้ดูแลนำเข้าแผนที่' : 'กำลังโหลดแผนที่…'}
           </div>
         )}
       </section>
@@ -111,13 +113,13 @@ export default function DashboardPage() {
                 <Reported>{headingToCompass(t.headingDeg)}</Reported>
               </Stat>
               <Stat label="Wi-Fi">
-                <Reported>{t.wifiDbm} dBm</Reported>
+                <Reported>{t.wifiDbm === null ? '—' : `${t.wifiDbm} dBm`}</Reported>
               </Stat>
               <Stat label="CPU">
-                <Reported>{t.cpuPct}%</Reported>
+                <Reported>{t.cpuPct === null ? '—' : `${t.cpuPct}%`}</Reported>
               </Stat>
               <Stat label="ใช้งานมาแล้ว">
-                <Reported>{fmtUptime(t.uptimeSec)}</Reported>
+                <Reported>{t.uptimeSec === null ? '—' : fmtUptime(t.uptimeSec)}</Reported>
               </Stat>
               <Stat label="LiDAR">
                 <span
@@ -126,10 +128,10 @@ export default function DashboardPage() {
                       ? 'bg-green-bg text-green'
                       : t.lidar === 'warn'
                         ? 'bg-amber-bg text-amber'
-                        : 'bg-red-bg text-red'
+                      : t.lidar === 'fault' ? 'bg-red-bg text-red' : 'bg-surface-2 text-ink-3'
                   }`}
                 >
-                  {t.lidar === 'ok' ? 'ปกติ' : t.lidar === 'warn' ? 'แจ้งเตือน' : 'เสีย'}
+                  {t.lidar === 'ok' ? 'ปกติ' : t.lidar === 'warn' ? 'แจ้งเตือน' : t.lidar === 'fault' ? 'เสีย' : '—'}
                 </span>
               </Stat>
             </dl>
@@ -211,7 +213,7 @@ export default function DashboardPage() {
         {/* lock (spec §6.2) */}
         <section className="bg-surface border border-line rounded-[3px] p-4">
           <h2 className="text-sm font-semibold text-ink-2 mb-2">การถือ lock</h2>
-          {state?.lock.heldBy ? (
+          {state?.lock.mode ? (
             <p className="text-sm text-ink leading-body">
               <span className="font-semibold">{state.lock.userName}</span>{' '}
               กำลังถือ lock แบบ{' '}

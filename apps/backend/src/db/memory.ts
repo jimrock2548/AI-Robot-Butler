@@ -2,7 +2,7 @@
  * โหมด DB_MODE=memory — ข้อมูลในหน่วยความจำ + หุ่นจำลอง
  * โครงสร้างแถวตรงกับ prisma/schema.prisma (spec §7)
  *
- * หมายเหตุ: เมื่อต่อ PostgreSQL จริง จะแทนชั้นนี้ด้วย Prisma client
+ * DB_MODE=pg โหลดข้อมูลเข้า World และบันทึกกลับผ่าน Prisma ใน postgres.ts
  */
 import argon2 from '@node-rs/argon2';
 import type {
@@ -112,8 +112,8 @@ export interface TelemetryRow {
   y: number;
   headingDeg: number;
   speedMps: number;
-  wifiDbm: number;
-  cpuPct: number;
+  wifiDbm: number | null;
+  cpuPct: number | null;
 }
 
 export interface LockRow {
@@ -217,28 +217,17 @@ export class World {
       y: round2(s.y),
       headingDeg: round2(s.headingDeg),
       speedMps: round2(s.speed),
-      wifiDbm: s.wifiDbm,
-      cpuPct: s.cpuPct,
+      wifiDbm: config.robotMode === 'hermes' ? null : s.wifiDbm,
+      cpuPct: config.robotMode === 'hermes' ? null : s.cpuPct,
     });
     if (this.telemetrySamples.length > 2000) this.telemetrySamples.splice(0, this.telemetrySamples.length - 2000);
   }
 
-  /** เรียกจาก poller ทุก tick — lock หมดอายุ + dock อัตโนมัติเมื่อแบตต่ำ */
+  /** เรียกจาก poller ทุก tick — lock หมดอายุ */
   tick(): void {
     const now = Date.now();
     if (this.lock?.expiresAt && new Date(this.lock.expiresAt).getTime() < now) {
       this.releaseLockInternal('lock_expired');
-    }
-    // CON-05: กลับแท่นชาร์จอัตโนมัติเมื่อแบตต่ำกว่าเกณฑ์ (เฉพาะเมื่อว่าง)
-    if (
-      this.sim.batteryPct < config.dock.autoDockBatteryPct &&
-      !this.activeJob() &&
-      this.sim.mode === 'idle'
-    ) {
-      const dock = this.publishedPois().find((p) => p.isDock);
-      if (dock) {
-        this.sim.startDocking({ x: dock.x, y: dock.y, poiCode: dock.code });
-      }
     }
   }
 
@@ -276,7 +265,7 @@ export function getWorld(): World {
  * สร้าง world + seed ข้อมูล
  * (ข้อมูลแผนที่เป็นสมมติตาม R-4 — ต้อง scan อาคารจริงก่อนใช้งานจริง)
  */
-export async function initWorld(): Promise<World> {
+export async function initWorld(options: { demoUsers?: boolean; demoMap?: boolean } = {}): Promise<World> {
   if (_world) return _world;
   const w = new World();
   const now = new Date().toISOString();
@@ -308,11 +297,13 @@ export async function initWorld(): Promise<World> {
       return u;
     });
 
-  await Promise.all([
-    mkUser('admin', 'ผู้ดูแลระบบ', 'admin', 'admin123'),
-    mkUser('operator', 'สมชาย เจ้าหน้าที่ต้อนรับ', 'operator', 'operator123'),
-    mkUser('viewer', 'ผู้ดูสถานะ', 'viewer', 'viewer123'),
-  ]);
+  if (options.demoUsers !== false) {
+    await Promise.all([
+      mkUser('admin', 'ผู้ดูแลระบบ', 'admin', 'admin123'),
+      mkUser('operator', 'สมชาย เจ้าหน้าที่ต้อนรับ', 'operator', 'operator123'),
+      mkUser('viewer', 'ผู้ดูสถานะ', 'viewer', 'viewer123'),
+    ]);
+  }
 
   w.robots.push({
     id: 1,
@@ -321,6 +312,12 @@ export async function initWorld(): Promise<World> {
     baseUrl: config.robot.baseUrl,
     isEnabled: true,
   });
+
+  if (options.demoMap === false) {
+    w.sim.onArrived = (poiCode: string) => w.handleArrival(poiCode);
+    _world = w;
+    return w;
+  }
 
   // แผนที่เวอร์ชัน 1 — เผยแพร่แล้ว (ข้อมูลสมมติ, R-4)
   const mapId = ++w.seq.map;

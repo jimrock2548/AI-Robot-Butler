@@ -27,7 +27,7 @@ export const loginSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 
 export const lockRequestSchema = z.object({
-  mode: z.enum(['manual', 'auto']),
+  mode: z.literal('manual'),
 });
 export type LockRequestInput = z.infer<typeof lockRequestSchema>;
 
@@ -91,6 +91,31 @@ export const keepoutsSchema = z.array(
   }),
 );
 export type KeepoutsInput = z.infer<typeof keepoutsSchema>;
+
+export const mapImportSchema = z.object({
+  name: z.string().min(1).max(100),
+  widthM: z.number().positive().max(1000),
+  heightM: z.number().positive().max(1000),
+  slamMapRef: z.string().max(255).nullable().optional(),
+  rooms: z.array(z.object({
+    id: z.string().min(1), x: z.number(), y: z.number(),
+    w: z.number().positive(), h: z.number().positive(),
+    nameTh: z.string().optional(), nameEn: z.string().optional(),
+    kind: z.enum(['lobby', 'room', 'corridor']).optional(),
+  })),
+  pois: z.array(poiUpsertSchema).min(1),
+  keepouts: keepoutsSchema.default([]),
+}).superRefine((map, ctx) => {
+  const codes = new Set<string>();
+  for (const [index, poi] of map.pois.entries()) {
+    if (codes.has(poi.code)) ctx.addIssue({ code: 'custom', path: ['pois', index, 'code'], message: 'รหัสจุดรับซ้ำ' });
+    codes.add(poi.code);
+    if (poi.x < 0 || poi.x > map.widthM || poi.y < 0 || poi.y > map.heightM) {
+      ctx.addIssue({ code: 'custom', path: ['pois', index], message: 'จุดรับอยู่นอกแผนที่' });
+    }
+  }
+});
+export type MapImportInput = z.infer<typeof mapImportSchema>;
 
 export const kioskEscortSchema = z.object({
   destPoiCode: z.string().min(1).max(16),
