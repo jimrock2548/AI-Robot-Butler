@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, requireRole } from '../middleware/auth';
 import { getWorld } from '../db/memory';
 import { classifyTranscript } from '../services/aiService';
 import { config } from '../config';
+import { handleRobotAiCommand } from '../services/robotAiService';
 
 /**
  * AI — Phase 2 (Qwen บน Jetson)
@@ -11,8 +12,20 @@ import { config } from '../config';
 export const aiRouter = Router();
 aiRouter.use(requireAuth);
 
-aiRouter.get('/status', (_req, res) => {
-  res.json({ mode: config.ai.mode, simulated: config.robotMode === 'sim', model: config.ai.mode === 'local' ? config.ai.model : null });
+aiRouter.get('/status', async (_req, res) => {
+  let modelReady = false;
+  if (config.ai.mode === 'local') {
+    try { modelReady = (await fetch(new URL('/v1/models', config.ai.baseUrl), { signal: AbortSignal.timeout(1500) })).ok; } catch { /* offline */ }
+  }
+  res.json({ mode: config.ai.mode, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', model: config.ai.mode === 'local' ? config.ai.model : null, modelReady });
+});
+
+aiRouter.post('/command', requireRole('operator', 'admin'), async (req, res, next) => {
+  const controller = new AbortController();
+  res.on('close', () => { if (!res.writableEnded) controller.abort(); });
+  try {
+    res.json(await handleRobotAiCommand(req.body, { id: req.user!.id, name: req.user!.displayName, ip: req.ip }, controller.signal));
+  } catch (error) { if (!res.destroyed) next(error); }
 });
 
 aiRouter.post('/intent', async (req, res, next) => {

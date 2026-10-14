@@ -8,9 +8,10 @@ import { startTelemetryPoller } from './services/telemetryPoller';
 import { setMapIo } from './routes/maps';
 import { initPostgresWorld } from './db/postgres';
 import { hermes } from './hermes/driver';
+import { startLiveMapPoller } from './services/liveMapService';
 
 async function main(): Promise<void> {
-  if (config.robotMode === 'hermes' && config.dbMode !== 'pg') throw new Error('ROBOT_MODE=hermes requires DB_MODE=pg');
+  if (config.robotMode === 'hermes' && !config.robot.readOnly && config.dbMode !== 'pg') throw new Error('Hermes movement requires DB_MODE=pg');
   if (process.env.NODE_ENV === 'production') {
     if (config.dbMode !== 'pg') throw new Error('Production requires DB_MODE=pg');
     if (config.sessionSecret.length < 32 || config.sessionSecret === 'dev-only-secret-change-me') {
@@ -21,12 +22,12 @@ async function main(): Promise<void> {
     }
   }
   if (config.dbMode === 'pg') await initPostgresWorld();
-  else await initWorld();
+  else await initWorld({ demoMap: config.robotMode === 'sim' });
   const world = getWorld();
   if (hermes) world.sim.lastTelemetryAt = 0;
   console.log(
     `[hermes] ready — ${world.users.length} users, ${world.robots[0].code}, ` +
-      `${world.publishedPois().length} POIs, ${hermes ? 'Hermes REST' : 'simulated robot'}`,
+      `${world.publishedPois().length} POIs, ${config.robotMode === 'mock' ? 'MOCK TEST (no hardware)' : hermes ? 'Hermes REST' : 'simulated robot'}`,
   );
 
   const app = createApp();
@@ -39,6 +40,7 @@ async function main(): Promise<void> {
   setMapIo(io);
   setupSockets(io);
   startTelemetryPoller(io);
+  startLiveMapPoller(io);
 
   server.listen(config.port, () => {
     console.log(`[hermes] backend listening on http://localhost:${config.port}`);

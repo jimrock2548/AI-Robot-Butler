@@ -118,7 +118,7 @@ export const mapImportSchema = z.object({
 export type MapImportInput = z.infer<typeof mapImportSchema>;
 
 export const kioskEscortSchema = z.object({
-  destPoiCode: z.string().min(1).max(16),
+  destPoiCode: z.string().min(1).max(64),
   lang: z.enum(['th', 'en']).default('th'),
 });
 export type KioskEscortInput = z.infer<typeof kioskEscortSchema>;

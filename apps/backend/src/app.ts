@@ -40,6 +40,9 @@ export function createApp(): express.Express {
     // A successful mutation is committed to PostgreSQL before its HTTP response is sent.
     app.use((req, res, next) => {
       if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
+      // High-frequency manual pulses do not mutate durable job/user data.
+      // Lock heartbeats are checkpointed by the telemetry writer every 5 seconds.
+      if (['/api/robot/manual', '/api/robot/halt', '/api/robot/lock/heartbeat'].includes(req.path)) return next();
       const end = res.end.bind(res) as (...args: any[]) => typeof res;
       res.end = ((...args: any[]) => {
         res.end = end as typeof res.end;

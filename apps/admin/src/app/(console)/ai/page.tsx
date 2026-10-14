@@ -12,14 +12,14 @@ import { fmtDateTime } from '../../../lib/format';
 export default function AiPage() {
   const [rejections, setRejections] = useState<AiRejection[] | null>(null);
   const [conversations, setConversations] = useState<AiConversation[] | null>(null);
-  const [status, setStatus] = useState<{ mode: 'off' | 'local'; simulated: boolean; model: string | null } | null>(null);
+  const [status, setStatus] = useState<{ mode: 'off' | 'local'; simulated: boolean; model: string | null; modelReady: boolean } | null>(null);
 
   useEffect(() => {
     let live = true;
     const load = () => {
       api<AiRejection[]>('/ai/rejections').then((items) => { if (live) setRejections(items); }).catch(() => {});
       api<AiConversation[]>('/ai/conversations').then((items) => { if (live) setConversations(items); }).catch(() => {});
-      api<{ mode: 'off' | 'local'; simulated: boolean; model: string | null }>('/ai/status')
+      api<{ mode: 'off' | 'local'; simulated: boolean; model: string | null; modelReady: boolean }>('/ai/status')
         .then((next) => { if (live) setStatus(next); }).catch(() => {});
     };
     load();
@@ -27,14 +27,14 @@ export default function AiPage() {
     return () => { live = false; window.clearInterval(timer); };
   }, []);
 
-  const demoReady = status?.mode === 'local' && status.simulated;
+  const demoReady = status?.mode === 'local' && status.modelReady;
 
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h1 className="font-sans font-semibold text-ink leading-heading">AI · Phase 2</h1>
+        <h1 className="font-sans font-semibold text-ink leading-heading">AI local · สถานะและประวัติ</h1>
         <p className="text-sm text-ink-2 mt-1">
-          สถานะโมเดลและประวัติคำขอจาก Kiosk
+          ดูสถานะโมเดลและประวัติคำขอจากเว็บผู้ช่วย AI
         </p>
       </div>
 
@@ -43,14 +43,16 @@ export default function AiPage() {
           <span className={`badge ${demoReady ? 'bg-green' : 'bg-amber'} text-white border-transparent`}>
             {demoReady ? 'ทดลองบนเครื่อง' : 'ยังไม่เปิดใช้งาน'}
           </span>
-          <span className="font-semibold">{demoReady ? status.model : 'AI_MODE=off หรือไม่ได้ใช้หุ่นจำลอง'}</span>
+          <span className="font-semibold">{demoReady ? status.model : 'กำลังรอโมเดล local'}</span>
         </div>
         <p className="text-ink-2 leading-body">
           {demoReady
-            ? 'ข้อความจาก Kiosk ใช้โมเดลในเครื่องกับหุ่นจำลองได้แล้ว ระบบเสียง STT/TTS และหุ่นจริงยังไม่เชื่อมต่อ'
-            : 'เปิดชุดทดลองด้วย AI_MODE=local และ ROBOT_MODE=sim ตามคู่มือ Phase 2 เพื่อทดสอบข้อความ'}
+            ? `โมเดลในเครื่องเชื่อมกับ${status.simulated ? 'หุ่นจำลอง' : 'หุ่นจริง'} · เลือกจุดหมายจาก POI บนหุ่น · ระบบเสียงยังไม่เปิดใช้งาน`
+            : 'เปิดโมเดลในเครื่องและตั้ง AI_MODE=local เพื่อรับคำสั่งข้อความ'}
         </p>
       </section>
+
+      <a href="http://localhost:3001/ai" target="_blank" rel="noopener noreferrer" className="btn btn-primary self-start">เปิดเว็บผู้ช่วย AI ↗</a>
 
       <section className="bg-surface border border-line rounded-[3px] p-4">
         <h2 className="text-sm font-semibold text-ink-2 mb-3">

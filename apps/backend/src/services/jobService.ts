@@ -3,8 +3,9 @@ import { ApiError } from '../errors';
 import { getWorld, type UserRow } from '../db/memory';
 import { config } from '../config';
 import { jobSummary, requireRobotLink } from './robotService';
-import { abortHermesJob, hermes, startHermesJob } from '../hermes/driver';
+import { abortHermesJob, emergencyStopHermes, hermes, startHermesJob } from '../hermes/driver';
 import { persistWorld } from '../db/postgres';
+import { validateLiveNavigation } from './navigationPolicy';
 
 /**
  * งานนำทาง — หนึ่ง job ต่อหนึ่งเวลา (spec §6.2 ข้อ 4)
@@ -17,13 +18,23 @@ export interface JobRequester {
   ip?: string;
 }
 
+export interface CoordinateTarget {
+  x: number;
+  y: number;
+  headingDeg: number | null;
+  isDock: boolean;
+  code: string;
+  nameTh: string;
+  isPublic: boolean;
+}
+
 let jobCommandPending = false;
 
 export async function createJob(
   destPoiCode: string,
   source: JobSource,
   requester: JobRequester,
-  opts: { requirePublic?: boolean } = {},
+  opts: { requirePublic?: boolean; target?: CoordinateTarget; allowDispatch?: () => boolean } = {},
 ): Promise<ReturnType<typeof jobSummary>> {
   requireRobotLink();
   const w = getWorld();
@@ -40,10 +51,10 @@ export async function createJob(
   }
 
   const map = w.findPublishedMap();
-  if (!map) throw new ApiError(409, 'no_map', 'ยังไม่มีแผนที่ที่เผยแพร่');
-  if (hermes && !map.slamMapRef) throw new ApiError(409, 'missing_slam_map_ref', 'แผนที่นี้ยังไม่ผูกกับแผนที่ SLAM ของหุ่นจริง');
-  const poi = w.mapPois(map.id).find((p) => p.code === destPoiCode);
-  if (!poi) throw new ApiError(404, 'unknown_poi', `ไม่พบปลายทาง ${destPoiCode} ในแผนที่เวอร์ชัน ${map.version}`);
+  if (!map && !opts.target) throw new ApiError(409, 'no_map', 'ยังไม่มีแผนที่ที่เผยแพร่');
+  if (hermes && !opts.target && !map?.slamMapRef) throw new ApiError(409, 'missing_slam_map_ref', 'แผนที่นี้ยังไม่ผูกกับแผนที่ SLAM ของหุ่นจริง');
+  const poi = opts.target ?? (map && w.mapPois(map.id).find((p) => p.code === destPoiCode));
+  if (!poi) throw new ApiError(404, 'unknown_poi', `ไม่พบปลายทาง ${destPoiCode}`);
   if (opts.requirePublic && !poi.isPublic) {
     throw new ApiError(403, 'restricted_poi', `ปลายทาง ${destPoiCode} ไม่เปิดให้ใช้งาน`);
   }
@@ -53,8 +64,11 @@ export async function createJob(
   if (hermes) {
     jobCommandPending = true;
     try {
-      await startHermesJob(w.seq.job + 1, poi.x, poi.y, poi.headingDeg, poi.isDock);
+      validateLiveNavigation(await hermes.inspectMap(), poi);
+      if (opts.allowDispatch && !opts.allowDispatch()) throw new ApiError(409, 'ai_cancelled', 'คำสั่งนี้ถูกยกเลิกแล้ว');
+      await startHermesJob(w.seq.job + 1, poi.x, poi.y, poi.headingDeg, poi.isDock, opts.allowDispatch);
     } catch (error) {
+      if (error instanceof ApiError) throw error;
       throw new ApiError(503, 'robot_command_failed', `หุ่นยนต์ไม่ยืนยันคำสั่งนำทาง: ${String(error)}`);
     } finally {
       jobCommandPending = false;
@@ -65,7 +79,8 @@ export async function createJob(
     id: ++w.seq.job,
     ref: w.nextJobRef(),
     robotId: w.robot().id,
-    mapVersion: map.version,
+    // 0 identifies a target from the robot's current SLAM map, not a published console version.
+    mapVersion: opts.target ? 0 : map!.version,
     destPoiCode: poi.code,
     destName: poi.nameTh,
     source,
@@ -125,10 +140,11 @@ export async function cancelJob(
 
 /** E-Stop — ข้ามทุกกฎ: ไม่ต้องถือ lock, ยกเลิก job + ปลด lock ทันที (spec §6.2 ข้อ 3) */
 export async function estop(user: UserRow, ip?: string): Promise<void> {
+  if (hermes && config.robot.readOnly) throw new ApiError(403, 'robot_read_only', 'โหมดอ่านอย่างเดียว — ใช้ปุ่มหยุดฉุกเฉินบนตัวหุ่น');
   const w = getWorld();
   let robotError: unknown = null;
   if (hermes) {
-    try { await hermes.emergencyStop(); }
+    try { await emergencyStopHermes(); }
     catch (error) { robotError = error; }
   }
   const job = w.activeJob();
@@ -148,6 +164,7 @@ export async function estop(user: UserRow, ip?: string): Promise<void> {
 
 /** Low battery return is a normal job so progress and audit history stay visible. */
 export async function maybeAutoDock(): Promise<void> {
+  if (hermes && (config.robot.readOnly || !config.dock.enabled)) return;
   const w = getWorld();
   if (w.sim.batteryPct >= config.dock.autoDockBatteryPct || w.sim.mode !== 'idle' || w.activeJob()) return;
   const dock = w.publishedPois().find((p) => p.isDock);

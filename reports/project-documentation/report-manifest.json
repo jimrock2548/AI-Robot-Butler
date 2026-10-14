@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-12",
+  "status": "draft; personal/institutional details need completion",
+  "templateCount": 10,
+  "chapters": 6,
+  "figures": 4,
+  "tables": 15,
+  "sources": {
+    "SPEC.md": "53e06582dc82468d3f76b291e35cf2b1463620f8d79d5f2c7f37fec369f650ec",
+    "PROGRESS.md": "4238441f7f6d53039bbcdfc9cfec2b17db2c12984c47f67f36749f5949a4b510",
+    "benchmarks\\robot-ai\\cases.json": "3262f953cb40b1946e5134f1c725720a2e9bddbcfe6d22c3b33de9abcbdcc711",
+    "reports\\ai-benchmark\\baseline.json": "c38399005a6648f113d02703d31a1bce2dd0d3af36a4ef772a3cf1295db523cc",
+    "reports\\ai-benchmark\\hybrid.json": "c98bc3fcd366fbd8688c28d6187a6ee2a2b39a6a61d022a361a69866ed759c13",
+    "reports\\ai-benchmark\\model.json": "5113b52b0d8ca461bd9e352d9fc2087f7720773418b0e0b9dca6cce99537b469"
+  },
+  "hardwareAccess": "none; report preparation only"
+}

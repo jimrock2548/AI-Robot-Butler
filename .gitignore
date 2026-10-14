@@ -12,3 +12,4 @@ coverage/
 prisma/*.db
 pgdata/
 .models/
+.tools/

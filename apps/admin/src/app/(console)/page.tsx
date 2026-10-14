@@ -7,6 +7,7 @@ import { api, ApiError } from '../../lib/api';
 import { useRobot } from '../../lib/RobotContext';
 import { useMe, useNow } from '../../lib/useMe';
 import { PlanRenderer } from '../../components/PlanRenderer';
+import { LiveRobotMap } from '../../components/LiveRobotMap';
 import { Reported } from '../../components/Reported';
 import {
   fmtAgeMs,
@@ -78,7 +79,7 @@ export default function DashboardPage() {
             </span>
           )}
         </div>
-        {map ? (
+        {state && (!state.simulated || state.mockConnected) ? <LiveRobotMap /> : map ? (
           <PlanRenderer
             map={map}
             robot={t ? { x: t.x, y: t.y, headingDeg: t.headingDeg } : null}
@@ -102,7 +103,7 @@ export default function DashboardPage() {
                 <Reported>{t.batteryPct}%</Reported>
               </Stat>
               <Stat label="ความเร็ว">
-                <Reported>{t.speedMps.toFixed(2)} m/s</Reported>
+                <Reported>{t.speedMps === null ? '—' : `${t.speedMps.toFixed(2)} m/s`}</Reported>
               </Stat>
               <Stat label="ตำแหน่ง (x, y)">
                 <Reported>

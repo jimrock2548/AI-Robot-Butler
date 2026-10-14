@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-13",
+  "revision": 2,
+  "slides": 19,
+  "speakerNotes": 19,
+  "sections": {
+    "overview": [
+      1,
+      2
+    ],
+    "website": [
+      3,
+      8
+    ],
+    "ai": [
+      9,
+      18
+    ],
+    "summary": [
+      19
+    ]
+  },
+  "screenshotSlots": 2,
+  "codeSlides": [
+    12,
+    13,
+    14,
+    15
+  ],
+  "textOverflow": 0,
+  "robotAccess": "none",
+  "modelAccess": "none",
+  "testsRerun": false,
+  "sources": {
+    "apps\\backend\\src\\services\\robotLanguage.ts": "88be0e23e7129642a88cd779d20d1d4b7bae85640533305121580fc72924d3c2",
+    "apps\\backend\\src\\services\\robotIntent.ts": "9c4fd2bd72f89940af3349acc7e737ebdc87edd6f6e1abe462e802166f68114f",
+    "apps\\backend\\src\\services\\robotAiService.ts": "ff4fc0d08213542c2ba73ccfa319b1a67e53ed304bcdfea34864f31d06fb43ea",
+    "reports\\ai-benchmark\\hybrid.json": "c98bc3fcd366fbd8688c28d6187a6ee2a2b39a6a61d022a361a69866ed759c13"
+  }
+}

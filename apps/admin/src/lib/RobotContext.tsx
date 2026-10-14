@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import type { RobotState } from '@hermes/shared';
+import type { RobotState, LiveRobotMap } from '@hermes/shared';
 import { useRobotState, type ConnectionState } from './useRobotState';
 
 /**
@@ -11,11 +11,15 @@ import { useRobotState, type ConnectionState } from './useRobotState';
 interface RobotContextValue {
   state: RobotState | null;
   connection: ConnectionState;
+  liveMap: LiveRobotMap | null;
+  mapError: string | null;
 }
 
 const RobotContext = createContext<RobotContextValue>({
   state: null,
   connection: 'connecting',
+  liveMap: null,
+  mapError: null,
 });
 
 export function RobotProvider({ children }: { children: React.ReactNode }) {

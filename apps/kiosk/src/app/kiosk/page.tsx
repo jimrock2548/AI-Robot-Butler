@@ -8,6 +8,7 @@ import {
   kioskDestinations,
   kioskEscort,
   kioskSession,
+  kioskAiStatus,
 } from '../../lib/api';
 import { ChatFlow } from './ChatFlow';
 
@@ -32,10 +33,17 @@ export default function KioskPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [authError, setAuthError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [mockConnected, setMockConnected] = useState(false);
+  useEffect(() => {
+    let active = true;
+    kioskAiStatus().then(status => { if (active) setMockConnected(!!status.mockConnected); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const t = useCallback((th: string, en: string) => (lang === 'th' ? th : en), [lang]);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('chat') === '1') setScene('voice');
     const id = Number(window.sessionStorage.getItem('hermes.kioskJobId'));
     if (!Number.isSafeInteger(id) || id <= 0) return;
     kioskSession(id, 'th').then((restored) => {
@@ -205,7 +213,7 @@ export default function KioskPage() {
         style={{ padding: `${u(2)} ${u(4)}` }}
       >
         <span className="font-display font-bold tracking-wide text-navy" style={{ fontSize: u(3) }}>
-          HERMES
+          HERMES {mockConnected && <span className="text-amber">· MOCK TEST</span>}
         </span>
         <div
           className="flex border border-line-2 rounded"

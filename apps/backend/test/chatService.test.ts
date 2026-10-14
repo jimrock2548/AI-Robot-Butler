@@ -7,6 +7,9 @@ import { config } from '../src/config';
 test('chat routing reserves robot actions for explicit visitor commands', () => {
   assert.equal(routeByRules('พาไปห้อง 101'), 'action');
   assert.equal(routeByRules('หยุด'), 'action');
+  assert.equal(routeByRules('เดินไปที่หน้าประตู'), 'action');
+  assert.equal(routeByRules('กลับจุดชาร์จ'), 'action');
+  assert.equal(routeByRules('เดินไปที่หน้าประตูตอนนี้'), 'action');
   assert.equal(routeByRules('ทำไมพาไปห้องผิด'), 'database');
   assert.equal(routeByRules('ตอนนี้มีโปรโมชั่นอะไร'), 'web');
   assert.equal(routeByRules('ห้อง 101 อยู่ไหน'), 'database');

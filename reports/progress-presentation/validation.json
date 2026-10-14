@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-13",
+  "slides": 14,
+  "notes": 14,
+  "format": "16:9; editable native PowerPoint; vector PDF",
+  "textOverflow": 0,
+  "robotAccess": "none",
+  "testsRerunDuringSlideCreation": false,
+  "benchmarkDate": "2026-10-07",
+  "sources": {
+    "PROGRESS.md": "b6005564f02311105774ed73483dd5be99ea393f57b97c98956432e64b45ec0f",
+    "docs\\mock-robot.md": "3583978c921fc7c0e7bce81d3cdd69a369880657dd8c956f9315907615e5bfbc",
+    "reports\\ai-benchmark\\hybrid.json": "c98bc3fcd366fbd8688c28d6187a6ee2a2b39a6a61d022a361a69866ed759c13"
+  }
+}

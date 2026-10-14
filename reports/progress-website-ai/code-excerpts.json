@@ -1,0 +1,26 @@
+[
+  {
+    "slide": 12,
+    "source": "robotIntent.ts · excerpt",
+    "display": "excerpt, reformatted; not a complete standalone function",
+    "code": "const language = analyzeRobotLanguage(transcript);\nconst matches = matchRobotDestinations(\n  transcript, catalog\n);\nif (language.stop) return rule('cancel_job');\nif (language.speechAct === 'request') {\n  if (matches.length === 1) {\n    return rule('navigate_to', matches[0].code);\n  }\n}"
+  },
+  {
+    "slide": 13,
+    "source": "robotIntent.ts · outputSchema",
+    "display": "excerpt, reformatted; not a complete standalone function",
+    "code": "const outputSchema = z.object({\n  intent: z.enum(intents),\n  confidence: z.number().min(0).max(1),\n  poiCode: z.string().nullable(),\n  speechAct: z.enum(speechActs),\n  needsClarification: z.boolean()\n}).strict();"
+  },
+  {
+    "slide": 14,
+    "source": "robotIntent.ts · request body (ย่อ)",
+    "display": "excerpt, reformatted; not a complete standalone function",
+    "code": "{\n  model: config.ai.model,\n  messages: [systemMessage, userMessage],\n  temperature: 0, seed: 42,\n  max_tokens: 256, stream: false,\n  response_format: {\n    type: 'json_schema', schema\n  },\n  chat_template_kwargs: { enable_thinking: false }\n}"
+  },
+  {
+    "slide": 15,
+    "source": "robotIntent.ts + robotAiService.ts · excerpts",
+    "display": "excerpt, reformatted; not a complete standalone function",
+    "code": "const decision = outputSchema.parse(\n  JSON.parse(content)\n);\nif (decision.poiCode && !catalog.some(\n  p => p.code === decision.poiCode\n)) throw new Error('Unknown POI');\n\nconst dispatchMap = !dryRun &&\n  decision.intent !== 'where_is'\n  ? await dependencies.loadMap() : map;"
+  }
+]

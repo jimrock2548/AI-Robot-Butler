@@ -2,7 +2,7 @@ import type { JobSummary, RobotState, Telemetry } from '@hermes/shared';
 import { config } from '../config';
 import { ApiError } from '../errors';
 import { getWorld, type JobRow, type UserRow } from '../db/memory';
-import { hermes, hermesUptimeAvailable } from '../hermes/driver';
+import { hermes, hermesSpeedAvailable, hermesUptimeAvailable } from '../hermes/driver';
 
 /**
  * ประกอบ RobotState — แหล่งความจริงเดียวของสถานะหุ่น (spec §6, §5.3)
@@ -18,7 +18,7 @@ export function buildTelemetry(): Telemetry | null {
     x: Math.round(s.x * 100) / 100,
     y: Math.round(s.y * 100) / 100,
     headingDeg: Math.round(s.headingDeg),
-    speedMps: Math.round(s.speed * 100) / 100,
+    speedMps: hermes && !hermesSpeedAvailable ? null : Math.round(s.speed * 100) / 100,
     wifiDbm: hermes ? null : s.wifiDbm,
     cpuPct: hermes ? null : s.cpuPct,
     uptimeSec: hermes && !hermesUptimeAvailable ? null : Math.round(s.uptimeSec),
@@ -35,6 +35,9 @@ export function linkStatus(): 'ok' | 'stale' | 'dead' {
 }
 
 export function requireRobotLink(): void {
+  if (hermes && config.robot.readOnly) {
+    throw new ApiError(403, 'robot_read_only', 'โหมดอ่านอย่างเดียว — ปิดคำสั่งควบคุมหุ่น');
+  }
   if (linkStatus() === 'dead') {
     throw new ApiError(503, 'robot_offline', 'ขาดการเชื่อมต่อกับหุ่นยนต์');
   }
@@ -64,7 +67,10 @@ export function buildRobotState(): RobotState {
       expiresAt: lock?.expiresAt ?? null,
     },
     currentJob: job ? jobSummary(job) : null,
-    simulated: !hermes,
+    simulated: !hermes || config.robotMode === 'mock',
+    mockConnected: config.robotMode === 'mock',
+    commandsEnabled: !hermes || !config.robot.readOnly,
+    motionLimits: hermes ? { linearMps: config.robot.maxLinearMps, angularRps: config.robot.maxAngularRps } : null,
   };
 }
 

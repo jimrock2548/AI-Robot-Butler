@@ -6,8 +6,10 @@ import { api, ApiError } from '../../../lib/api';
 import { useRobot } from '../../../lib/RobotContext';
 import { useMe, useNow } from '../../../lib/useMe';
 import { PlanRenderer } from '../../../components/PlanRenderer';
+import { LiveRobotMap } from '../../../components/LiveRobotMap';
 import { Joystick } from '../../../components/Joystick';
 import { Reported } from '../../../components/Reported';
+import { RobotOperatingMode } from '../../../components/RobotOperatingMode';
 import {
   fmtAgeMs,
   fmtDurationSec,
@@ -21,7 +23,7 @@ import {
  * - E-Stop อยู่ในแถบฉุกเฉินทุกหน้า (กดได้โดยไม่ต้องถือ lock)
  */
 export default function ControlPage() {
-  const { state, connection } = useRobot();
+  const { state, connection, liveMap, mapError } = useRobot();
   const me = useMe();
   const now = useNow();
   const [map, setMap] = useState<MapFull | null>(null);
@@ -30,15 +32,20 @@ export default function ControlPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<{ x: number; y: number } | null>(null);
   const lastManualAt = useRef(0);
 
   const t = state?.telemetry ?? null;
   const lock = state?.lock ?? null;
   const iHold = !!me && !!lock && lock.heldBy === me.id;
   const heldByOther = !!lock && lock.heldBy !== null && lock.heldBy !== me?.id;
-  const canControl = me?.role === 'operator' || me?.role === 'admin';
-  const isAdmin = me?.role === 'admin';
+  const canControl = !!state?.commandsEnabled && (me?.role === 'operator' || me?.role === 'admin');
+  const isAdmin = !!state?.commandsEnabled && me?.role === 'admin';
   const linkDead = state?.linkStatus === 'dead';
+  const realRobot = !!state && (!state.simulated || !!state.mockConnected);
+  const navigationReady = !realRobot || (!!liveMap && !mapError && liveMap.mappingEnabled === false
+    && liveMap.localizationQuality !== null && liveMap.localizationQuality >= 50
+    && now - Date.parse(liveMap.capturedAt) <= 5000);
 
   useEffect(() => {
     let live = true;
@@ -88,7 +95,7 @@ export default function ControlPage() {
     api('/robot/manual', {
       method: 'POST',
       body: JSON.stringify({ vx, vyaw: Math.round(vyaw * 300) / 100 }),
-    }).catch(() => {});
+    }).catch((cause) => setError(cause instanceof Error ? cause.message : 'ส่งคำสั่งควบคุมไม่สำเร็จ'));
   };
 
   const acquire = () =>
@@ -101,8 +108,14 @@ export default function ControlPage() {
         body: JSON.stringify({ destPoiCode: destCode, source: 'operator' }),
       }),
     );
-  const dock = () =>
-    act('dock', () => api('/robot/dock', { method: 'POST', body: '{}' }));
+  const dock = () => {
+    if (!window.confirm('ให้หุ่นกลับจุดชาร์จที่บันทึกไว้? ตรวจว่าทางเดินพร้อมก่อนยืนยัน')) return;
+    return act('dock', () => api('/robot/dock', { method: 'POST', body: '{}' }), 'ส่งคำสั่งกลับจุดชาร์จแล้ว');
+  };
+  const sendPoint = () => {
+    if (!selectedPoint || !navigationReady || !window.confirm(`นำทางไปพิกัด (${selectedPoint.x.toFixed(2)}, ${selectedPoint.y.toFixed(2)})?`)) return;
+    void act('point', () => api('/robot/navigate', { method: 'POST', body: JSON.stringify(selectedPoint) }));
+  };
   const halt = () => act('halt', () => api('/robot/halt', { method: 'POST', body: '{}' }));
 
   const job = state?.currentJob ?? null;
@@ -110,6 +123,10 @@ export default function ControlPage() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
+      <div className="xl:col-span-2">
+        <RobotOperatingMode connected={!!state && (!state.simulated || !!state.mockConnected) && state.linkStatus === 'ok' && connection !== 'connecting'}
+          canSelect={me?.role === 'admin' || me?.role === 'operator'} />
+      </div>
       {/* แผนที่ + joystick */}
       <section className="flex flex-col gap-4 min-w-0">
         <div className="bg-surface border border-line rounded-[3px] p-4">
@@ -121,7 +138,8 @@ export default function ControlPage() {
               </span>
             )}
           </div>
-          {map ? (
+          {realRobot ? <LiveRobotMap selected={selectedPoint}
+            onSelect={canControl && navigationReady && !state?.currentJob ? setSelectedPoint : undefined} /> : map ? (
             <PlanRenderer
               map={map}
               robot={t ? { x: t.x, y: t.y, headingDeg: t.headingDeg } : null}
@@ -136,7 +154,7 @@ export default function ControlPage() {
           {t && (
             <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 text-sm mt-3">
               <Readout label="ความเร็ว">
-                <Reported>{t.speedMps.toFixed(2)} m/s</Reported>
+                <Reported>{t.speedMps === null ? '—' : `${t.speedMps.toFixed(2)} m/s`}</Reported>
               </Readout>
               <Readout label="ทิศ">
                 <Reported>{headingToCompass(t.headingDeg)}</Reported>
@@ -218,7 +236,14 @@ export default function ControlPage() {
             <p className="mb-3 text-sm text-red">ลิงก์ขาด — ควบคุมไม่ได้ ยกเว้น E-Stop (NFR-08)</p>
           )}
 
-          <Joystick onMove={onMove} disabled={!iHold || linkDead} />
+          <Joystick onMove={onMove} disabled={!canControl || !iHold || lock?.mode !== 'manual' || linkDead} />
+          {realRobot && <p className="text-sm text-ink-2 mt-3">โหมดห้องแลป · เดินสูงสุด {state?.motionLimits?.linearMps ?? '—'} m/s · หมุนสูงสุด {state?.motionLimits?.angularRps ?? '—'} rad/s · ปล่อยปุ่มเพื่อหยุด</p>}
+          {state?.mode === 'stopped' && canControl && <button type="button" disabled={busy !== null}
+            className="btn border-line-2 mt-3" onClick={() => {
+              if (window.confirm('ปลดหยุดฉุกเฉินหลังตรวจว่าพื้นที่พร้อมแล้ว?')) {
+                void act('reset', () => api('/robot/estop/reset', { method: 'POST', body: '{}' }));
+              }
+            }}>ปลดหยุดฉุกเฉิน</button>}
 
           {iHold && lock?.mode === 'manual' && (
             <div className="mt-3 flex justify-center">
@@ -239,7 +264,13 @@ export default function ControlPage() {
       <div className="flex flex-col gap-4 min-w-0">
         <section className="bg-surface border border-line rounded-[3px] p-4">
           <h2 className="text-sm font-semibold text-ink-2 mb-3">สั่งไปจุดรับ (CON-04)</h2>
-          {map ? (
+          {realRobot ? <div className="flex flex-col gap-3 text-sm">
+            <p className="text-ink-2">เลือกจุดบนแผนที่ แล้วกดปุ่มเพื่อยืนยันการนำทาง</p>
+            {!navigationReady && <p className="text-amber">ยังนำทางไม่ได้ — ตรวจโหมดแผนที่และคุณภาพระบุตำแหน่งบนหุ่น ควบคุมด้วยมือได้หลังขอ lock</p>}
+            <p className="font-mono">{selectedPoint ? `x=${selectedPoint.x.toFixed(2)}, y=${selectedPoint.y.toFixed(2)} m` : 'ยังไม่ได้เลือกจุดหมาย'}</p>
+            <button type="button" className="btn btn-primary disabled:opacity-50" onClick={sendPoint}
+              disabled={!canControl || !navigationReady || !selectedPoint || !!job || !!busy || linkDead}>นำทางไปจุดที่เลือก</button>
+          </div> : map ? (
             <div className="flex flex-col gap-2">
               <select
                 value={destCode}
@@ -275,18 +306,25 @@ export default function ControlPage() {
         </section>
 
         <section className="bg-surface border border-line rounded-[3px] p-4">
-          <h2 className="text-sm font-semibold text-ink-2 mb-3">กลับแท่นชาร์จ (CON-05)</h2>
+          <h2 className="text-sm font-semibold text-ink-2 mb-3">กลับจุดชาร์จ</h2>
           <button
             type="button"
             onClick={() => void dock()}
-            disabled={!canControl || !!job || linkDead}
-            className="btn w-full disabled:opacity-60"
+            disabled={!canControl || !navigationReady || !!job || !!busy || linkDead || (realRobot && liveMap?.dockingStatus === 'on_dock')}
+            className="btn btn-primary w-full disabled:opacity-60"
           >
-            {busy === 'dock' ? 'กำลังสั่ง…' : 'สั่งกลับแท่นชาร์จ'}
+            {busy === 'dock' ? 'กำลังสั่ง…' : 'กลับจุดชาร์จ'}
           </button>
           <p className="text-xs text-ink-3 mt-2 leading-body">
-            หุ่นจะกลับแท่นชาร์จอัตโนมัติเมื่อแบตต่ำกว่า 15% และไม่มีงานค้าง (sim จำลอง)
+            {realRobot ? 'ใช้ตำแหน่งแท่นชาร์จที่บันทึกบนหุ่น · ปิดการกลับแท่นอัตโนมัติในห้องแลป' : 'หุ่นจะกลับแท่นชาร์จอัตโนมัติเมื่อแบตต่ำกว่า 15% และไม่มีงานค้าง'}
           </p>
+          {realRobot && <p className="text-xs text-ink-2 mt-2" role="status">
+            {liveMap?.dockingStatus === 'on_dock' ? 'หุ่นอยู่ที่จุดชาร์จแล้ว'
+              : linkDead ? 'หุ่นขาดการเชื่อมต่อ'
+              : !navigationReady ? 'รอหุ่นเข้าโหมดระบุตำแหน่งและค่าความมั่นใจอย่างน้อย 50'
+              : job ? 'รอให้งานปัจจุบันสิ้นสุดหรือยกเลิกก่อน'
+              : 'กดแล้วจะมีหน้าต่างยืนยันก่อนให้หุ่นเคลื่อนที่'}
+          </p>}
         </section>
 
         {/* งานปัจจุบัน */}

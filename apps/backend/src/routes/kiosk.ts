@@ -9,6 +9,9 @@ import { getWorld } from '../db/memory';
 import { handleKioskIntent } from '../services/aiService';
 import { streamKioskChat } from '../services/chatService';
 import { config } from '../config';
+import { hermes } from '../hermes/driver';
+import { getLiveMap } from '../services/liveMapService';
+import { handleRobotAiCommand } from '../services/robotAiService';
 
 /**
  * Kiosk (จอบนตัวหุ่น) — device token, จำกัด 4 endpoint (spec §8.6)
@@ -22,11 +25,15 @@ kioskRouter.get('/ai-status', async (_req, res) => {
     const health = await fetch(new URL('/healthz', config.ai.searxngUrl), { signal: AbortSignal.timeout(1500) });
     webReady = health.ok;
   } catch { /* SearXNG ยังไม่เปิด */ }
-  res.json({ textReady: config.ai.mode === 'local' && config.robotMode === 'sim', voiceReady: false, webReady, simulated: config.robotMode === 'sim' });
+  let modelReady = false;
+  if (config.ai.mode === 'local') {
+    try { modelReady = (await fetch(new URL('/v1/models', config.ai.baseUrl), { signal: AbortSignal.timeout(1500) })).ok; } catch { /* model offline */ }
+  }
+  res.json({ textReady: modelReady, voiceReady: false, webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
 });
 
 kioskRouter.post('/chat', async (req, res, next) => {
-  if (config.ai.mode !== 'local' || config.robotMode !== 'sim') {
+  if (config.ai.mode !== 'local') {
     res.status(503).json({ error: { code: 'ai_unavailable', message: 'ระบบสนทนายังไม่พร้อมใช้งาน' } });
     return;
   }
@@ -64,11 +71,9 @@ kioskRouter.post('/intent', async (req, res, next) => {
       res.status(501).json({ error: { code: 'ai_unavailable', message: 'ระบบ AI ยังไม่พร้อมใช้งาน' } });
       return;
     }
-    if (config.robotMode !== 'sim') {
-      res.status(503).json({ error: { code: 'ai_sim_only', message: 'AI รุ่นทดลองใช้ได้กับหุ่นจำลองเท่านั้น' } });
-      return;
-    }
-    res.json(await handleKioskIntent(req.body, undefined, requestController.signal));
+    res.json(hermes
+      ? await handleRobotAiCommand(req.body, { id: null, name: 'จอผู้ช่วย AI' }, requestController.signal)
+      : await handleKioskIntent(req.body, undefined, requestController.signal));
   } catch (error) {
     if (!res.destroyed) next(error);
   }
@@ -78,8 +83,17 @@ const KIOSK_REQUESTER = { id: null, name: 'จอหุ่น (Kiosk)' };
 const KIOSK_CANCELLER = { id: null, displayName: 'จอหุ่น (Kiosk)' };
 
 /** GET /api/kiosk/destinations — เฉพาะ POI ที่ is_public = true (RBT-01) */
-kioskRouter.get('/destinations', (req, res, next) => {
+kioskRouter.get('/destinations', async (req, res, next) => {
   try {
+    if (hermes) {
+      const map = await getLiveMap();
+      const items: KioskDestination[] = (map.pois ?? []).filter(poi => poi.metadata?.is_public !== false && poi.pose
+        && [poi.pose.x, poi.pose.y, poi.pose.yaw].every(Number.isFinite) && typeof poi.metadata?.display_name === 'string')
+        .map((poi, sortOrder) => ({ code: poi.id, nameTh: poi.metadata!.display_name as string, nameEn: poi.metadata!.display_name as string,
+          x: poi.pose!.x, y: poi.pose!.y, headingDeg: poi.pose!.yaw * 180 / Math.PI, zone: '', isPublic: true, isDock: false, sortOrder }));
+      res.json({ lang: req.query.lang === 'en' ? 'en' : 'th', items });
+      return;
+    }
     const items: KioskDestination[] = getWorld()
       .publishedPois()
       .filter((p) => p.isPublic)
@@ -94,6 +108,16 @@ kioskRouter.get('/destinations', (req, res, next) => {
 kioskRouter.post('/escort', async (req, res, next) => {
   try {
     const { destPoiCode } = kioskEscortSchema.parse(req.body);
+    if (hermes) {
+      const map = await getLiveMap(true);
+      const poi = map.pois?.find(item => item.id === destPoiCode && item.metadata?.is_public !== false);
+      if (!poi?.pose) { res.status(404).json({ error: { code: 'unknown_poi', message: 'ไม่พบจุดหมายที่เปิดให้ใช้งานบนหุ่น' } }); return; }
+      const job = await createJob(poi.id, 'kiosk_touch', KIOSK_REQUESTER, { requirePublic: true, target: {
+        code: poi.id, nameTh: String(poi.metadata?.display_name ?? poi.id), ...poi.pose,
+        headingDeg: poi.pose.yaw * 180 / Math.PI, isPublic: true, isDock: false,
+      } });
+      res.status(201).json(job); return;
+    }
     const job = await createJob(destPoiCode, 'kiosk_touch', KIOSK_REQUESTER, { requirePublic: true });
     res.status(201).json(job);
   } catch (e) {
@@ -138,6 +162,11 @@ kioskRouter.get('/session/:jobId', (req, res, next) => {
 /** POST /api/kiosk/cancel — ผู้มาเยือนกดปุ่มหยุด (RBT-06) */
 kioskRouter.post('/cancel', async (req, res, next) => {
   try {
+    if (hermes) {
+      const result = await handleRobotAiCommand({ transcript: 'หยุด', lang: 'th' }, KIOSK_REQUESTER);
+      if (result.rejected) { res.status(409).json({ error: { code: 'cancel_rejected', message: result.replyText } }); return; }
+      res.json({ job: null }); return;
+    }
     const w = getWorld();
     const job = w.activeJob();
     if (!job || !['kiosk_touch', 'kiosk_voice'].includes(job.source)) {

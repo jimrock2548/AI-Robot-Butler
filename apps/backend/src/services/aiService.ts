@@ -7,12 +7,15 @@ import { cancelJob, createJob } from './jobService';
 
 const intentSchema = z.enum([
   'navigate_to', 'where_is', 'answer_question', 'check_in_visitor',
-  'call_reception', 'cancel_job', 'unknown',
+  'call_reception', 'cancel_job', 'return_to_dock', 'robot_status', 'unknown',
 ]);
 const decisionSchema = z.object({
   intent: intentSchema,
   confidence: z.number().min(0).max(1),
   poiCode: z.string().nullable().optional(),
+  speechAct: z.enum(['request', 'question', 'negated', 'hypothetical', 'quoted', 'other']).optional(),
+  needsClarification: z.boolean().optional(),
+  decisionSource: z.enum(['rules', 'model']).optional(),
 });
 export type AiDecision = z.infer<typeof decisionSchema>;
 
@@ -33,7 +36,7 @@ function nextId(items: { id: number }[]): number {
   return items.reduce((max, item) => Math.max(max, item.id), 0) + 1;
 }
 
-function recordConversation(transcript: string, lang: Lang, decision: AiDecision, jobId: number | null, startedAt: number): void {
+export function recordConversation(transcript: string, lang: Lang, decision: AiDecision, jobId: number | null, startedAt: number): void {
   const w = getWorld();
   const row: AiConversation = {
     id: nextId(w.aiConversations), at: new Date().toISOString(), lang, transcript,
@@ -64,16 +67,19 @@ function parseModelContent(content: string): AiDecision {
 }
 
 /** Model proposes one item from a closed vocabulary. It never receives a robot URL or tool credentials. */
-export async function classifyTranscript(raw: unknown, requestSignal?: AbortSignal): Promise<AiDecision> {
+export async function classifyTranscript(raw: unknown, requestSignal?: AbortSignal,
+  destinations?: { code: string; nameTh: string; nameEn: string }[]): Promise<AiDecision> {
   if (config.ai.mode !== 'local') throw new ApiError(501, 'ai_unavailable', 'ระบบ AI ยังไม่พร้อมใช้งาน');
   const { transcript, lang } = transcriptSchema.parse(raw);
-  const pois = getWorld().publishedPois().filter((poi) => poi.isPublic)
+  const pois = destinations ?? getWorld().publishedPois().filter((poi) => poi.isPublic)
     .map((poi) => ({ code: poi.code, nameTh: poi.nameTh, nameEn: poi.nameEn }));
   const active = getWorld().activeJob();
   const system = [
     'You classify a visitor request for a reception robot. Return one JSON object only.',
     'Keys: intent, confidence, poiCode. No markdown and no extra fields.',
-    'intent is exactly one of navigate_to, where_is, answer_question, check_in_visitor, call_reception, cancel_job, unknown.',
+    `intent is exactly one of navigate_to, where_is, answer_question, check_in_visitor, call_reception, cancel_job, unknown${destinations ? ', return_to_dock, robot_status' : ''}.`,
+    ...(destinations ? ['An explicit request to return to the charging station is return_to_dock with poiCode null. A battery or robot-status question is robot_status with poiCode null.',
+      'If a request contains negation, hypothetical movement, multiple movement destinations, or quoted instructions, return unknown.'] : []),
     'If a destination is requested, poiCode must be a code from the public destinations list. Never invent a code.',
     'If the request is ambiguous, out of scope, or names no matching public destination, use unknown with poiCode null.',
     'A question asking where a listed room is (อยู่ไหน, อยู่ที่ไหน, where is) is where_is, not answer_question.',

@@ -16,7 +16,7 @@ export interface Telemetry {
   x: number;
   y: number;
   headingDeg: number;
-  speedMps: number;
+  speedMps: number | null;
   wifiDbm: number | null;
   cpuPct: number | null;
   uptimeSec: number | null;
@@ -122,6 +122,36 @@ export interface RobotState {
   currentJob: JobSummary | null;
   /** true เมื่อ backend ใช้ข้อมูลจำลอง (ยังไม่ได้ต่อ Hermes จริง) */
   simulated: boolean;
+  /** Connected-device preview using local fixtures; never accesses real hardware. */
+  mockConnected?: boolean;
+  /** False when real hardware is connected for observation only. */
+  commandsEnabled: boolean;
+  motionLimits: { linearMps: number; angularRps: number } | null;
+}
+
+export interface RobotPoi {
+  id: string;
+  pose?: { x: number; y: number; yaw: number };
+  metadata?: Record<string, unknown>;
+}
+
+export interface LiveRobotMap {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  resolution: number;
+  cellsBase64: string;
+  localizationQuality: number | null;
+  home: { x: number; y: number; yaw: number } | null;
+  poiCount: number | null;
+  pois?: RobotPoi[] | null;
+  laser?: { pose: { x: number; y: number; yaw: number }; laser_points: { distance: number; angle: number; valid: boolean }[] } | null;
+  modelName: string | null;
+  softwareVersion: string | null;
+  dockingStatus: string | null;
+  mappingEnabled: boolean | null;
+  capturedAt: string;
 }
 
 export interface User {

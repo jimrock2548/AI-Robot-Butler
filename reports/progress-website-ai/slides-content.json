@@ -1,0 +1,367 @@
+[
+  {
+    "number": 1,
+    "title": "รายงานความคืบหน้า Website และ AI",
+    "notes": "แนะนำโครงงานและผู้จัดทำ รายงานแบ่งสองช่วงคือ Website และ AI โดยเริ่มจากความคืบหน้าปัจจุบันก่อนงานค้าง เว็บไซต์สำหรับผู้ใช้หุ่นเรียกว่า Robot Interface ในสไลด์ชุดนี้ มีช่องภาพให้ผู้จัดทำเติมเองและตัวอย่างโค้ดที่ย่อจากโค้ดจริง ไม่มีการทดลองหุ่นหรือโมเดลใหม่ระหว่างจัดทำ",
+    "source": "",
+    "text": [
+      "PROGRESS REPORT · 13 OCTOBER 2026",
+      "รายงานความคืบหน้า Website และ AI",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "01 / 19",
+      "AI ROBOT\nBUTLER",
+      "Website: Admin + Robot Interface\nAI: กฎภาษา + โมเดล local + ตรวจคำสั่ง",
+      "[กรอกชื่อผู้จัดทำ]  |  [กรอกอาจารย์ที่ปรึกษา]",
+      "WEBSITE",
+      "ข้อมูล / ควบคุม",
+      "AI",
+      "ตีความ / เลือก POI"
+    ]
+  },
+  {
+    "number": 2,
+    "title": "ความคืบหน้าปัจจุบัน แยกเป็น 2 ฝั่ง",
+    "notes": "Website มีสองหน้าใช้งาน Backend และฐานข้อมูล แสดงแผนที่จัดการ POI และมีคำสั่งควบคุมแล้ว งานที่ยังค้างคือเส้นทางอัปโหลดแผนที่ แก้ไขแผนที่รวมกำแพงเสมือน และการเชื่อมโหมดหุ่น ส่วน AI วิธีหนึ่งและสองทำแล้วบน PC มีชุด regression 40 กรณี ส่วนวิธีสาม Jetson และเสียงยังค้าง ไม่ใช้คะแนน benchmark เป็นเปอร์เซ็นต์ความสำเร็จของโครงการ",
+    "source": "PROGRESS.md; maps.ts; robotIntent.ts",
+    "text": [
+      "OVERVIEW · CURRENT STATUS",
+      "ความคืบหน้าปัจจุบัน แยกเป็น 2 ฝั่ง",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "02 / 19",
+      "ช่วงที่ 1 · WEBSITE",
+      "ระบบเว็บและการควบคุม",
+      "Admin + Robot Interface\nBackend / แผนที่สด / POI ทำแล้ว\nยังค้าง: upload / แก้แผนที่ / โหมด",
+      "ช่วงที่ 2 · AI",
+      "คำสั่งภาษาธรรมชาติ",
+      "กฎ + aliases + โมเดลบน PC\nstructured output / benchmark ทำแล้ว\nยังค้าง: บริบท / Jetson / เสียง",
+      "สถานะอ้างอิงโค้ดและผลเดิม · การเคลื่อนที่จริงยังรอตรวจรับ"
+    ]
+  },
+  {
+    "number": 3,
+    "title": "ช่วงที่ 1 — ความคืบหน้าฝั่ง Website",
+    "notes": "ช่วง Website เริ่มด้วยหน้าที่ของเว็บไซต์ทั้งสองฝั่งและพื้นที่ภาพหน้าจอ ต่อด้วยคำอธิบายเส้นทางคำสั่ง Backend ข้อมูลแผนที่และ POI ก่อนสรุปงานค้างที่ผู้จัดทำระบุคืออัปโหลด แก้ไขแผนที่ กำแพงเสมือนและโหมดของหุ่น การมีปุ่มหรือ API ยังไม่เท่ากับผ่านการตรวจรับอุปกรณ์",
+    "source": "",
+    "text": [
+      "PART 01 · WEBSITE",
+      "ช่วงที่ 1 — ความคืบหน้าฝั่ง Website",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "03 / 19",
+      "Admin Website + Robot Interface",
+      "มี Backend และฐานข้อมูลกลาง\nแสดงสถานะ แผนที่ POI และงานนำทาง",
+      "รายงาน: หน้าจอ → การไหลของข้อมูล → งานค้าง → ผลตรวจ"
+    ]
+  },
+  {
+    "number": 4,
+    "title": "เว็บไซต์ทั้ง 2 ฝั่ง: หน้าที่และความคืบหน้า",
+    "notes": "Admin Website ใช้โดยเจ้าหน้าที่หรือผู้ดูแลสำหรับดูสถานะ แผนที่ ควบคุมและจัดการจุดหมาย รวมถึงดูงานและบัญชีตามสิทธิ์ Robot Interface ใช้โดยผู้มาเยือนหรือผู้ใช้หุ่น สำหรับเลือกจุดหมาย พิมพ์คำขอ AI ดูงานและยกเลิกงานของตนเอง จุดส่วนตัวถูกกรองจากหน้าใช้งานผู้มาเยือน ช่องสีเทาทั้งสองช่องเป็นรูปทรงแก้ไขได้สำหรับนำภาพหน้าจอมาใส่ ไม่ใช่ภาพหน้าจอจริง",
+    "source": "apps/admin; routes/robot.ts; services/chatService.ts",
+    "text": [
+      "WEBSITE · INTERFACES",
+      "เว็บไซต์ทั้ง 2 ฝั่ง: หน้าที่และความคืบหน้า",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "04 / 19",
+      "Admin Website",
+      "ผู้ใช้: เจ้าหน้าที่ / ผู้ดูแลระบบ\nดูสถานะ แผนที่ และควบคุมหุ่น\nจัดการ POI ผู้ใช้ และประวัติงาน",
+      "ใส่รูปหน้า Admin Dashboard",
+      "พื้นที่สำหรับใส่ภาพหน้าจอเอง",
+      "Robot Interface",
+      "ผู้ใช้: ผู้มาเยือน / ผู้ใช้หุ่น\nเลือก POI และพิมพ์คำขอ AI\nติดตามงานและยกเลิกงานของตน",
+      "ใส่รูปหน้า Robot Interface",
+      "พื้นที่สำหรับใส่ภาพหน้าจอเอง"
+    ]
+  },
+  {
+    "number": 5,
+    "title": "เมื่อผู้ใช้กดสั่งงาน ข้อมูลเดินทางอย่างไร",
+    "notes": "หนึ่ง ผู้ใช้กดจาก Admin หรือ Robot Interface ส่ง REST request ถึง Backend สอง Backend ตรวจ session หรือ device token บทบาท งาน lock และความพร้อมของแผนที่ สาม บันทึกงานเหตุการณ์ลงฐานข้อมูลเมื่อใช้งานจริง สี่ สั่งหุ่นผ่าน REST adapter ห้า รับข้อมูลหุ่นกลับแล้วส่งสถานะไปเว็บด้วย Socket.IO พร้อม HTTP fallback แหล่งเก็บข้อมูลต่างจากตัวหุ่น เว็บไซต์จึงไม่ยิงคำสั่งฮาร์ดแวร์โดยตรง",
+    "source": "app.ts; middleware/auth.ts; jobService.ts; ws/socket.ts; prisma/schema.prisma",
+    "text": [
+      "WEBSITE · REQUEST / VALIDATION / ACTION",
+      "เมื่อผู้ใช้กดสั่งงาน ข้อมูลเดินทางอย่างไร",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "05 / 19",
+      "ADMIN WEBSITE",
+      "1. ส่งคำขอควบคุม\nใช้ session ผู้ใช้",
+      "ROBOT INTERFACE",
+      "1. ส่งคำขอผู้มาเยือน\nผ่าน server-side proxy",
+      "BACKEND",
+      "2. ตรวจสิทธิ์และงาน / lock\nตรวจแผนที่และตำแหน่ง\nเลือก adapter ของหุ่น\nประสานฐานข้อมูล",
+      "DATABASE",
+      "3. เก็บงานและเหตุการณ์\nPostgreSQL / Prisma",
+      "HERMES",
+      "4. รับคำสั่ง REST\nส่ง pose / battery / map",
+      "5. หุ่น → Backend → เว็บ: อัปเดตสถานะด้วย Socket.IO / HTTP fallback"
+    ]
+  },
+  {
+    "number": 6,
+    "title": "แผนที่ POI และการควบคุม: ทำส่วนไหนแล้ว",
+    "notes": "แผนที่สดมี grid หุ่น home POI และ LiDAR ซูมและลากได้ จุดหมายเพิ่มแก้ลบและใส่ aliases ได้พร้อมอ่านกลับยืนยัน มี joystick นำทาง กลับแท่นและหยุดที่ผ่านสิทธิ์และ lock การแก้จุด POI ไม่ใช่การแก้ occupancy map หรือกำแพงเสมือนบนหุ่น ผลการอ่านอุปกรณ์เคยตรวจแล้ว แต่การถึงจุดหมายและการหยุดจริงยังรอตรวจรับ",
+    "source": "LiveRobotMap.tsx; RobotMapEditor.tsx; jobService.ts; navigationPolicy.ts",
+    "text": [
+      "WEBSITE · IMPLEMENTED FEATURES",
+      "แผนที่ POI และการควบคุม: ทำส่วนไหนแล้ว",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "06 / 19",
+      "MAP",
+      "แสดงแผนที่สด",
+      "SLAM grid / pose / LiDAR\nหุ่น / home / POI\nซูม ลาก และเวลาอัปเดต",
+      "POI",
+      "จัดการจุดหมาย",
+      "ชื่อ / พิกัด / ทิศ / aliases\nเพิ่ม แก้ ลบทีละจุด\nอ่านกลับก่อนแจ้งสำเร็จ",
+      "CONTROL",
+      "คำสั่งควบคุม",
+      "joystick / นำทาง / กลับแท่น\nmanual lock / halt / E-Stop\nBackend ตรวจสิทธิ์และสถานะ",
+      "การจัดการ POI ทำแล้ว · การแก้แผนที่และกำแพงเสมือนยังเป็นงานค้าง"
+    ]
+  },
+  {
+    "number": 7,
+    "title": "Website: งานที่ยังค้างอยู่",
+    "notes": "งานค้างตามที่ผู้จัดทำระบุมีสามกลุ่ม: อัปโหลดหรือใช้ไฟล์แผนที่ร่วมกับหุ่น แก้ไขแผนที่รวมวาดกำแพงเสมือน และเชื่อมโหมดของหุ่น ในโค้ดเดิมมี import JSON ไป draft และเก็บ keepout polygons แต่ไม่ถือว่าเส้นทางอัปโหลดหรือแก้ SLAM map และกำแพงเสมือนบนหุ่นเสร็จแล้ว ต้องเชื่อม API ใช้กับ navigation และอ่านกลับยืนยันจริง",
+    "source": "maps.ts; mapImportSchema; RobotOperatingMode.tsx; SPEC.md",
+    "text": [
+      "WEBSITE · REMAINING WORK",
+      "Website: งานที่ยังค้างอยู่",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "07 / 19",
+      "01 · UPLOAD",
+      "อัปโหลดแผนที่",
+      "รองรับไฟล์และตรวจความถูกต้อง\nเชื่อมการใช้แผนที่กับหุ่น\nอ่านกลับตรวจผลหลังอัปโหลด",
+      "02 · MAP EDIT",
+      "แก้ไขแผนที่",
+      "วาดกำแพงเสมือน\nกำหนดเขตห้ามผ่าน\nใช้ข้อจำกัดกับการนำทางจริง",
+      "03 · ROBOT MODE",
+      "โหมดของหุ่นยนต์",
+      "เชื่อมโหมดปกติ / สำรวจ\nยืนยันสถานะที่หุ่นตอบกลับ\nควบคุมเริ่ม / จบการสร้างแผนที่",
+      "ตัวเลือกโหมดบนเว็บมีแล้ว · การเปลี่ยนโหมดจริงและตรวจรับยังค้าง"
+    ]
+  },
+  {
+    "number": 8,
+    "title": "หลักฐานฝั่งระบบเว็บและ Backend",
+    "notes": "ผล Backend ล่าสุดที่บันทึกไว้ผ่าน 52 tests เป็นจำนวนรวมทั้งระบบ ไม่ใช่ฝั่งเว็บเพียงอย่างเดียว typecheck ผ่าน Admin Robot Interface และ Backend ครอบคลุมสิทธิ์ API เซสชัน งาน แผนที่ POI และการตรวจคำขอ AI ผลอ่านแผนที่ตำแหน่งและ LiDAR จริงเป็นหลักฐานรอบก่อนหน้า ยังไม่อ้างผลเดินจริงหรืออัปโหลดกำแพงเสมือนจริง",
+    "source": "PROGRESS.md; apps/backend/test; scripts/check-robot-live.mjs",
+    "text": [
+      "WEBSITE · VERIFICATION",
+      "หลักฐานฝั่งระบบเว็บและ Backend",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "08 / 19",
+      "52 TESTS",
+      "Backend ระบบรวม",
+      "API / session / สิทธิ์\nงาน / POI / แผนที่ / AI\nผ่านตามผลที่บันทึกไว้",
+      "TYPECHECK",
+      "ผ่านทุกส่วนหลัก",
+      "Admin Website\nRobot Interface\nBackend",
+      "HARDWARE READ",
+      "เคยตรวจอ่านจริง",
+      "pose / battery / map\nLiDAR และ POI จริง\nการเคลื่อนที่ยังรอตรวจรับ",
+      "ใช้หลักฐานเดิม · ไม่ได้รัน tests หรือทดลองอุปกรณ์ใหม่ในการทำสไลด์นี้"
+    ]
+  },
+  {
+    "number": 9,
+    "title": "ช่วงที่ 2 — ความคืบหน้าฝั่ง AI",
+    "notes": "AI ปัจจุบันใช้ Qwen3.5-2B Q5_K_M บน PC ผ่าน llama-server ยังไม่ใช่ Jetson เนื้อหาต่อไปอธิบายเทคนิคที่ทำแล้ว ได้แก่กฎและ aliases โมเดลคืน structured JSON และ backend validation พร้อมโค้ดบางส่วนที่จัดบรรทัดเพื่ออ่านง่าย บริบทถามตอบคำสั่งข้ามข้อความและระบบเสียงยังเป็นงานค้าง",
+    "source": "",
+    "text": [
+      "PART 02 · AI",
+      "ช่วงที่ 2 — ความคืบหน้าฝั่ง AI",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "09 / 19",
+      "AI local เชื่อม Robot Interface แล้ว",
+      "Rule-based + POI aliases\nLLM + Structured JSON + Backend validation",
+      "Qwen3.5-2B Q5_K_M · llama-server · รันบน PC"
+    ]
+  },
+  {
+    "number": 10,
+    "title": "เทคนิคที่ใช้: Hybrid intent classification",
+    "notes": "เป็น hybrid intent classification: ตรวจภาษาและจับชื่อก่อน ถ้าคำขอชัดใช้กฎเพื่อลดการรอ หากรูปประโยคอ้อมให้ LLM ตีความ โดยให้เลือก UUID จากรายการปลายทาง และให้ Backend ตรวจอีกชั้น ไม่ได้ใช้ embeddings vector search หรือ fuzzy matching ในการจับชื่อปัจจุบัน ทั้งสองเทคนิคทำแล้ว ไม่ได้ fine-tune โมเดลใหม่",
+    "source": "robotLanguage.ts; robotIntent.ts; robotAiService.ts",
+    "text": [
+      "AI · METHODS & CURRENT CAPABILITIES",
+      "เทคนิคที่ใช้: Hybrid intent classification",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "10 / 19",
+      "METHOD 01 · ทำแล้ว",
+      "Rules + Dictionary",
+      "Regex แยกเจตนาของประโยค\nชื่อ POI + aliases ที่บันทึกไว้\nคำขอชัดเจน → ไม่รอโมเดล",
+      "METHOD 02 · ทำแล้ว",
+      "LLM + Structured output",
+      "Prompt กำกับเจตนาและรายการจุดหมาย\nJSON Schema จำกัดรูปผลลัพธ์\nZod + Backend ตรวจอีกชั้น",
+      "ไม่ฝึกโมเดลใหม่ · ไม่ให้โมเดลสร้างพิกัดหรือเรียก API หุ่นเอง"
+    ]
+  },
+  {
+    "number": 11,
+    "title": "ขั้นตอนจริง: ข้อความ → เจตนา → งานนำทาง",
+    "notes": "Robot Interface ส่งข้อความ ขั้นแรก normalize และวิเคราะห์ speechAct กับชื่อจุดหมาย คำหยุดที่รองรับเข้าทางลัด ถัดไปกฎหรือโมเดลคืน intent confidence poiCode speechAct needsClarification จากนั้นตรวจ schema รหัสและความกำกวม ก่อนอ่านแผนที่ใหม่และสร้างงาน เฉพาะกรณีผ่านข้อกำหนด หากเป็น dry-run จะคืนผลอย่างเดียว ไม่สร้างงาน",
+    "source": "robotIntent.ts; robotAiService.ts",
+    "text": [
+      "AI · IMPLEMENTED PIPELINE",
+      "ขั้นตอนจริง: ข้อความ → เจตนา → งานนำทาง",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "11 / 19",
+      "1. ข้อความ",
+      "ไทย / อังกฤษ",
+      "2. ตีความ",
+      "Rules หรือ LLM",
+      "3. ตรวจผล",
+      "Schema / POI / สิทธิ์",
+      "4. สร้างงาน",
+      "ใช้พิกัดจาก Backend",
+      "ข้อมูลที่โมเดลคืน",
+      "intent · confidence · poiCode · speechAct · needsClarification",
+      "คำปฏิเสธ / สมมติ / ชื่อกำกวม → ปฏิเสธหรือถามใหม่ ไม่สร้างงาน"
+    ]
+  },
+  {
+    "number": 12,
+    "title": "เทคนิค 1: Normalize + Regex + POI aliases",
+    "notes": "normalize ใช้ NFC เพื่อคงรูปสระภาษาไทย จากนั้นใช้ regular expressions ตรวจคำขอ คำถาม คำปฏิเสธ สมมติและข้อความยกมา matchRobotDestinations เทียบชื่อและ aliases ตรวจขอบเขตชื่ออังกฤษ และเลือกชื่อเฉพาะกว่าที่ทับตำแหน่งเดียวกัน กรณีชื่อซ้ำจะไม่เดา โค้ดที่เห็นเป็นส่วนของ classifyRobotTranscript ที่จัดบรรทัดใหม่ ไม่ใช่ฟังก์ชันที่รันเดี่ยวได้",
+    "source": "robotLanguage.ts; robotIntent.ts",
+    "text": [
+      "AI · RULE-BASED CLASSIFICATION",
+      "เทคนิค 1: Normalize + Regex + POI aliases",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "12 / 19",
+      "robotIntent.ts · excerpt",
+      "const language = analyzeRobotLanguage(transcript);\nconst matches = matchRobotDestinations(\n  transcript, catalog\n);\nif (language.stop) return rule('cancel_job');\nif (language.speechAct === 'request') {\n  if (matches.length === 1) {\n    return rule('navigate_to', matches[0].code);\n  }\n}",
+      "อ่านโค้ดเป็น 3 ขั้น",
+      "1. แยกเจตนาของข้อความ\n2. เทียบชื่อกับรายการ POI\n3. ชัดเจนจุดเดียว → คืนรหัส",
+      "aliases เช่น ทางเข้า → หน้าประตู · ไม่ใช่การเดาจุดที่ไม่มีในรายการ"
+    ]
+  },
+  {
+    "number": 13,
+    "title": "เทคนิค 2: บังคับรูปแบบ JSON และตรวจด้วย Zod",
+    "notes": "LLM มี closed set ของ intent และ poiCode ที่อยู่ใน catalog คำสั่งกำหนด JSON Schema เพื่อให้โมเดลตอบตามรูปแบบ และใช้ Zod ตรวจชนิดและช่วงคะแนนอีกครั้ง โค้ด outputSchema เป็น excerpt ที่จัดบรรทัดจากของจริง strict ไม่ให้เพิ่มฟิลด์อื่น confidence เป็นคะแนนจากโมเดล ไม่ใช่สิทธิ์ให้เดินเอง",
+    "source": "robotIntent.ts: outputSchema / schema",
+    "text": [
+      "AI · STRUCTURED OUTPUT",
+      "เทคนิค 2: บังคับรูปแบบ JSON และตรวจด้วย Zod",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "13 / 19",
+      "robotIntent.ts · outputSchema",
+      "const outputSchema = z.object({\n  intent: z.enum(intents),\n  confidence: z.number().min(0).max(1),\n  poiCode: z.string().nullable(),\n  speechAct: z.enum(speechActs),\n  needsClarification: z.boolean()\n}).strict();",
+      "ผลที่คาดหวัง",
+      "intent = navigate_to\npoiCode = UUID ในรายการ\nspeechAct = request\nneedsClarification = false",
+      "JSON Schema จำกัดรูปแบบ · Zod ตรวจผล · UUID ต้องมีอยู่ใน catalog"
+    ]
+  },
+  {
+    "number": 14,
+    "title": "การเรียกโมเดล: Prompt + Schema + ค่าควบคุม",
+    "notes": "Backend เรียก llama-server ผ่าน endpoint chat completions ซึ่งรัน Qwen บน PC prompt อธิบายคำขอสุภาพ คำถาม สมมติ และปฏิเสธ พร้อมรายชื่อ/aliases ของ POI ใช้ temperature 0 seed 42 max tokens 256 และปิด thinking โดยส่ง schema ไปด้วย seed และ temperature ช่วยลดการสุ่มแต่ไม่ได้รับประกันเหมือนกันทุกเครื่องหรืออนุมานว่าคำตอบถูกเสมอ โค้ดนี้ย่อ body จริงเพื่ออ่านบนสไลด์",
+    "source": "robotIntent.ts: fetch / system prompt",
+    "text": [
+      "AI · LOCAL LLM REQUEST",
+      "การเรียกโมเดล: Prompt + Schema + ค่าควบคุม",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "14 / 19",
+      "robotIntent.ts · request body (ย่อ)",
+      "{\n  model: config.ai.model,\n  messages: [systemMessage, userMessage],\n  temperature: 0, seed: 42,\n  max_tokens: 256, stream: false,\n  response_format: {\n    type: 'json_schema', schema\n  },\n  chat_template_kwargs: { enable_thinking: false }\n}",
+      "Prompt กำหนดอะไร",
+      "ประโยคสุภาพ = คำขอได้\nแยกคำถาม / ปฏิเสธ / สมมติ\nเลือกรหัสจาก POI ที่ให้เท่านั้น\nชื่อไม่ชัดเจน → ขอข้อมูลเพิ่ม",
+      "systemMessage / userMessage เป็นชื่อย่อบนสไลด์แทน objects ในโค้ดจริง"
+    ]
+  },
+  {
+    "number": 15,
+    "title": "Backend validation: ไม่เชื่อผลโมเดลอย่างเดียว",
+    "notes": "หลัง parse JSON มีการตรวจ Zod และตรวจรหัส POI ใน catalog จากนั้น service ตรวจคำปฏิเสธ กำกวม สิทธิ์และชื่อที่ผู้ใช้ระบุ อ่านแผนที่และพิกัดใหม่ก่อน dispatch และตรวจ freshness mapping localization และ lock คำหยุดยังตรวจ command epoch เพื่อกันผล AI ที่มาช้าสั่งเดินภายหลัง โค้ดด้านซ้าย excerpt สองส่วนจากไฟล์จริงจัดบรรทัดและตัดข้อความ error ให้สั้น",
+    "source": "robotIntent.ts; robotAiService.ts; navigationPolicy.ts",
+    "text": [
+      "AI · VALIDATION BEFORE DISPATCH",
+      "Backend validation: ไม่เชื่อผลโมเดลอย่างเดียว",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "15 / 19",
+      "robotIntent.ts + robotAiService.ts · excerpts",
+      "const decision = outputSchema.parse(\n  JSON.parse(content)\n);\nif (decision.poiCode && !catalog.some(\n  p => p.code === decision.poiCode\n)) throw new Error('Unknown POI');\n\nconst dispatchMap = !dryRun &&\n  decision.intent !== 'where_is'\n  ? await dependencies.loadMap() : map;",
+      "ก่อนส่งงานตรวจเพิ่ม",
+      "ชื่อจุดหมายชัดและสิทธิ์ผ่าน\nไม่มีงาน / manual lock ขัดกัน\nแผนที่ใหม่และปิด mapping\nคุณภาพตำแหน่ง ≥ 50",
+      "confidence ผ่านเกณฑ์อย่างเดียว ยังไม่เพียงพอสำหรับส่งคำสั่งเดิน"
+    ]
+  },
+  {
+    "number": 16,
+    "title": "ตัวอย่าง: ข้อความต่างสำนวนเลือก POI เดียวกัน",
+    "notes": "ตัวอย่างนี้อิงชื่อหน้าประตูที่มีหลักฐาน dry-run และชื่อเรียกทางเข้าที่รองรับใน metadata ถ้ามี alias อยู่จริง คำขอสุภาพสองแบบเข้าทางกฎ ส่วนข้อความที่วางจุดหมายก่อนคำขออาจใช้ LLM ผลคือ navigate_to กับรหัสเดียวกัน ข้อมูลด้านขวาเป็นรูปอธิบาย ไม่ใช่ log การทดลองใหม่ คำถามอยู่ไหนต้อง where_is ไม่เดิน และอย่าเพิ่งไปต้องไม่ dispatch",
+    "source": "robotIntent.ts; scripts/check-kiosk-ai.mjs; reports/ai-benchmark/hybrid.json",
+    "text": [
+      "AI · WORKED EXAMPLE",
+      "ตัวอย่าง: ข้อความต่างสำนวนเลือก POI เดียวกัน",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "16 / 19",
+      "คำขอของผู้ใช้",
+      "“ช่วยพาไปที่หน้าประตูหน่อย”\n“ไปส่งที่หน้าประตูได้ไหมครับ”\n“หน้าประตูคือจุดหมายของผม\nคุณช่วยไปส่งผมที่นั่นได้ไหม”",
+      "ผลตีความ",
+      "intent: navigate_to\npoiCode: UUID ของหน้าประตู\nspeechAct: request",
+      "“หน้าประตูอยู่ไหน” → ตอบข้อมูล · “อย่าเพิ่งไป” → ไม่ส่งคำสั่งเดิน"
+    ]
+  },
+  {
+    "number": 17,
+    "title": "ผล benchmark: วัดการตีความและ policy ร่วมกัน",
+    "notes": "ชุด regression มี 40 กรณีและ 6 POI fixture ตรวจ outcome และ target ที่คาดหวัง ผลวันที่ 7 ตุลาคม ก่อนปรับผ่าน 21/40 หลัง hybrid และ model เป็นหลักผ่าน 40/40 เสนอเดินผิดเจตนาหรือจุดหมายลด 4 เป็น 0 ในชุดนี้ เป็น dry-run บน PC และชุดที่ใช้พัฒนา ไม่ใช่ผล unseen หรือการเดินจริง hybrid ใช้กฎ 33 กรณี โมเดล 7 กรณี p95 4684 ms",
+    "source": "reports/ai-benchmark/{baseline,hybrid,model}.json; docs/benchmark-ai.md",
+    "text": [
+      "AI · RECORDED BENCHMARK",
+      "ผล benchmark: วัดการตีความและ policy ร่วมกัน",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "17 / 19",
+      "ก่อนปรับ",
+      "21/40",
+      "กฎ + โมเดล",
+      "40/40",
+      "โมเดล + กฎป้องกัน",
+      "40/40",
+      "Hybrid: Rules 33 / Model 7 · p95 4.684 วินาที · เสนอเดินผิด 4 → 0 กรณี",
+      "7 ต.ค. 2569 · PC / dry-run · ชุดพัฒนา ไม่ใช่ unseen test หรือผลเดินจริง"
+    ]
+  },
+  {
+    "number": 18,
+    "title": "AI: งานที่ยังค้างอยู่",
+    "notes": "วิธีสามจะเพิ่ม pending intent และอายุของบริบทสำหรับคำตอบถามกลับหรือคำอ้างที่นั่น ต้องกันงานซ้ำและล้างเมื่อยกเลิก พร้อม benchmark แบบหลายข้อความ Jetson เตรียม source/model แล้วแต่ build พัก ไม่มี server และไม่มีผล benchmark ส่วน STT/TTS ยังไม่เปิดใช้ ทั้งหมดนี้เป็นงานถัดไป ไม่ใช่ความสามารถที่ทำเสร็จแล้ว",
+    "source": "PROGRESS.md; SPEC.md; docs/jetson-ai.md",
+    "text": [
+      "AI · REMAINING WORK",
+      "AI: งานที่ยังค้างอยู่",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "18 / 19",
+      "METHOD 03",
+      "บริบทถามกลับ",
+      "pending intent + timeout\nอ้างจุดหมายข้ามข้อความ\nกันซ้ำ / ยกเลิก / benchmark",
+      "JETSON",
+      "ย้ายและวัดโมเดล",
+      "เริ่ม build ที่พัก\nวัด latency / RAM / เสถียรภาพ\nเลือกโมเดลจากผลบนอุปกรณ์",
+      "VOICE",
+      "STT / TTS",
+      "รับเสียงและอ่านข้อความ\nวัดคุณภาพและความหน่วง\nตรวจร่วมกับอุปกรณ์จริง",
+      "วิธีที่ 1–2 ทำแล้ว · วิธีที่ 3, Jetson และระบบเสียงยังค้าง"
+    ]
+  },
+  {
+    "number": 19,
+    "title": "สรุปความคืบหน้า Website และ AI",
+    "notes": "สรุปฝั่ง Website มี Admin Robot Interface Backend แผนที่สดและ POI แล้ว ส่วน upload แก้แผนที่/กำแพงเสมือนและโหมดหุ่นยังค้าง ฝั่ง AI ทำ hybrid rules + LLM พร้อม JSON schema Zod validation และ backend checks แล้ว ผล regressionผ่าน 40/40 ในชุดพัฒนาบน PC งานต่อคือบริบท Jetson และเสียง เปิดรับคำถามและใช้ speaker notes อ้างตำแหน่งโค้ดได้",
+    "source": "",
+    "text": [
+      "SUMMARY · Q&A",
+      "สรุปความคืบหน้า Website และ AI",
+      "AI ROBOT BUTLER  ·  WEBSITE + AI PROGRESS",
+      "19 / 19",
+      "WEBSITE",
+      "AI",
+      "Admin / Robot Interface / POI ทำแล้ว\nUpload / แก้แผนที่ / โหมด ยังค้าง",
+      "Rules + LLM + Validation ทำแล้ว\nบริบท / Jetson / เสียง ยังค้าง",
+      "52 tests ระบบรวม · AI regression 40/40 · ใช้หลักฐานเดิม",
+      "ขอบคุณครับ / ค่ะ",
+      "Q & A"
+    ]
+  }
+]

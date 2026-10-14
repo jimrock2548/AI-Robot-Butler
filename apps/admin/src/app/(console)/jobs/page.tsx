@@ -368,7 +368,7 @@ export default function JobsPage() {
                 <KV label="เริ่มเมื่อ">{fmtDateTime(detail.createdAt)}</KV>
                 <KV label="เริ่มเดินทาง">{fmtDateTime(detail.departedAt)}</KV>
                 <KV label="ระยะทั้งหมด">{detail.distanceM === null ? '—' : `${detail.distanceM.toFixed(1)} m`}</KV>
-                <KV label="แผนที่">v{detail.mapVersion}</KV>
+                <KV label="แผนที่">{detail.mapVersion === 0 ? 'แผนที่บนหุ่น' : `v${detail.mapVersion}`}</KV>
                 {detail.cancelReason && <KV label="เหตุผลการยกเลิก">{detail.cancelReason}</KV>}
                 {detail.arrivedAt && <KV label="ถึงเมื่อ">{fmtDateTime(detail.arrivedAt)}</KV>}
               </dl>

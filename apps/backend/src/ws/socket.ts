@@ -34,7 +34,7 @@ export function setupSockets(io: Server): void {
         }
         const parsed = manualControlSchema.safeParse(data);
         if (!parsed.success) return;
-        if (hermes) await pulseHermesManual(parsed.data.vx, parsed.data.vyaw);
+        if (hermes) await pulseHermesManual(parsed.data.vx, parsed.data.vyaw, user.id);
         else w.sim.setManual(parsed.data.vx, parsed.data.vyaw);
       } catch (error) {
         socket.emit('ws:error', { code: 'robot_command_failed', message: String(error) });

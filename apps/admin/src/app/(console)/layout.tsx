@@ -109,10 +109,14 @@ function EmergencyStrip() {
               {modeLabel[state.mode]}
             </span>
           )}
-          {state.simulated && (
+          {state.mockConnected && <span className="badge bg-surface-3 text-amber border-transparent">MOCK TEST · จำลองการเชื่อมต่อ ไม่มีหุ่นจริง</span>}
+          {state.simulated && !state.mockConnected && (
             <span className="badge bg-surface-3 text-ink-3 border-transparent" title="กำลังใช้ข้อมูลจำลอง (RobotSim) — ยังไม่ได้ต่อ Hermes จริง">
               จำลอง (sim)
             </span>
+          )}
+          {!state.commandsEnabled && (
+            <span className="badge bg-amber-bg text-amber border-amber">อ่านอย่างเดียว · ปิดการสั่งหุ่น</span>
           )}
           {dead && (
             <span className="text-sm font-semibold text-red">

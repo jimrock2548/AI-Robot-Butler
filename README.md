@@ -10,6 +10,8 @@
 
 ## เริ่มโหมดจำลอง
 
+หากต้องการดูหน้าเว็บเหมือนเชื่อมต่อ Hermes พร้อมแผนที่สด LiDAR และ POI โดยไม่มีหุ่นจริง ใช้ [Mock Test แบบเชื่อมต่อหุ่น](docs/mock-robot.md) เริ่ม Backend ด้วย `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-robot-mock.ps1 -LocalAI` โหมดนี้แยกฐานข้อมูลในหน่วยความจำและไม่เรียก API หุ่นจริง
+
 ต้องมี Node.js, pnpm 9 และติดตั้งแพ็กเกจด้วย `pnpm install` จากรากโปรเจ็กต์
 
 1. คัดลอก `.env.example` เป็น `.env` แล้วใช้ `DB_MODE=memory` และ `ROBOT_MODE=sim`

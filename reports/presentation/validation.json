@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-12",
+  "slides": 18,
+  "mainSlides": 16,
+  "backupSlides": 2,
+  "format": "16:9; native editable PowerPoint text/shapes; vector PDF",
+  "speakerNotes": 18,
+  "robotAccess": "none",
+  "modelAccess": "none",
+  "textOverflow": 0,
+  "sources": {
+    "reports\\ai-benchmark\\baseline.json": "c38399005a6648f113d02703d31a1bce2dd0d3af36a4ef772a3cf1295db523cc",
+    "reports\\ai-benchmark\\hybrid.json": "c98bc3fcd366fbd8688c28d6187a6ee2a2b39a6a61d022a361a69866ed759c13",
+    "reports\\ai-benchmark\\model.json": "5113b52b0d8ca461bd9e352d9fc2087f7720773418b0e0b9dca6cce99537b469"
+  }
+}

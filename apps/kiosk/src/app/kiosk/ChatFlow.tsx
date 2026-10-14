@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { JobSummary, Lang } from '@hermes/shared';
-import { kioskAiStatus, kioskChat, type KioskChatMessage, type KioskChatSource } from '../../lib/api';
+import type { JobSummary, Lang, KioskDestination } from '@hermes/shared';
+import { kioskAiStatus, kioskChat, kioskDestinations, kioskCancel, type KioskChatMessage, type KioskChatSource } from '../../lib/api';
 
 const u = (n: number) => `calc(${n} * var(--u))`;
 type Turn = KioskChatMessage & { sources?: KioskChatSource[] };
@@ -12,7 +12,9 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<{ textReady: boolean; webReady: boolean; simulated: boolean } | null>(null);
+  const [status, setStatus] = useState<{ textReady: boolean; webReady: boolean; simulated: boolean; mockConnected?: boolean } | null>(null);
+  const [destinations, setDestinations] = useState<KioskDestination[]>([]);
+  const [stopping, setStopping] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const alive = useRef(false);
   const bottom = useRef<HTMLDivElement | null>(null);
@@ -24,9 +26,13 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
   }, []);
   useEffect(() => {
     let live = true;
-    kioskAiStatus().then((next) => { if (live) setStatus(next); }).catch(() => {});
-    return () => { live = false; };
-  }, []);
+    const load = () => {
+      kioskAiStatus().then((next) => { if (live) setStatus(next); }).catch(() => {});
+      kioskDestinations(lang).then(next => { if (live) setDestinations(next.items); }).catch(() => {});
+    };
+    load(); const timer = window.setInterval(load, 5000);
+    return () => { live = false; window.clearInterval(timer); };
+  }, [lang]);
   useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [turns, busy]);
 
   const cancel = () => {
@@ -39,7 +45,7 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
   const send = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const question = input.trim();
-    if (!question || busy) return;
+    if (!question || busy || stopping) return;
     const history = turns.filter((turn) => turn.content.trim()).slice(-7)
       .map(({ role, content }) => ({ role, content }));
     const messages: KioskChatMessage[] = [...history, { role: 'user', content: question }];
@@ -73,6 +79,15 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
 
   const close = () => { controller.current?.abort(); onClose(); };
 
+  const stopRobot = async () => {
+    controller.current?.abort(); controller.current = null; setBusy(false); setStopping(true); setError(null);
+    try {
+      await kioskCancel();
+      if (alive.current) setTurns(current => [...current, { role: 'assistant', content: t('หยุดงานและยกเลิกคำสั่งที่รอแล้ว', 'Navigation and pending commands stopped.') }]);
+    } catch (cause) { if (alive.current) setError(cause instanceof Error ? cause.message : 'หยุดไม่สำเร็จ'); }
+    finally { if (alive.current) setStopping(false); }
+  };
+
   return <div className="flex-1 min-h-0 flex flex-col" style={{ gap: u(2) }}>
     <div className="flex items-center justify-between shrink-0" style={{ gap: u(2) }}>
       <button type="button" onClick={close} className="text-ink-2 bg-surface border border-line rounded active:bg-surface-3"
@@ -84,11 +99,20 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
     </div>
 
     <div className="border border-line bg-surface-2 text-ink-2 shrink-0" style={{ padding: `${u(1.3)} ${u(2)}`, fontSize: u(1.9) }}>
-      <strong className="text-amber">{t('โหมดทดลอง', 'DEMO MODE')}</strong>{' · '}
+      <strong className={status?.simulated === false ? 'text-navy' : 'text-amber'}>{status?.mockConnected ? t('MOCK TEST · หุ่นจำลอง', 'MOCK TEST · NO REAL ROBOT') : status?.simulated === false ? t('เชื่อมกับหุ่นจริง', 'LIVE ROBOT') : t('โหมดทดลอง', 'DEMO MODE')}</strong>{' · '}
       {status?.textReady
-        ? t('คุยด้วยข้อความได้ หุ่นเป็นแบบจำลอง', 'Text chat is ready. Robot actions are simulated.')
+        ? status.simulated ? t('คุยด้วยข้อความได้ หุ่นเป็นแบบจำลอง', 'Text chat is ready. Robot actions are simulated.') : t('พิมพ์คำสั่งไป POI แล้วกดส่งเพื่อเริ่มนำทาง', 'Send a POI command to start navigation.')
         : t('กำลังตรวจสถานะ AI', 'Checking AI status')}
       {' · '}{status?.webReady ? t('ค้นเว็บพร้อม', 'Web search ready') : t('ยังไม่ได้เปิดค้นเว็บ', 'Web search not configured')}
+    </div>
+
+    <div className="flex flex-wrap shrink-0" style={{ gap: u(0.8) }}>
+      {destinations.map(poi => <button key={poi.code} type="button" disabled={busy || stopping} onClick={() => setInput(lang === 'th' ? `เดินไปที่${poi.nameTh}` : `Go to ${poi.nameEn}`)}
+        className="border border-line bg-surface rounded text-navy disabled:opacity-50" style={{ padding: `${u(0.7)} ${u(1.2)}`, fontSize: u(1.9) }}>{lang === 'th' ? poi.nameTh : poi.nameEn}</button>)}
+      <button type="button" disabled={busy || stopping} onClick={() => setInput(t('กลับจุดชาร์จ', 'Return to charging station'))}
+        className="border border-line bg-surface rounded text-navy disabled:opacity-50" style={{ padding: `${u(0.7)} ${u(1.2)}`, fontSize: u(1.9) }}>{t('กลับจุดชาร์จ', 'Return to charger')}</button>
+      <button type="button" disabled={stopping} onClick={() => void stopRobot()}
+        className="border border-red bg-red-bg rounded text-red disabled:opacity-50" style={{ padding: `${u(0.7)} ${u(1.2)}`, fontSize: u(1.9) }}>{stopping ? t('กำลังหยุด…', 'Stopping…') : t('หยุดหุ่น / ยกเลิกคำสั่ง', 'Stop / cancel command')}</button>
     </div>
 
     <div className="flex-1 min-h-0 overflow-y-auto flex flex-col" style={{ gap: u(2), padding: `${u(1)} 0` }} aria-live="polite">
@@ -115,11 +139,11 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
     {busy && <button type="button" onClick={cancel} className="border border-line-2 bg-surface text-navy rounded self-center"
       style={{ padding: `${u(1)} ${u(2)}`, fontSize: u(2.1) }}>{t('ยกเลิกคำตอบ', 'Cancel response')}</button>}
     <form onSubmit={(event) => void send(event)} className="flex shrink-0" style={{ gap: u(1) }}>
-      <input value={input} onChange={(event) => setInput(event.target.value)} maxLength={500} disabled={busy || !status?.textReady}
+      <input value={input} onChange={(event) => setInput(event.target.value)} maxLength={500} disabled={busy || stopping || !status?.textReady}
         className="min-w-0 flex-1 border border-line-2 rounded bg-white text-ink focus:outline-none focus:border-navy"
         style={{ padding: `${u(1.5)} ${u(1.8)}`, fontSize: u(2.35) }}
         aria-label={t('พิมพ์ข้อความ', 'Type a message')} placeholder={t('พิมพ์คำถามหรือคำขอ…', 'Type your question…')} />
-      <button type="submit" disabled={busy || !input.trim() || !status?.textReady}
+      <button type="submit" disabled={busy || stopping || !input.trim() || !status?.textReady}
         className="bg-navy text-white font-bold rounded disabled:opacity-50 active:bg-navy-2"
         style={{ padding: `0 ${u(2.5)}`, fontSize: u(2.3) }}>{t('ส่ง', 'Send')}</button>
     </form>

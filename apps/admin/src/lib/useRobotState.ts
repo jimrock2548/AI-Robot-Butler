@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
-import type { RobotState } from '@hermes/shared';
+import type { RobotState, LiveRobotMap } from '@hermes/shared';
 import { API_URL, api } from './api';
 
 /**
@@ -15,25 +15,39 @@ export type ConnectionState = 'connecting' | 'ws' | 'polling';
 export function useRobotState(): {
   state: RobotState | null;
   connection: ConnectionState;
+  liveMap: LiveRobotMap | null;
+  mapError: string | null;
 } {
   const [state, setState] = useState<RobotState | null>(null);
   const [connection, setConnection] = useState<ConnectionState>('connecting');
+  const [liveMap, setLiveMap] = useState<LiveRobotMap | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     let disposed = false;
     let pollTimer: number | undefined;
+    let pollBusy = false;
+    const loadMap = async () => {
+      try {
+        const map = await api<LiveRobotMap>('/robot/live-map');
+        if (!disposed) { setLiveMap(map); setMapError(null); }
+      } catch { if (!disposed) setMapError('อ่านแผนที่จากหุ่นไม่ได้'); }
+    };
 
     const startPolling = () => {
       if (pollTimer !== undefined || disposed) return;
       setConnection('polling');
       const tick = async () => {
+        if (pollBusy) return;
+        pollBusy = true;
         try {
           const s = await api<RobotState>('/robot/state');
           if (!disposed) setState(s);
+          if (!s.simulated || s.mockConnected) await loadMap();
         } catch {
           // backend ยังไม่พร้อม — ปล่อยค่าเดิมไว้ (จะแสดง banner)
-        }
+        } finally { pollBusy = false; }
       };
       void tick();
       pollTimer = window.setInterval(tick, 2000);
@@ -62,6 +76,7 @@ export function useRobotState(): {
       void api<RobotState>('/robot/state')
         .then((s) => {
           if (!disposed) setState(s);
+          if (!s.simulated || s.mockConnected) void loadMap();
         })
         .catch(() => {});
     });
@@ -69,6 +84,13 @@ export function useRobotState(): {
     socket.on('telemetry', (s: RobotState) => {
       if (!disposed) setState(s);
     });
+    socket.on('map:live', (map: LiveRobotMap) => {
+      if (!disposed) { setLiveMap(map); setMapError(null); }
+    });
+    socket.on('map:live-error', (error: { message: string }) => {
+      if (!disposed) setMapError(error.message);
+    });
+    socket.on('disconnect', () => { if (!disposed) startPolling(); });
 
     socket.on('connect_error', () => {
       if (disposed) return;
@@ -88,5 +110,5 @@ export function useRobotState(): {
     };
   }, []);
 
-  return { state, connection };
+  return { state, connection, liveMap, mapError };
 }
