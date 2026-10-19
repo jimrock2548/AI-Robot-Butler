@@ -24,6 +24,7 @@ export const config = {
   },
   kioskToken: process.env.KIOSK_TOKEN ?? 'dev-kiosk-token',
   ai: {
+    navigationOnly: process.env.AI_NAVIGATION_ONLY !== 'false',
     mode: (process.env.AI_MODE ?? 'off') as 'off' | 'local',
     baseUrl: process.env.AI_BASE_URL ?? 'http://127.0.0.1:8080',
     model: process.env.AI_MODEL ?? 'qwen3.5-2b',

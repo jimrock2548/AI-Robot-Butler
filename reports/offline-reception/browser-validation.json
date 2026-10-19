@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-19T04:40:24.146Z",
+  "robotMode": "mock",
+  "realHardwareAccess": false,
+  "speech": "stubbed browser API, not real microphone/voice accuracy",
+  "checks": [
+    "wake gates transcript; valid wake fills preview without sending",
+    "unsupported request receives bounded reply",
+    "admin SSE shows chat; staff takeover and reply reach kiosk; TTS stub invoked",
+    "mobile screen has no horizontal overflow",
+    "two independent map libraries save, select and preview their standby points"
+  ],
+  "runtimeErrors": []
+}

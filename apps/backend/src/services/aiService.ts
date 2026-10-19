@@ -4,6 +4,7 @@ import { config } from '../config';
 import { ApiError } from '../errors';
 import { getWorld } from '../db/memory';
 import { cancelJob, createJob } from './jobService';
+import { navigationScopeReply } from './navigationScope';
 
 const intentSchema = z.enum([
   'navigate_to', 'where_is', 'answer_question', 'check_in_visitor',
@@ -131,6 +132,8 @@ export async function classifyTranscript(raw: unknown, requestSignal?: AbortSign
 export async function handleKioskIntent(raw: unknown, classify = classifyTranscript, requestSignal?: AbortSignal): Promise<AiResult> {
   const { transcript, lang } = transcriptSchema.parse(raw);
   const startedAt = Date.now();
+  const scopeReply = config.ai.navigationOnly ? navigationScopeReply(transcript, lang) : null;
+  if (scopeReply) return reject(transcript, lang, { intent: 'unknown', confidence: 1, poiCode: null }, 'outside_navigation_scope', startedAt, scopeReply);
   // An explicit stop command must not wait for LLM inference.
   const immediateStop = /^(?:หยุด|ยกเลิก|หยุดเดิน|หยุดนำทาง|stop|cancel|stop navigation|cancel navigation)[.!\s]*$/iu.test(transcript);
   const asksLocation = /อยู่(?:ที่)?ไหน|where is|where can i find/iu.test(transcript)

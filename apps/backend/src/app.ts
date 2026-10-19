@@ -8,6 +8,8 @@ import { jobsRouter } from './routes/jobs';
 import { mapsRouter } from './routes/maps';
 import { usersRouter } from './routes/users';
 import { aiRouter } from './routes/ai';
+import { receptionRouter } from './routes/reception';
+import { mapLibraryRouter } from './routes/mapLibrary';
 import { kioskRouter } from './routes/kiosk';
 import { errorHandler } from './middleware/errorHandler';
 import { getWorld } from './db/memory';
@@ -84,7 +86,9 @@ export function createApp(): express.Express {
   app.use('/api/robot', robotRouter);
   app.use('/api/jobs', jobsRouter);
   app.use('/api/maps', mapsRouter);
+  app.use('/api/map-library', mapLibraryRouter);
   app.use('/api/users', usersRouter);
+  app.use('/api/ai/reception', receptionRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/kiosk', kioskRouter);
 

@@ -1,6 +1,14 @@
 # ความคืบหน้าโครงการ Hermes Reception Control
 
-อัปเดต: 13 ตุลาคม 2569
+## งานตามคอมเมนต์อาจารย์ — 19 ตุลาคม 2569
+
+พัฒนาส่วนที่ไม่ต้องต่อหุ่น: Robot Interface ใหม่, STT/TTS ผ่านเบราว์เซอร์และ wake gate จาก transcript, แชตแยก session แบบสดใน Admin, เจ้าหน้าที่รับช่วง/ตอบข้อความ, ขอบเขตบริการนำทางและคำขอทำไม่ได้, คลังแผนที่หลายสถานที่พร้อมจุดประจำและ preview เพิ่ม service_documents/migration สำหรับ PostgreSQL และฟอนต์ local เพื่อ build โดยไม่ดึง Google Fonts
+
+ตรวจ Backend 58 tests, typecheck, production build และ browser integration กับ Mock ผ่าน; ทดสอบเก็บ document ข้าม PostgreSQL connection ผ่าน ไม่มีการติดต่อหรือเคลื่อนที่หุ่นจริง เสียง browser test ใช้ stub จึงยังไม่ใช่ผลความแม่นยำไมค์จริง หลายแผนที่ยังไม่สลับ SLAM บนหุ่น และนโยบายกลับจุดประจำยังไม่ dispatch อัตโนมัติ
+
+ส่งมอบ [รายงานละเอียด](reports/offline-reception/REPORT.md), [คู่มือทดลอง](docs/offline-reception.md), [แผน Field Test กับพี่ปลั๊ก](docs/field-test-plan.md), [สไลด์ย่อ 9 หน้า PPTX](reports/offline-reception/slides/AI-Robot-Butler-Progress-2026-10-19.pptx) / [PDF](reports/offline-reception/slides/AI-Robot-Butler-Progress-2026-10-19.pdf)
+
+อัปเดต: 19 ตุลาคม 2569
 
 ## สไลด์รายงานความคืบหน้า — 13 ตุลาคม 2569
 

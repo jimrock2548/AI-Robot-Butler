@@ -10,6 +10,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Small service documents: conversation sessions and offline map library.
+model service_documents {
+  id         String   @id
+  kind       String
+  data       Json
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@index([kind, updated_at])
+}
+
 enum user_role {
   viewer
   operator

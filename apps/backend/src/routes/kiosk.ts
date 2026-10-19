@@ -12,12 +12,73 @@ import { config } from '../config';
 import { hermes } from '../hermes/driver';
 import { getLiveMap } from '../services/liveMapService';
 import { handleRobotAiCommand } from '../services/robotAiService';
+import { z } from 'zod';
+import { ApiError } from '../errors';
+import { createReception, authorizeReception, publicSession, appendMessage, saveReception, beginReceptionTurn, finishReceptionTurn, receptionEvents } from '../services/receptionService';
 
 /**
  * Kiosk (จอบนตัวหุ่น) — device token, จำกัด 4 endpoint (spec §8.6)
  */
 export const kioskRouter = Router();
 kioskRouter.use(requireKioskToken);
+
+kioskRouter.post('/conversation', async (_req, res, next) => {
+  try { res.status(201).json(await createReception()); } catch (error) { next(error); }
+});
+kioskRouter.get('/conversation/:id', async (req, res, next) => {
+  try {
+    const session = await authorizeReception(z.string().uuid().parse(req.params.id), req.header('x-conversation-token') ?? '');
+    res.setHeader('Cache-Control', 'no-store');
+    res.json(publicSession(session));
+  } catch (error) { next(error); }
+});
+
+kioskRouter.post('/conversation/:id/messages', async (req, res, next) => {
+  const controller = new AbortController();
+  res.on('close', () => { if (!res.writableEnded) controller.abort(); });
+  let session: Awaited<ReturnType<typeof authorizeReception>> | undefined;
+  let started = false;
+  try {
+    const body = z.object({ content: z.string().trim().min(1).max(500), lang: z.enum(['th', 'en']) }).parse(req.body);
+    session = await authorizeReception(z.string().uuid().parse(req.params.id), req.header('x-conversation-token') ?? '');
+    if (session.messages.length > 197) throw new ApiError(409, 'conversation_full', 'กรุณาเริ่มบทสนทนาใหม่');
+    beginReceptionTurn(session.id, controller); started = true;
+    appendMessage(session, 'user', body.content);
+    await saveReception(session);
+    res.set({ 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store, no-transform' });
+    res.flushHeaders();
+    res.write(`${JSON.stringify({ type: 'session', session: publicSession(session) })}\n`);
+    if (session.mode === 'staff') {
+      res.end(`${JSON.stringify({ type: 'done' })}\n`);
+      return;
+    }
+    const answer = appendMessage(session, 'assistant', '');
+    answer.status = 'streaming';
+    const history = session.messages.filter(m => m.role !== 'staff' && m.content.trim()).slice(-8)
+      .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content.slice(0, 500) }));
+    try {
+      await streamKioskChat({ messages: history, lang: body.lang }, event => {
+        if (controller.signal.aborted || session!.mode !== 'ai') return;
+        if (event.type === 'delta') {
+          answer.content += event.text;
+          session!.revision++;
+          receptionEvents.emit('update', publicSession(session!));
+          if (!res.destroyed) res.write(`${JSON.stringify({ type: 'session', session: publicSession(session!) })}\n`);
+        }
+        if (!res.destroyed) res.write(`${JSON.stringify(event)}\n`);
+      }, controller.signal);
+      answer.status = controller.signal.aborted ? 'cancelled' : 'complete';
+    } catch (error) {
+      answer.status = controller.signal.aborted ? 'cancelled' : 'error';
+      if (!controller.signal.aborted && !res.destroyed) res.write(`${JSON.stringify({ type: 'error', message: error instanceof Error ? error.message : 'ตอบไม่สำเร็จ' })}\n`);
+    }
+    await saveReception(session);
+    if (!res.destroyed) res.end();
+  } catch (error) {
+    if (!res.headersSent) next(error);
+    else if (!res.destroyed) res.end();
+  } finally { if (session && started) finishReceptionTurn(session.id); }
+});
 
 kioskRouter.get('/ai-status', async (_req, res) => {
   let webReady = false;
@@ -29,7 +90,7 @@ kioskRouter.get('/ai-status', async (_req, res) => {
   if (config.ai.mode === 'local') {
     try { modelReady = (await fetch(new URL('/v1/models', config.ai.baseUrl), { signal: AbortSignal.timeout(1500) })).ok; } catch { /* model offline */ }
   }
-  res.json({ textReady: modelReady, voiceReady: false, webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
+  res.json({ textReady: modelReady || config.ai.navigationOnly, modelReady, navigationOnly: config.ai.navigationOnly, voiceReady: false, voiceMode: 'browser', webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
 });
 
 kioskRouter.post('/chat', async (req, res, next) => {

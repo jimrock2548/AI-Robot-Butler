@@ -16,6 +16,7 @@ const items = [
   { href: '/control', label: 'ควบคุม', icon: ArrowsRightLeftIcon, adminOnly: false },
   { href: '/jobs', label: 'งาน (Jobs)', icon: ClipboardDocumentListIcon, adminOnly: false },
   { href: '/map', label: 'แผนที่', icon: MapIcon, adminOnly: false },
+  { href: '/map-library', label: 'คลังแผนที่ / จุดประจำ', icon: MapIcon, adminOnly: true },
   { href: '/users', label: 'ผู้ใช้', icon: UsersIcon, adminOnly: true },
   { href: '/ai', label: 'AI (Phase 2)', icon: SparklesIcon, adminOnly: false },
 ];
@@ -42,7 +43,7 @@ export function SideNav({ role }: { role: string }) {
       {items
         .filter((it) => !it.adminOnly || role === 'admin')
         .map((it) => {
-          const active = it.href === '/' ? pathname === '/' : pathname.startsWith(it.href);
+          const active = it.href === '/' || it.href === '/map' ? pathname === it.href : pathname.startsWith(it.href);
           const Icon = it.icon;
           return (
             <Link

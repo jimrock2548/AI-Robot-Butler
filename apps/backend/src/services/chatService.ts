@@ -7,7 +7,8 @@ import { handleKioskIntent } from './aiService';
 import { handleRobotAiCommand } from './robotAiService';
 import { hermes } from '../hermes/driver';
 import { getLiveMap } from './liveMapService';
-import { analyzeRobotLanguage } from './robotLanguage';
+import { analyzeRobotLanguage, matchRobotDestinations } from './robotLanguage';
+import { navigationScopeReply } from './navigationScope';
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -139,6 +140,33 @@ async function streamModel(messages: { role: 'system' | 'user' | 'assistant'; co
 export async function streamKioskChat(raw: unknown, emit: Emit, signal: AbortSignal): Promise<void> {
   const { messages, lang } = requestSchema.parse(raw);
   const latest = messages.at(-1)!.content;
+  const scopeReply = navigationScopeReply(latest, lang);
+  if (config.ai.navigationOnly && scopeReply) {
+    emit({ type: 'route', route: 'chat' });
+    emit({ type: 'delta', text: scopeReply });
+    emit({ type: 'done' });
+    return;
+  }
+  if (config.ai.navigationOnly) {
+    const language = analyzeRobotLanguage(latest);
+    const quick = (text: string) => { emit({ type: 'route', route: 'database' }); emit({ type: 'delta', text }); emit({ type: 'done' }); };
+    if (['negated', 'hypothetical', 'quoted'].includes(language.speechAct)) {
+      quick(lang === 'th' ? 'รับทราบครับ ยังไม่เริ่มนำทาง กรุณาระบุจุดหมายเมื่อพร้อม' : 'No navigation started. Please name a destination when ready.');
+      return;
+    }
+    if (!language.stop && language.speechAct !== 'request' && !language.location && !language.status) {
+      quick(lang === 'th' ? 'สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ' : 'I can guide you to listed destinations, locate places, report robot status and cancel navigation. Choose a destination or contact staff.');
+      return;
+    }
+    if (!hermes && language.location) {
+      const pois = getWorld().publishedPois().filter(poi => poi.isPublic);
+      const hits = matchRobotDestinations(latest, pois);
+      const poi = hits.length === 1 ? pois.find(p => p.code === hits[0].code) : null;
+      quick(poi ? `${lang === 'th' ? poi.nameTh : poi.nameEn}: x=${poi.x}, y=${poi.y} m`
+        : lang === 'th' ? 'กรุณาเลือกชื่อจุดหมายให้ชัดเจนจากรายการบนหน้าจอครับ' : 'Please select a specific destination from the screen.');
+      return;
+    }
+  }
   const proposed = routeByRules(latest) ?? await modelRoute(messages, lang, signal);
   // A model cannot turn a general question or retrieved page into a robot command.
   const route = proposed === 'action' && !hermes && !actionWords.test(latest) && analyzeRobotLanguage(latest).speechAct !== 'request' ? 'chat' : proposed;

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { AiConversation, AiRejection } from '@hermes/shared';
 import { api } from '../../../lib/api';
 import { fmtDateTime } from '../../../lib/format';
+import { ReceptionMonitor } from '../../../components/ReceptionMonitor';
 
 /**
  * AI (Phase 2 — Qwen บน Jetson) — spec §8.7
@@ -31,6 +32,7 @@ export default function AiPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <ReceptionMonitor />
       <div>
         <h1 className="font-sans font-semibold text-ink leading-heading">AI local · สถานะและประวัติ</h1>
         <p className="text-sm text-ink-2 mt-1">

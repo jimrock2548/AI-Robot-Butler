@@ -1,5 +1,7 @@
 # Hermes Reception Control
 
+งานล่าสุด 19 ต.ค. 2569: [รายงานผล Reception บน PC](reports/offline-reception/REPORT.md) · [คู่มือเปิดชุดทดลอง Mock แยกพอร์ต](docs/offline-reception.md) · [แผน Field Test](docs/field-test-plan.md)
+
 ระบบควบคุมหุ่นยนต์ต้อนรับตาม [SPEC.md](SPEC.md) ระยะที่ 1 มีเว็บผู้ดูแล, จอ Kiosk, Backend และ PostgreSQL พร้อมโหมดจำลองสำหรับพัฒนา
 
 อ่าน [ภาพรวมระบบและสถานะงานทั้งหมด](docs/system-overview.md) เพื่อดูองค์ประกอบ การไหลของข้อมูล สิ่งที่ทำแล้ว และงานที่ยังค้างของทั้งระยะที่ 1 และระยะ AI

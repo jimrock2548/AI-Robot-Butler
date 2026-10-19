@@ -10,6 +10,7 @@ import { createJob, cancelJob, type JobRequester } from './jobService';
 import { buildRobotState } from './robotService';
 import { analyzeRobotLanguage, matchRobotDestinations, readPoiAliases } from './robotLanguage';
 import { classifyRobotTranscript } from './robotIntent';
+import { navigationScopeReply } from './navigationScope';
 
 const inputSchema = z.object({ transcript: z.string().trim().min(1).max(500), lang: z.enum(['th', 'en']).default('th'), dryRun: z.boolean().default(false) });
 export interface RobotAiResult {
@@ -53,6 +54,8 @@ export async function handleRobotAiCommand(raw: unknown, requester: JobRequester
       decisionSource: decision.decisionSource, needsClarification: decision.needsClarification ?? false, ...extra };
   };
   if (signal?.aborted) throw new ApiError(503, 'ai_cancelled', 'ยกเลิกคำขอแล้ว');
+  const scopeReply = config.ai.navigationOnly ? navigationScopeReply(transcript, lang) : null;
+  if (scopeReply) return finish({ intent: 'unknown', confidence: 1, poiCode: null, decisionSource: 'rules' }, scopeReply, true);
   if (language.stop) {
     const decision: AiDecision = { intent: 'cancel_job', confidence: 1, poiCode: null, speechAct: 'request', decisionSource: 'rules' };
     if (dryRun) return finish(decision, t('ทดสอบคำสั่งหยุด — ไม่ส่งคำสั่งให้หุ่น', 'Stop preview only; no command sent.'));

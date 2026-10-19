@@ -1,154 +1,132 @@
 'use client';
-
 import { useEffect, useRef, useState } from 'react';
-import type { JobSummary, Lang, KioskDestination } from '@hermes/shared';
-import { kioskAiStatus, kioskChat, kioskDestinations, kioskCancel, type KioskChatMessage, type KioskChatSource } from '../../lib/api';
-
-const u = (n: number) => `calc(${n} * var(--u))`;
-type Turn = KioskChatMessage & { sources?: KioskChatSource[] };
+import type { JobSummary, Lang, KioskDestination, ReceptionSession } from '@hermes/shared';
+import { createConversation, readConversation, kioskAiStatus, kioskChat, kioskDestinations, kioskCancel } from '../../lib/api';
+import { useBrowserVoice } from '../../lib/browserVoice';
 
 export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => void; onJob: (job: JobSummary) => void }) {
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const [session, setSession] = useState<ReceptionSession | null>(null);
+  const [credentials, setCredentials] = useState<{ id: string; token: string } | null>(null);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<{ textReady: boolean; webReady: boolean; simulated: boolean; mockConnected?: boolean } | null>(null);
+  const [error, setError] = useState('');
   const [destinations, setDestinations] = useState<KioskDestination[]>([]);
+  const [simulated, setSimulated] = useState<boolean | null>(null);
+  const [autoSpeak, setAutoSpeak] = useState(false);
   const [stopping, setStopping] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const alive = useRef(false);
+  const credentialsRef = useRef<typeof credentials>(null);
+  const seenSpeech = useRef(new Set<string>());
   const bottom = useRef<HTMLDivElement | null>(null);
+  const voice = useBrowserVoice(lang, text => setInput(text));
   const t = (th: string, en: string) => lang === 'th' ? th : en;
-
+  const apply = (next: ReceptionSession) => setSession(old => !old || next.id !== old.id || next.revision >= old.revision ? next : old);
+  const create = async () => {
+    const result = await createConversation();
+    if (!alive.current) return;
+    const c = { id: result.session.id, token: result.token };
+    credentialsRef.current = c; setCredentials(c); setSession(result.session); setInput(''); setError('');
+  };
   useEffect(() => {
-    alive.current = true;
+    alive.current = true; void create().catch(e => { if (alive.current) setError(e.message); });
     return () => { alive.current = false; controller.current?.abort(); };
   }, []);
   useEffect(() => {
+    if (!credentials) return;
+    let live = true, loading = false;
+    const load = async () => {
+      if (loading) return; loading = true;
+      try { const next = await readConversation(credentials.id, credentials.token); if (live) apply(next); }
+      catch (e) { if (live) setError(e instanceof Error ? e.message : 'อ่านแชตไม่ได้'); }
+      finally { loading = false; }
+    };
+    const timer = window.setInterval(() => void load(), 1000);
+    return () => { live = false; window.clearInterval(timer); };
+  }, [credentials]);
+  useEffect(() => {
     let live = true;
     const load = () => {
-      kioskAiStatus().then((next) => { if (live) setStatus(next); }).catch(() => {});
-      kioskDestinations(lang).then(next => { if (live) setDestinations(next.items); }).catch(() => {});
+      kioskAiStatus().then(s => { if (live) setSimulated(s.simulated); }).catch(() => {});
+      kioskDestinations(lang).then(s => { if (live) setDestinations(s.items); }).catch(() => {});
     };
     load(); const timer = window.setInterval(load, 5000);
-    return () => { live = false; window.clearInterval(timer); };
+    return () => { live = false; clearInterval(timer); };
   }, [lang]);
-  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [turns, busy]);
-
-  const cancel = () => {
-    controller.current?.abort();
-    controller.current = null;
-    setBusy(false);
-    setError(t('ยกเลิกคำตอบแล้ว', 'Response cancelled.'));
-  };
-
-  const send = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const question = input.trim();
-    if (!question || busy || stopping) return;
-    const history = turns.filter((turn) => turn.content.trim()).slice(-7)
-      .map(({ role, content }) => ({ role, content }));
-    const messages: KioskChatMessage[] = [...history, { role: 'user', content: question }];
-    setTurns((current) => [...current, { role: 'user', content: question }, { role: 'assistant', content: '' }]);
-    setInput('');
-    setError(null);
-    setBusy(true);
-    const request = new AbortController();
-    controller.current = request;
+  useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [session?.messages.at(-1)?.content]);
+  useEffect(() => {
+    const latest = session?.messages.at(-1);
+    if (!latest || latest.role === 'user' || latest.status !== 'complete' || !latest.content || seenSpeech.current.has(latest.id)) return;
+    seenSpeech.current.add(latest.id);
+    if (autoSpeak) voice.speak(latest.content);
+  }, [session, autoSpeak]);
+  useEffect(() => { if (session?.mode === 'staff') controller.current?.abort(); }, [session?.mode]);
+  const send = async (event: React.FormEvent) => {
+    event.preventDefault(); const question = input.trim();
+    if (!question || !credentials || busy || stopping) return;
+    voice.stop(); voice.stopSpeaking(); setBusy(true); setInput(''); setError('');
+    const request = new AbortController(); controller.current = request;
     try {
-      for await (const update of kioskChat(messages, lang, request.signal)) {
-        if (!alive.current || request.signal.aborted) break;
-        if (update.type === 'delta') {
-          setTurns((current) => current.map((turn, index) => index === current.length - 1
-            ? { ...turn, content: turn.content + update.text } : turn));
-        } else if (update.type === 'done') {
-          if (update.sources?.length) setTurns((current) => current.map((turn, index) => index === current.length - 1
-            ? { ...turn, sources: update.sources } : turn));
-          if (update.job) { onJob(update.job); return; }
-        }
+      for await (const event of kioskChat([{ role: 'user', content: question }], lang, request.signal, credentials)) {
+        if (!alive.current || credentialsRef.current?.id !== credentials.id) break;
+        if (event.type === 'session') apply(event.session);
+        if (event.type === 'done' && event.job) { onJob(event.job); return; }
       }
-    } catch (cause) {
-      if (alive.current && !request.signal.aborted) {
-        setError(cause instanceof Error ? cause.message : t('ตอบคำถามไม่สำเร็จ', 'Could not answer.'));
-      }
-    } finally {
+    } catch (e) { if (alive.current && !request.signal.aborted) { setError(e instanceof Error ? e.message : 'ส่งไม่สำเร็จ'); setInput(question); } }
+    finally {
       if (controller.current === request) controller.current = null;
-      if (alive.current) setBusy(false);
+      if (alive.current) { setBusy(false); void readConversation(credentials.id, credentials.token).then(next => { if (alive.current && credentialsRef.current?.id === credentials.id) apply(next); }).catch(() => {}); }
     }
   };
-
-  const close = () => { controller.current?.abort(); onClose(); };
-
   const stopRobot = async () => {
-    controller.current?.abort(); controller.current = null; setBusy(false); setStopping(true); setError(null);
-    try {
-      await kioskCancel();
-      if (alive.current) setTurns(current => [...current, { role: 'assistant', content: t('หยุดงานและยกเลิกคำสั่งที่รอแล้ว', 'Navigation and pending commands stopped.') }]);
-    } catch (cause) { if (alive.current) setError(cause instanceof Error ? cause.message : 'หยุดไม่สำเร็จ'); }
-    finally { if (alive.current) setStopping(false); }
+    controller.current?.abort(); voice.stop(); voice.stopSpeaking(); setStopping(true); setError('');
+    try { await kioskCancel(); } catch (e) { setError(e instanceof Error ? e.message : 'หยุดไม่สำเร็จ'); }
+    finally { setStopping(false); }
   };
-
-  return <div className="flex-1 min-h-0 flex flex-col" style={{ gap: u(2) }}>
-    <div className="flex items-center justify-between shrink-0" style={{ gap: u(2) }}>
-      <button type="button" onClick={close} className="text-ink-2 bg-surface border border-line rounded active:bg-surface-3"
-        style={{ padding: `${u(1.2)} ${u(3)}`, fontSize: u(2.5) }}>← {t('กลับ', 'Back')}</button>
-      <span className="font-display font-bold text-navy" style={{ fontSize: u(2.5) }}>{t('คุยกับผู้ช่วย AI', 'AI assistant')}</span>
-      <button type="button" onClick={() => { if (busy) cancel(); setTurns([]); setError(null); }}
-        className="text-ink-2 bg-surface border border-line rounded active:bg-surface-3"
-        style={{ padding: `${u(1.2)} ${u(2)}`, fontSize: u(2.2) }}>{t('เริ่มใหม่', 'New chat')}</button>
+  return <div className="reception-shell">
+    <header className="reception-header">
+      <button type="button" className="reception-button" onClick={() => { controller.current?.abort(); voice.stop(); voice.stopSpeaking(); onClose(); }}>← {t('กลับ', 'Back')}</button>
+      <div><strong>HERMES</strong><span>{t('ผู้ช่วยนำทางของคุณ', 'Your navigation assistant')}</span></div>
+      <button className="reception-button" disabled={busy} onClick={() => { voice.stop(); voice.stopSpeaking(); void create().catch(e => setError(e.message)); }}>{t('เริ่มใหม่', 'New chat')}</button>
+    </header>
+    <div className="reception-body">
+      <aside className="reception-guide">
+        <div className={`reception-avatar ${voice.speaking ? 'is-speaking' : ''}`} aria-label="ผู้ช่วยเฮอร์มีส"><div className="reception-eyes"><i /><i /></div><div className="reception-smile" /></div>
+        <h1>{session?.mode === 'staff' ? t('เจ้าหน้าที่กำลังดูแลคุณ', 'Staff is assisting you') : t('ให้ฉันพาไปไหมครับ?', 'Where shall we go?')}</h1>
+        <p>{t('เลือกจุดหมาย พิมพ์ หรือกดพูด แล้วให้ฉันช่วยนำทาง', 'Choose a destination, type or speak to request navigation.')}</p>
+        <span className="reception-badge">{simulated === null ? t('กำลังเชื่อมต่อ', 'Connecting') : simulated ? t('หุ่นจำลอง', 'Simulated robot') : t('เชื่อมกับหุ่นจริง', 'Live robot')}</span>
+        <div className="reception-destinations">{destinations.map(p => <button disabled={busy || session?.mode === 'staff'} key={p.code} onClick={() => setInput(t(`พาไป${p.nameTh}`, `Take me to ${p.nameEn}`))}>{lang === 'th' ? p.nameTh : p.nameEn} ↗</button>)}</div>
+        <button className="reception-button" disabled={busy || session?.mode === 'staff'} onClick={() => setInput(t('กลับจุดชาร์จ', 'Return to charging station'))}>{t('กลับจุดชาร์จ', 'Return to charger')}</button>
+        <button className="reception-stop" disabled={stopping} onClick={() => void stopRobot()}>{t('หยุด / ยกเลิกงาน', 'Stop / cancel navigation')}</button>
+      </aside>
+      <section className="reception-chat" aria-label="บทสนทนา">
+        <div className="reception-chat-title"><strong>{t('สนทนากับเรา', 'Talk to us')}</strong><span>{session?.mode === 'staff' ? t('เจ้าหน้าที่', 'Staff') : 'AI'}</span></div>
+        <div className="reception-turns" aria-live="polite">
+          {!session?.messages.length && <p className="reception-welcome">{t('สวัสดีครับ เลือกจุดหมายที่ต้องการได้เลย หากต้องการเจ้าหน้าที่ กรุณาแจ้งในช่องสนทนา', 'Hello! Choose your destination. If you need staff, let us know in the conversation.')}</p>}
+          {session?.messages.map(m => <article key={m.id} className={`reception-turn ${m.role}`}>
+            <small>{m.role === 'user' ? t('คุณ', 'You') : m.role === 'staff' ? t('เจ้าหน้าที่', 'Staff') : 'Hermes'}</small>
+            <p>{m.content || (m.status === 'streaming' ? t('กำลังตอบ…', 'Responding…') : '')}</p>
+            {m.status === 'cancelled' && <small>{t('ยกเลิกคำตอบแล้ว', 'Response cancelled')}</small>}
+            {m.status === 'error' && <small>{t('ตอบไม่สำเร็จ กรุณาลองใหม่', 'Response failed. Please retry.')}</small>}
+            {m.role !== 'user' && m.status === 'complete' && m.content && <button onClick={() => voice.speak(m.content)} aria-label={t('อ่านออกเสียง', 'Read aloud')}>🔊</button>}
+          </article>)}<div ref={bottom} />
+        </div>
+        {error && <p role="alert" className="reception-error">{error}</p>}
+        <div className="reception-voice">
+          <button className="reception-button" disabled={!voice.supported || busy} onClick={() => voice.listening ? voice.stop() : voice.start(false)}>{voice.listening ? t('ปิดไมค์', 'Stop listening') : t('กดพูด', 'Speak')}</button>
+          <button className="reception-button" disabled={!voice.supported || busy || !voice.wakePhrase.trim()} onClick={() => voice.start(true)}>{t('ฟังคำเรียก', 'Listen for wake word')}</button>
+          <input aria-label="คำเรียกหุ่น" maxLength={50} value={voice.wakePhrase} onChange={e => { voice.stop(); voice.setWakePhrase(e.target.value); }} />
+          <label><input type="checkbox" checked={autoSpeak} onChange={e => { setAutoSpeak(e.target.checked); if (!e.target.checked) voice.stopSpeaking(); }} />{t('อ่านคำตอบ', 'Speak replies')}</label>
+          {voice.speaking && <button className="reception-button" onClick={voice.stopSpeaking}>{t('หยุดเสียง', 'Stop speaking')}</button>}
+        </div>
+        <p className="reception-hint" role="status">{voice.notice || t('รับเสียงแล้วให้ตรวจข้อความก่อนกดส่ง', 'Review recognized text before sending.')}</p>
+        <form className="reception-compose" onSubmit={e => void send(e)}>
+          <input aria-label={t('ข้อความหรือคำสั่งนำทาง', 'Message or navigation request')} maxLength={500} disabled={!credentials || busy || stopping} value={input} onChange={e => setInput(e.target.value)} placeholder={session?.mode === 'staff' ? t('พิมพ์คุยกับเจ้าหน้าที่…', 'Message staff…') : t('เช่น ช่วยพาไปห้องประชุมหน่อย', 'e.g. Please take me to the meeting room')} />
+          <button disabled={!credentials || !input.trim() || busy || stopping}>{busy ? '…' : t('ส่ง', 'Send')}</button>
+          {busy && <button type="button" onClick={() => controller.current?.abort()}>{t('ยกเลิก', 'Cancel')}</button>}
+        </form>
+        <p className="reception-hint">{t('รับเสียงผ่านเบราว์เซอร์อาจใช้อินเทอร์เน็ตและส่งเสียงไปยังผู้ให้บริการ · แชตแสดงให้เจ้าหน้าที่ดูแลบริการ', 'Browser speech recognition may send audio to its provider and require internet. Staff can view this service conversation.')}</p>
+      </section>
     </div>
-
-    <div className="border border-line bg-surface-2 text-ink-2 shrink-0" style={{ padding: `${u(1.3)} ${u(2)}`, fontSize: u(1.9) }}>
-      <strong className={status?.simulated === false ? 'text-navy' : 'text-amber'}>{status?.mockConnected ? t('MOCK TEST · หุ่นจำลอง', 'MOCK TEST · NO REAL ROBOT') : status?.simulated === false ? t('เชื่อมกับหุ่นจริง', 'LIVE ROBOT') : t('โหมดทดลอง', 'DEMO MODE')}</strong>{' · '}
-      {status?.textReady
-        ? status.simulated ? t('คุยด้วยข้อความได้ หุ่นเป็นแบบจำลอง', 'Text chat is ready. Robot actions are simulated.') : t('พิมพ์คำสั่งไป POI แล้วกดส่งเพื่อเริ่มนำทาง', 'Send a POI command to start navigation.')
-        : t('กำลังตรวจสถานะ AI', 'Checking AI status')}
-      {' · '}{status?.webReady ? t('ค้นเว็บพร้อม', 'Web search ready') : t('ยังไม่ได้เปิดค้นเว็บ', 'Web search not configured')}
-    </div>
-
-    <div className="flex flex-wrap shrink-0" style={{ gap: u(0.8) }}>
-      {destinations.map(poi => <button key={poi.code} type="button" disabled={busy || stopping} onClick={() => setInput(lang === 'th' ? `เดินไปที่${poi.nameTh}` : `Go to ${poi.nameEn}`)}
-        className="border border-line bg-surface rounded text-navy disabled:opacity-50" style={{ padding: `${u(0.7)} ${u(1.2)}`, fontSize: u(1.9) }}>{lang === 'th' ? poi.nameTh : poi.nameEn}</button>)}
-      <button type="button" disabled={busy || stopping} onClick={() => setInput(t('กลับจุดชาร์จ', 'Return to charging station'))}
-        className="border border-line bg-surface rounded text-navy disabled:opacity-50" style={{ padding: `${u(0.7)} ${u(1.2)}`, fontSize: u(1.9) }}>{t('กลับจุดชาร์จ', 'Return to charger')}</button>
-      <button type="button" disabled={stopping} onClick={() => void stopRobot()}
-        className="border border-red bg-red-bg rounded text-red disabled:opacity-50" style={{ padding: `${u(0.7)} ${u(1.2)}`, fontSize: u(1.9) }}>{stopping ? t('กำลังหยุด…', 'Stopping…') : t('หยุดหุ่น / ยกเลิกคำสั่ง', 'Stop / cancel command')}</button>
-    </div>
-
-    <div className="flex-1 min-h-0 overflow-y-auto flex flex-col" style={{ gap: u(2), padding: `${u(1)} 0` }} aria-live="polite">
-      {turns.length === 0 && <div className="flex-1 flex flex-col items-center justify-center text-center text-ink-2" style={{ gap: u(1.5) }}>
-        <div className="bg-navy text-white rounded-full grid place-items-center font-display font-bold" style={{ width: u(10), height: u(10), fontSize: u(4) }}>AI</div>
-        <h1 className="font-display font-bold text-ink m-0" style={{ fontSize: u(4) }}>{t('อยากรู้อะไร ถามได้เลย', 'What would you like to know?')}</h1>
-        <p className="m-0" style={{ fontSize: u(2.3) }}>{t('ถามทั่วไป ถามเรื่องอาคาร หรือขอให้พาไปห้อง', 'Ask anything, ask about the building, or request directions.')}</p>
-      </div>}
-      {turns.map((turn, index) => <div key={index} className={`max-w-[92%] border rounded ${turn.role === 'user'
-        ? 'self-end bg-navy text-white border-navy' : 'self-start bg-surface text-ink border-line'}`}
-        style={{ padding: `${u(1.5)} ${u(2)}`, fontSize: u(2.35), lineHeight: 1.45 }}>
-        <div className="whitespace-pre-wrap">{turn.content || (busy && index === turns.length - 1 ? t('กำลังคิด…', 'Thinking…') : '')}</div>
-        {turn.sources?.length ? <div className="border-t border-line mt-2 pt-2 flex flex-col" style={{ gap: u(0.7), fontSize: u(1.8) }}>
-          <strong>{t('แหล่งข้อมูลที่ค้นพบ', 'Sources found')}</strong>
-          {turn.sources.map((source, sourceIndex) => <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer"
-            className="text-navy underline break-all">[{sourceIndex + 1}] {source.title}</a>)}
-          <span className="text-ink-3">{t('ค้นเมื่อ', 'Retrieved')}: {new Date(turn.sources[0].retrievedAt).toLocaleString(lang === 'th' ? 'th-TH' : 'en-US')}</span>
-        </div> : null}
-      </div>)}
-      <div ref={bottom} />
-    </div>
-
-    {error && <p role="alert" className="text-red m-0" style={{ fontSize: u(2.1) }}>{error}</p>}
-    {busy && <button type="button" onClick={cancel} className="border border-line-2 bg-surface text-navy rounded self-center"
-      style={{ padding: `${u(1)} ${u(2)}`, fontSize: u(2.1) }}>{t('ยกเลิกคำตอบ', 'Cancel response')}</button>}
-    <form onSubmit={(event) => void send(event)} className="flex shrink-0" style={{ gap: u(1) }}>
-      <input value={input} onChange={(event) => setInput(event.target.value)} maxLength={500} disabled={busy || stopping || !status?.textReady}
-        className="min-w-0 flex-1 border border-line-2 rounded bg-white text-ink focus:outline-none focus:border-navy"
-        style={{ padding: `${u(1.5)} ${u(1.8)}`, fontSize: u(2.35) }}
-        aria-label={t('พิมพ์ข้อความ', 'Type a message')} placeholder={t('พิมพ์คำถามหรือคำขอ…', 'Type your question…')} />
-      <button type="submit" disabled={busy || stopping || !input.trim() || !status?.textReady}
-        className="bg-navy text-white font-bold rounded disabled:opacity-50 active:bg-navy-2"
-        style={{ padding: `0 ${u(2.5)}`, fontSize: u(2.3) }}>{t('ส่ง', 'Send')}</button>
-    </form>
-    <p className="m-0 text-center text-ink-3 shrink-0" style={{ fontSize: u(1.7) }}>
-      {t('เสียงยังไม่พร้อมใช้งาน · คำตอบ AI อาจผิดพลาดได้', 'Voice is not ready · AI answers may be inaccurate')}
-    </p>
   </div>;
 }

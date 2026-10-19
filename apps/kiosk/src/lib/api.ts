@@ -1,4 +1,5 @@
 import type { JobSummary, KioskDestination, KioskSession, Lang } from '@hermes/shared';
+import type { ReceptionSession } from '@hermes/shared';
 
 /**
  * Kiosk API client — device token (spec §8.6)
@@ -63,14 +64,16 @@ export function kioskAiStatus() {
 export interface KioskChatMessage { role: 'user' | 'assistant'; content: string }
 export interface KioskChatSource { title: string; url: string; snippet: string; retrievedAt: string }
 export type KioskChatEvent =
+  | { type: 'session'; session: ReceptionSession }
   | { type: 'route'; route: 'chat' | 'database' | 'web' | 'action' }
   | { type: 'delta'; text: string }
   | { type: 'done'; sources?: KioskChatSource[]; job?: JobSummary | null }
   | { type: 'error'; message: string };
 
-export async function* kioskChat(messages: KioskChatMessage[], lang: Lang, signal: AbortSignal): AsyncGenerator<KioskChatEvent> {
-  const res = await fetch('/api/kiosk/chat', { method: 'POST', cache: 'no-store',
-    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages, lang }), signal });
+export async function* kioskChat(messages: KioskChatMessage[], lang: Lang, signal: AbortSignal, conversation?: { id: string; token: string }): AsyncGenerator<KioskChatEvent> {
+  const res = await fetch(conversation ? `/api/kiosk/conversation/${conversation.id}/messages` : '/api/kiosk/chat', { method: 'POST', cache: 'no-store',
+    headers: { 'Content-Type': 'application/json', ...(conversation ? { 'x-conversation-token': conversation.token } : {}) },
+    body: JSON.stringify(conversation ? { content: messages.at(-1)?.content, lang } : { messages, lang }), signal });
   if (!res.ok) {
     const body = await res.json().catch(() => null) as { error?: { code?: string; message?: string } } | null;
     throw new KioskApiError(body?.error?.message ?? `HTTP ${res.status}`, body?.error?.code ?? `http_${res.status}`);
@@ -107,6 +110,13 @@ export interface KioskVoiceResult {
   replyText: string;
   job?: JobSummary | null;
   rejected?: boolean;
+}
+
+export function createConversation() {
+  return req<{ session: ReceptionSession; token: string }>('/kiosk/conversation', { method: 'POST', body: '{}' });
+}
+export function readConversation(id: string, token: string) {
+  return req<ReceptionSession>(`/kiosk/conversation/${id}`, { headers: { 'x-conversation-token': token } });
 }
 
 export function kioskIntent(transcript: string, lang: Lang, signal?: AbortSignal) {

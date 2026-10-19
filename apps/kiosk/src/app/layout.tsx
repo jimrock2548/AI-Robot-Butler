@@ -1,24 +1,26 @@
 import type { Metadata, Viewport } from 'next';
-import { Archivo, Anuphan, Courier_Prime } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 
-const archivo = Archivo({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+const archivo = localFont({
+  src: '../../../../assets/fonts/archivo.ttf',
+  weight: '400 700',
   variable: '--font-archivo',
   display: 'swap',
 });
 
-const anuphan = Anuphan({
-  subsets: ['latin', 'thai'],
-  weight: ['400', '500', '600', '700'],
+const anuphan = localFont({
+  src: '../../../../assets/fonts/anuphan.ttf',
+  weight: '400 700',
   variable: '--font-anuphan',
   display: 'swap',
 });
 
-const courier = Courier_Prime({
-  subsets: ['latin'],
-  weight: ['400', '700'],
+const courier = localFont({
+  src: [
+    { path: '../../../../assets/fonts/courier-regular.ttf', weight: '400' },
+    { path: '../../../../assets/fonts/courier-bold.ttf', weight: '700' },
+  ],
   variable: '--font-courier',
   display: 'swap',
 });

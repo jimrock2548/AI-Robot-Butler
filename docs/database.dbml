@@ -185,6 +185,16 @@ Table ai_rejections {
 }
 
 // Physical foreign keys only; user IDs and destination codes above are scalar fields.
+Table service_documents {
+  id text [pk]
+  kind text [not null, note: 'conversation, map-library, selection']
+  data jsonb [not null, note: 'Session messages/capability hash or map/POI/standby document']
+  updated_at timestamp [not null, default: `now()`]
+  indexes {
+    (kind, updated_at)
+  }
+}
+
 Ref: maps.robot_id > robots.id
 Ref: pois.map_id > maps.id [delete: cascade]
 Ref: keepout_zones.map_id > maps.id [delete: cascade]

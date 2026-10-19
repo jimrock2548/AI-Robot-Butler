@@ -45,3 +45,23 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .voice-wave > span { animation: none; }
 }
+/* Reception screen: large touch controls, friendly code-drawn assistant. */
+.reception-shell { display:flex; flex-direction:column; flex:1; min-height:0; color:#213b39; background:#f8f8f2; border-radius:24px; overflow:hidden; font-size:clamp(16px,1.5vw,24px); }
+.reception-header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 24px; background:#fff; border-bottom:1px solid #dde8df; }
+.reception-header strong { font-size:1.3em; letter-spacing:.12em; color:#166b56; }.reception-header span { display:block; font-size:.7em; }
+.reception-body { display:grid; grid-template-columns:minmax(240px,32%) 1fr; flex:1; min-height:0; }
+.reception-guide { display:flex; flex-direction:column; align-items:center; gap:14px; padding:24px; background:#e8f2e7; overflow:auto; text-align:center; }
+.reception-guide h1 { font-weight:700; font-size:1.4em; }.reception-guide p { font-size:.8em; }
+.reception-avatar { width:150px; height:126px; background:#fff; border:8px solid #176b56; border-radius:42px; display:flex; align-items:center; flex-direction:column; justify-content:center; gap:16px; box-shadow:0 10px 0 #cadcc8; }
+.reception-eyes { display:flex; gap:36px; }.reception-eyes i { width:15px; height:26px; border-radius:12px; background:#176b56; }.reception-smile { width:44px; height:18px; border-bottom:5px solid #176b56; border-radius:50%; }
+.is-speaking .reception-smile { background:#176b56; border-radius:50%; animation:reception-talk .5s infinite alternate; }@keyframes reception-talk { to { transform:scaleY(.4); } }
+.reception-badge { border-radius:99px; background:#fff; padding:4px 14px; font-size:.7em; }.reception-destinations { display:flex; flex-direction:column; gap:8px; width:100%; }
+.reception-destinations button,.reception-button { border:1px solid #bed1c7; background:#fff; border-radius:14px; padding:10px 14px; min-height:44px; font-size:.8em; }.reception-destinations button { text-align:left; }
+.reception-stop { background:#fff0eb; color:#ad3522; border:1px solid #dcad9f; padding:10px 14px; border-radius:14px; width:100%; }
+.reception-chat { display:flex; flex-direction:column; min-height:0; min-width:0; padding:20px; gap:10px; }.reception-chat-title { display:flex; justify-content:space-between; border-bottom:1px solid #dde8df; padding-bottom:12px; }
+.reception-turns { display:flex; flex-direction:column; gap:14px; flex:1; min-height:0; overflow:auto; }.reception-welcome { padding:20px; border-radius:20px; background:#fff; }
+.reception-turn { max-width:90%; border-radius:20px; padding:12px 18px; background:#fff; border:1px solid #dae4db; align-self:flex-start; word-break:break-word; }.reception-turn.user { align-self:flex-end; background:#176b56; color:#fff; }.reception-turn.staff { background:#fff5d7; }.reception-turn small { font-size:.65em; opacity:.8; }.reception-turn p { white-space:pre-wrap; }.reception-turn button { padding:4px 12px; }
+.reception-compose { display:flex; gap:8px; }.reception-compose input { flex:1; min-width:0; border:1px solid #bed1c7; padding:14px; border-radius:16px; }.reception-compose button { border-radius:16px; background:#176b56; color:#fff; padding:10px 20px; }
+.reception-voice { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }.reception-voice>input { border:1px solid #bed1c7; padding:8px; border-radius:12px; width:180px; font-size:.75em; }.reception-voice label { display:flex; gap:8px; font-size:.7em; }.reception-hint { color:#60746a; font-size:.62em; }.reception-error { color:#ad3522; font-size:.8em; }
+.reception-shell button:disabled { opacity:.45; cursor:not-allowed; }.reception-shell button:focus-visible,.reception-shell input:focus-visible { outline:3px solid #dc9f27; outline-offset:2px; }
+@media(max-width:760px) { .reception-body { grid-template-columns:1fr; overflow:auto; }.reception-guide { flex-direction:row; flex-wrap:wrap; padding:12px; justify-content:center; overflow:visible; }.reception-avatar { display:none; }.reception-guide h1 { font-size:1em; }.reception-guide p { display:none; }.reception-destinations { flex-direction:row; flex-wrap:wrap; }.reception-chat { min-height:420px; overflow:visible; }.reception-turns { max-height:45vh; }.reception-stop { width:auto; } }

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { getWorld, initWorld } from '../src/db/memory';
 import { routeByRules, streamKioskChat, type ChatEvent } from '../src/services/chatService';
 import { config } from '../src/config';
+// Regression coverage for the optional general chat / web-search mode.
+Object.assign(config.ai, { navigationOnly: false });
 
 test('chat routing reserves robot actions for explicit visitor commands', () => {
   assert.equal(routeByRules('พาไปห้อง 101'), 'action');

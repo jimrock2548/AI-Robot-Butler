@@ -1,0 +1,11 @@
+{
+  "date": "2026-10-19T04:38:42.109Z",
+  "database": "PostgreSQL",
+  "checks": [
+    "conversation messages survive disconnect",
+    "map and standby survive disconnect",
+    "separate Prisma connection reads persisted documents",
+    "concurrent updates to one document retain the last submitted revision"
+  ],
+  "robotAccess": false
+}

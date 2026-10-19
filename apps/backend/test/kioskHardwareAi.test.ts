@@ -3,6 +3,7 @@ import test from 'node:test';
 import type { LiveRobotMap } from '@hermes/shared';
 
 process.env.ROBOT_MODE = 'hermes';
+process.env.AI_NAVIGATION_ONLY = 'false';
 process.env.HERMES_READ_ONLY = 'false';
 process.env.AI_MODE = 'local';
 const realFetch = globalThis.fetch;

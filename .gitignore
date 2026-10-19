@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .next/
+.next-offline-demo*/
 .next-ai*/
 out/
 *.log

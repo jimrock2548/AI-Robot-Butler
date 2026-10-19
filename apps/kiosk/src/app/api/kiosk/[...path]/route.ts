@@ -8,6 +8,9 @@ async function forward(req: NextRequest, { params }: { params: { path: string[] 
   const allowed =
     (req.method === 'GET' && path.length === 1 && ['destinations', 'ai-status'].includes(path[0])) ||
     (req.method === 'GET' && path.length === 2 && path[0] === 'session' && /^\d+$/.test(path[1])) ||
+    (req.method === 'POST' && path.length === 1 && path[0] === 'conversation') ||
+    (req.method === 'GET' && path.length === 2 && path[0] === 'conversation' && /^[0-9a-f-]{36}$/i.test(path[1])) ||
+    (req.method === 'POST' && path.length === 3 && path[0] === 'conversation' && /^[0-9a-f-]{36}$/i.test(path[1]) && path[2] === 'messages') ||
     (req.method === 'POST' && path.length === 1 && ['escort', 'cancel', 'intent', 'voice', 'chat'].includes(path[0]));
   if (!allowed) return NextResponse.json({ error: { code: 'not_found', message: 'ไม่พบคำสั่ง' } }, { status: 404 });
   if (!token) return NextResponse.json({ error: { code: 'unconfigured', message: 'ยังไม่ได้ตั้งค่าจอหุ่น' } }, { status: 503 });
@@ -19,10 +22,11 @@ async function forward(req: NextRequest, { params }: { params: { path: string[] 
     }
     const url = new URL(`/api/kiosk/${path.join('/')}`, backend);
     url.search = req.nextUrl.search;
-    const deadline = AbortSignal.timeout(path[0] === 'chat' ? 105_000 : path[0] === 'voice' || path[0] === 'intent' ? 23_000 : 5000);
+    const deadline = AbortSignal.timeout(path[0] === 'chat' || path[2] === 'messages' ? 105_000 : path[0] === 'voice' || path[0] === 'intent' ? 23_000 : 5000);
     const upstream = await fetch(url, {
       method: req.method,
-      headers: { 'Content-Type': req.headers.get('content-type') ?? 'application/json', Authorization: `Bearer ${token}` },
+      headers: { 'Content-Type': req.headers.get('content-type') ?? 'application/json', Authorization: `Bearer ${token}`,
+        'x-conversation-token': req.headers.get('x-conversation-token') ?? '' },
       body,
       cache: 'no-store',
       signal: AbortSignal.any([req.signal, deadline]),
