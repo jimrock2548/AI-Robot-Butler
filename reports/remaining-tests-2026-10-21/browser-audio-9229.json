@@ -1,0 +1,118 @@
+{
+  "at": "2026-10-21T05:41:03.273Z",
+  "browser": "Chrome CDP on local PC, debugging port 9229",
+  "realSpeechEngine": true,
+  "enginePassed": false,
+  "availability": {
+    "secure": true,
+    "recognition": true,
+    "microphonePermission": "prompt",
+    "devices": [],
+    "voices": [
+      {
+        "name": "Microsoft David - English (United States)",
+        "lang": "en-US"
+      },
+      {
+        "name": "Microsoft Mark - English (United States)",
+        "lang": "en-US"
+      },
+      {
+        "name": "Microsoft Zira - English (United States)",
+        "lang": "en-US"
+      },
+      {
+        "name": "Microsoft Pattara - Thai (Thailand)",
+        "lang": "th-TH"
+      },
+      {
+        "name": "Google Deutsch",
+        "lang": "de-DE"
+      },
+      {
+        "name": "Google US English",
+        "lang": "en-US"
+      },
+      {
+        "name": "Google UK English Female",
+        "lang": "en-GB"
+      },
+      {
+        "name": "Google UK English Male",
+        "lang": "en-GB"
+      },
+      {
+        "name": "Google español",
+        "lang": "es-ES"
+      },
+      {
+        "name": "Google español de Estados Unidos",
+        "lang": "es-US"
+      },
+      {
+        "name": "Google français",
+        "lang": "fr-FR"
+      },
+      {
+        "name": "Google हिन्दी",
+        "lang": "hi-IN"
+      },
+      {
+        "name": "Google Bahasa Indonesia",
+        "lang": "id-ID"
+      },
+      {
+        "name": "Google italiano",
+        "lang": "it-IT"
+      },
+      {
+        "name": "Google 日本語",
+        "lang": "ja-JP"
+      },
+      {
+        "name": "Google 한국의",
+        "lang": "ko-KR"
+      },
+      {
+        "name": "Google Nederlands",
+        "lang": "nl-NL"
+      },
+      {
+        "name": "Google polski",
+        "lang": "pl-PL"
+      },
+      {
+        "name": "Google português do Brasil",
+        "lang": "pt-BR"
+      },
+      {
+        "name": "Google русский",
+        "lang": "ru-RU"
+      },
+      {
+        "name": "Google 普通话（中国大陆）",
+        "lang": "zh-CN"
+      },
+      {
+        "name": "Google 粤語（香港）",
+        "lang": "zh-HK"
+      },
+      {
+        "name": "Google 國語（臺灣）",
+        "lang": "zh-TW"
+      }
+    ]
+  },
+  "events": [
+    {
+      "type": "error",
+      "error": "synthesis-failed",
+      "elapsedTime": 3,
+      "at": 1792561263272
+    }
+  ],
+  "uiNotice": "พูดเสียงไม่ได้ (synthesis-failed) กรุณาตรวจลำโพง เลือกเสียงอื่น หรือเปิดเว็บบนอุปกรณ์ที่ใช้งานจริง",
+  "physicalRobotSpeakerVerified": false,
+  "physicalRobotMicrophoneVerified": false,
+  "humanListeningRequired": true
+}

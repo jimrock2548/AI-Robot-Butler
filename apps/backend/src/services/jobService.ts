@@ -6,6 +6,7 @@ import { jobSummary, requireRobotLink } from './robotService';
 import { abortHermesJob, emergencyStopHermes, hermes, startHermesJob } from '../hermes/driver';
 import { persistWorld } from '../db/postgres';
 import { validateLiveNavigation } from './navigationPolicy';
+import { assertRobotAvailable, setDispatching } from './robotActivity';
 
 /**
  * งานนำทาง — หนึ่ง job ต่อหนึ่งเวลา (spec §6.2 ข้อ 4)
@@ -37,6 +38,7 @@ export async function createJob(
   opts: { requirePublic?: boolean; target?: CoordinateTarget; allowDispatch?: () => boolean } = {},
 ): Promise<ReturnType<typeof jobSummary>> {
   requireRobotLink();
+  assertRobotAvailable();
   const w = getWorld();
   if (jobCommandPending) throw new ApiError(409, 'job_in_progress', 'กำลังรอหุ่นยนต์ยืนยันคำสั่งก่อนหน้า');
   const existing = w.activeJob();
@@ -63,6 +65,7 @@ export async function createJob(
   const distance = Math.hypot(poi.x - from.x, poi.y - from.y);
   if (hermes) {
     jobCommandPending = true;
+    setDispatching(true);
     try {
       validateLiveNavigation(await hermes.inspectMap(), poi);
       if (opts.allowDispatch && !opts.allowDispatch()) throw new ApiError(409, 'ai_cancelled', 'คำสั่งนี้ถูกยกเลิกแล้ว');
@@ -72,6 +75,7 @@ export async function createJob(
       throw new ApiError(503, 'robot_command_failed', `หุ่นยนต์ไม่ยืนยันคำสั่งนำทาง: ${String(error)}`);
     } finally {
       jobCommandPending = false;
+      setDispatching(false);
     }
   }
   const now = new Date().toISOString();

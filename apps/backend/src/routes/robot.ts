@@ -10,6 +10,8 @@ import { ApiError } from '../errors';
 import { getLiveMap } from '../services/liveMapService';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
+import { beginMaintenance, verifyHardwareIdle } from '../services/robotActivity';
+import { requireIdleRobot } from '../services/robotControlService';
 
 const coordinateSchema = z.object({ x: z.number().finite(), y: z.number().finite() });
 
@@ -30,8 +32,10 @@ for (const method of ['post', 'put'] as const) {
       const input = poiInput.parse(req.body);
       const id = method === 'post' ? randomUUID() : z.string().uuid().parse(req.params.id);
       const client = requirePoiEditor();
+      const releaseMaintenance = beginMaintenance(requireIdleRobot);
       poiWriteBusy = true;
       try {
+        await verifyHardwareIdle(); requireIdleRobot();
         const map = await getLiveMap(true);
         if (map.mappingEnabled !== false) throw new ApiError(409, 'mapping_active', 'บันทึกแผนที่และปิดโหมดสร้างแผนที่ก่อนแก้จุด POI');
         if (input.x < map.x || input.y < map.y || input.x >= map.x + map.width * map.resolution || input.y >= map.y + map.height * map.resolution) throw new ApiError(422, 'outside_map', 'จุด POI อยู่นอกแผนที่');
@@ -39,23 +43,26 @@ for (const method of ['post', 'put'] as const) {
         const poi = await client.savePoi({ id, pose: { x: input.x, y: input.y, yaw: input.headingDeg * Math.PI / 180 }, metadata: { display_name: input.name,
           ...(input.aliases ? { aliases: [...new Set(input.aliases)] } : {}), ...(method === 'post' ? { type: 'poi' } : {}) } }, method === 'put');
         getWorld().addAudit(req.user!.id, `robot.poi.${method === 'post' ? 'create' : 'update'}`, id, { name: input.name }, req.ip);
-        await getLiveMap(true);
+        // A map refresh is independent of the verified POI write. The shared poller refreshes viewers.
         res.status(method === 'post' ? 201 : 200).json(poi);
-      } finally { poiWriteBusy = false; }
-    } catch (error) { next(error); }
+      } finally { poiWriteBusy = false; releaseMaintenance(); }
+    } catch (error) { next(error instanceof ApiError || error instanceof z.ZodError ? error : new ApiError(503, 'poi_write_failed', `บันทึก POI ไม่สำเร็จ: ${String(error)}`)); }
   });
 }
 robotRouter.delete('/pois/:id', requireRole('operator', 'admin'), async (req, res, next) => {
   try {
     const id = z.string().uuid().parse(req.params.id);
     const client = requirePoiEditor();
+    const releaseMaintenance = beginMaintenance(requireIdleRobot);
     poiWriteBusy = true;
     try {
+      await verifyHardwareIdle(); requireIdleRobot();
+      const map = await getLiveMap(true);
+      if (map.mappingEnabled !== false) throw new ApiError(409, 'mapping_active', 'ปิดโหมดสร้างแผนที่ก่อนลบ POI');
       await client.deletePoi(id);
       getWorld().addAudit(req.user!.id, 'robot.poi.delete', id, null, req.ip);
-      await getLiveMap(true);
       res.status(204).end();
-    } finally { poiWriteBusy = false; }
+    } finally { poiWriteBusy = false; releaseMaintenance(); }
   } catch (error) { next(error); }
 });
 

@@ -1,0 +1,1367 @@
+{
+  "at": "2026-10-21T06:02:30.096Z",
+  "case": "navigate",
+  "approvedPoi": "หน้าประตูห้อง",
+  "supervised": true,
+  "samples": [
+    {
+      "at": "2026-10-21T06:02:31.136Z",
+      "x": 0.31,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:31.430Z",
+      "x": 0.31,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:31.692Z",
+      "x": 0.32,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:31.955Z",
+      "x": 0.32,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:32.228Z",
+      "x": 0.36,
+      "y": 0,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:32.491Z",
+      "x": 0.36,
+      "y": 0,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:32.765Z",
+      "x": 0.41,
+      "y": 0,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:33.042Z",
+      "x": 0.46,
+      "y": 0,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:33.305Z",
+      "x": 0.46,
+      "y": 0,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:33.568Z",
+      "x": 0.51,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:33.833Z",
+      "x": 0.51,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:34.107Z",
+      "x": 0.56,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:34.371Z",
+      "x": 0.56,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:34.648Z",
+      "x": 0.62,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:34.923Z",
+      "x": 0.62,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:35.197Z",
+      "x": 0.66,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:35.459Z",
+      "x": 0.66,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:35.734Z",
+      "x": 0.71,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:35.997Z",
+      "x": 0.71,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:36.276Z",
+      "x": 0.76,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:36.551Z",
+      "x": 0.76,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:36.827Z",
+      "x": 0.81,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:37.101Z",
+      "x": 0.81,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:37.363Z",
+      "x": 0.88,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:37.630Z",
+      "x": 0.92,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:37.906Z",
+      "x": 0.92,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:38.184Z",
+      "x": 0.97,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:38.458Z",
+      "x": 0.97,
+      "y": 0.01,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:38.719Z",
+      "x": 1.02,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:38.982Z",
+      "x": 1.02,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:39.243Z",
+      "x": 1.07,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:39.518Z",
+      "x": 1.07,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:39.781Z",
+      "x": 1.13,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:40.057Z",
+      "x": 1.13,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:40.331Z",
+      "x": 1.17,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:40.606Z",
+      "x": 1.17,
+      "y": 0.01,
+      "heading": 360,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:40.878Z",
+      "x": 1.22,
+      "y": 0.02,
+      "heading": 359,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:41.153Z",
+      "x": 1.26,
+      "y": 0.02,
+      "heading": 359,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:41.415Z",
+      "x": 1.26,
+      "y": 0.02,
+      "heading": 359,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:41.689Z",
+      "x": 1.3,
+      "y": 0.02,
+      "heading": 359,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:41.953Z",
+      "x": 1.3,
+      "y": 0.02,
+      "heading": 359,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:42.229Z",
+      "x": 1.34,
+      "y": 0.02,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:42.491Z",
+      "x": 1.34,
+      "y": 0.02,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:42.765Z",
+      "x": 1.37,
+      "y": 0.02,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:43.040Z",
+      "x": 1.37,
+      "y": 0.02,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:43.315Z",
+      "x": 1.38,
+      "y": 0.01,
+      "heading": 357,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:43.580Z",
+      "x": 1.38,
+      "y": 0.01,
+      "heading": 357,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:43.851Z",
+      "x": 1.41,
+      "y": 0.01,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:44.114Z",
+      "x": 1.41,
+      "y": 0.01,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:44.385Z",
+      "x": 1.43,
+      "y": 0.01,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:44.647Z",
+      "x": 1.43,
+      "y": 0.01,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:44.924Z",
+      "x": 1.46,
+      "y": 0,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:45.199Z",
+      "x": 1.48,
+      "y": 0,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:45.463Z",
+      "x": 1.48,
+      "y": 0,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:45.736Z",
+      "x": 1.5,
+      "y": 0,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:46.016Z",
+      "x": 1.5,
+      "y": 0,
+      "heading": 358,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:46.289Z",
+      "x": 1.52,
+      "y": 0,
+      "heading": 356,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:46.564Z",
+      "x": 1.52,
+      "y": 0,
+      "heading": 356,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:46.838Z",
+      "x": 1.54,
+      "y": 0,
+      "heading": 356,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:47.111Z",
+      "x": 1.54,
+      "y": 0,
+      "heading": 356,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:47.387Z",
+      "x": 1.55,
+      "y": 0,
+      "heading": 356,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:47.664Z",
+      "x": 1.55,
+      "y": 0,
+      "heading": 356,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:47.942Z",
+      "x": 1.57,
+      "y": 0,
+      "heading": 355,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:48.214Z",
+      "x": 1.59,
+      "y": 0,
+      "heading": 355,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:48.488Z",
+      "x": 1.59,
+      "y": 0,
+      "heading": 355,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:48.751Z",
+      "x": 1.61,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:49.027Z",
+      "x": 1.61,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:49.304Z",
+      "x": 1.62,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:49.580Z",
+      "x": 1.62,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:49.855Z",
+      "x": 1.63,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:50.117Z",
+      "x": 1.63,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:50.392Z",
+      "x": 1.64,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:50.654Z",
+      "x": 1.64,
+      "y": 0,
+      "heading": 354,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:50.930Z",
+      "x": 1.66,
+      "y": 0,
+      "heading": 353,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:51.194Z",
+      "x": 1.66,
+      "y": 0,
+      "heading": 353,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:51.470Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 353,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:51.730Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 353,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:51.991Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 353,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:52.265Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 351,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:52.544Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 351,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:52.803Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:53.065Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:53.327Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:53.587Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:53.848Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:54.124Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:54.386Z",
+      "x": 1.66,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:54.648Z",
+      "x": 1.66,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:54.910Z",
+      "x": 1.65,
+      "y": 0.01,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:55.185Z",
+      "x": 1.65,
+      "y": 0.01,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:55.446Z",
+      "x": 1.63,
+      "y": 0.01,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:55.721Z",
+      "x": 1.63,
+      "y": 0.01,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:55.997Z",
+      "x": 1.62,
+      "y": 0.01,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:56.259Z",
+      "x": 1.62,
+      "y": 0.01,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:56.520Z",
+      "x": 1.62,
+      "y": 0.01,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:56.785Z",
+      "x": 1.62,
+      "y": 0.01,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:57.060Z",
+      "x": 1.64,
+      "y": 0.01,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:57.336Z",
+      "x": 1.65,
+      "y": 0.01,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:57.611Z",
+      "x": 1.65,
+      "y": 0.01,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:57.873Z",
+      "x": 1.66,
+      "y": 0,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:58.149Z",
+      "x": 1.66,
+      "y": 0,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:58.423Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:58.687Z",
+      "x": 1.67,
+      "y": 0,
+      "heading": 350,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:58.963Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:59.226Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:59.501Z",
+      "x": 1.69,
+      "y": 0,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:02:59.778Z",
+      "x": 1.69,
+      "y": 0,
+      "heading": 349,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:00.041Z",
+      "x": 1.69,
+      "y": 0,
+      "heading": 357,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:00.309Z",
+      "x": 1.69,
+      "y": 0,
+      "heading": 357,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:00.580Z",
+      "x": 1.69,
+      "y": 0,
+      "heading": 6,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:00.852Z",
+      "x": 1.69,
+      "y": 0,
+      "heading": 6,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:01.126Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 15,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:01.389Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 23,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:01.664Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 23,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:01.937Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 32,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:02.212Z",
+      "x": 1.68,
+      "y": 0,
+      "heading": 32,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:02.487Z",
+      "x": 1.69,
+      "y": -0.01,
+      "heading": 40,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:02.749Z",
+      "x": 1.69,
+      "y": -0.01,
+      "heading": 40,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:03.026Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 49,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:03.301Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 49,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:03.562Z",
+      "x": 1.72,
+      "y": -0.01,
+      "heading": 57,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:03.840Z",
+      "x": 1.72,
+      "y": -0.01,
+      "heading": 57,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:04.120Z",
+      "x": 1.72,
+      "y": 0,
+      "heading": 66,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:04.392Z",
+      "x": 1.72,
+      "y": 0,
+      "heading": 66,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:04.657Z",
+      "x": 1.7,
+      "y": 0.01,
+      "heading": 75,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:04.919Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 83,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:05.194Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 83,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:05.470Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 88,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:05.732Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 88,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:05.992Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 90,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:06.256Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 90,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 38
+    },
+    {
+      "at": "2026-10-21T06:03:06.528Z",
+      "x": 1.71,
+      "y": 0,
+      "heading": 90,
+      "mode": "idle",
+      "link": "ok"
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": [],
+  "before": {
+    "state": {
+      "robotCode": "HX-01",
+      "linkStatus": "ok",
+      "lastSeenAt": "2026-10-21T06:02:30.001Z",
+      "mode": "idle",
+      "telemetry": {
+        "batteryPct": 100,
+        "x": 0.31,
+        "y": 0,
+        "headingDeg": 0,
+        "speedMps": null,
+        "wifiDbm": null,
+        "cpuPct": null,
+        "uptimeSec": 455596,
+        "lidar": null,
+        "capturedAt": "2026-10-21T06:02:30.001Z"
+      },
+      "lock": {
+        "heldBy": null,
+        "userName": null,
+        "mode": null,
+        "expiresAt": null
+      },
+      "currentJob": null,
+      "simulated": false,
+      "mockConnected": false,
+      "commandsEnabled": true,
+      "motionLimits": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      }
+    },
+    "quality": 75,
+    "settings": {
+      "desired": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "actual": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "bounds": {
+        "minLinearMps": 0.05,
+        "maxLinearMps": 0.5,
+        "minAngularRps": 0.1,
+        "maxAngularRps": 1
+      },
+      "mode": "normal",
+      "mappingEnabled": false,
+      "binding": {
+        "archiveId": "fa2f8262-0b90-4e95-9243-6816393bf686",
+        "needsLocalization": false
+      },
+      "standby": {
+        "poiId": null,
+        "updatedAt": "2026-10-21T04:27:40.608Z",
+        "mapSignature": "720345a01ec508fbe8b721a09998c18a99ff85a1995c84c8cbcc81a8c56230d0",
+        "returnPolicy": "manual"
+      }
+    },
+    "poi": {
+      "id": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+      "metadata": {
+        "aliases": [],
+        "display_name": "หน้าประตูห้อง",
+        "type": "poi"
+      },
+      "pose": {
+        "x": 1.776379823684692,
+        "y": -0.02617776952683926,
+        "yaw": 1.570796370506287
+      }
+    }
+  },
+  "job": {
+    "id": 38,
+    "ref": "HX-0038",
+    "destPoiCode": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+    "destName": "หน้าประตูห้อง",
+    "source": "operator",
+    "status": "navigating",
+    "mapVersion": 0,
+    "distanceM": 1.47,
+    "remainingM": 1.47,
+    "etaSec": 15,
+    "progress": 0,
+    "requestedByName": "ผู้ดูแลระบบ",
+    "createdAt": "2026-10-21T06:02:31.070Z"
+  },
+  "jobResult": {
+    "id": 38,
+    "ref": "HX-0038",
+    "destPoiCode": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+    "destName": "หน้าประตูห้อง",
+    "source": "operator",
+    "status": "arrived",
+    "mapVersion": 0,
+    "distanceM": 1.47,
+    "remainingM": 0,
+    "etaSec": 0,
+    "progress": 1,
+    "requestedByName": "ผู้ดูแลระบบ",
+    "createdAt": "2026-10-21T06:02:31.070Z",
+    "events": [
+      {
+        "id": 112,
+        "at": "2026-10-21T06:02:31.070Z",
+        "kind": "requested",
+        "detail": {
+          "source": "operator",
+          "dest": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+          "requestedBy": "ผู้ดูแลระบบ"
+        }
+      },
+      {
+        "id": 113,
+        "at": "2026-10-21T06:02:31.070Z",
+        "kind": "accepted",
+        "detail": {
+          "distanceM": 1.47
+        }
+      },
+      {
+        "id": 114,
+        "at": "2026-10-21T06:03:06.461Z",
+        "kind": "arrived",
+        "detail": {
+          "poi": "610dcd65-bc53-406c-969b-2d2296c5cc50"
+        }
+      }
+    ],
+    "cancelReason": null,
+    "departedAt": "2026-10-21T06:02:31.070Z",
+    "arrivedAt": "2026-10-21T06:03:06.461Z"
+  },
+  "after": {
+    "robotCode": "HX-01",
+    "linkStatus": "ok",
+    "lastSeenAt": "2026-10-21T06:03:06.458Z",
+    "mode": "idle",
+    "telemetry": {
+      "batteryPct": 100,
+      "x": 1.71,
+      "y": 0,
+      "headingDeg": 90,
+      "speedMps": null,
+      "wifiDbm": null,
+      "cpuPct": null,
+      "uptimeSec": 455632,
+      "lidar": null,
+      "capturedAt": "2026-10-21T06:03:06.458Z"
+    },
+    "lock": {
+      "heldBy": null,
+      "userName": null,
+      "mode": null,
+      "expiresAt": null
+    },
+    "currentJob": null,
+    "simulated": false,
+    "mockConnected": false,
+    "commandsEnabled": true,
+    "motionLimits": {
+      "linearMps": 0.1,
+      "angularRps": 0.3
+    }
+  },
+  "speedRestored": true
+}

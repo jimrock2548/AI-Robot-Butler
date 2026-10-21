@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-21T02:33:52.557Z",
+  "liveCatalog": true,
+  "motionDispatched": false,
+  "passed": 2,
+  "total": 2,
+  "results": [
+    {
+      "text": "พาไปที่นั่น",
+      "result": {
+        "intent": "unknown",
+        "confidence": 0.95,
+        "poiCode": null,
+        "speechAct": "request",
+        "needsClarification": true,
+        "decisionSource": "model"
+      },
+      "passed": true,
+      "elapsedMs": 5414
+    },
+    {
+      "text": "ห้อง1004คือจุดหมายของผม ช่วยไปส่งหน่อย",
+      "result": {
+        "intent": "navigate_to",
+        "confidence": 0.95,
+        "poiCode": "1722879a-d29f-4949-ad4a-989399926b5d",
+        "speechAct": "request",
+        "needsClarification": false,
+        "decisionSource": "model"
+      },
+      "passed": true,
+      "elapsedMs": 4322
+    }
+  ]
+}

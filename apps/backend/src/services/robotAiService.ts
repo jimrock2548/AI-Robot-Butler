@@ -73,7 +73,6 @@ export async function handleRobotAiCommand(raw: unknown, requester: JobRequester
     else if (hermes && inferenceBusy && pendingChannel === channel) await abortHermesJob();
     return finish(decision, t('หยุดงานนำทางและยกเลิกคำสั่ง AI ที่รออยู่แล้ว', 'Navigation and pending AI commands stopped.'));
   }
-  if (config.ai.mode !== 'local' && dependencies === defaults) throw new ApiError(503, 'ai_unavailable', 'AI local ยังไม่เปิดใช้งาน');
   if (inferenceBusy) throw new ApiError(409, 'ai_busy', 'กำลังประมวลผลคำสั่งก่อนหน้า สามารถกดหยุดได้ทันที');
   inferenceBusy = true;
   pendingChannel = channel;

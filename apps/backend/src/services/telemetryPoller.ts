@@ -5,6 +5,7 @@ import { buildRobotState, linkStatus } from './robotService';
 import { persistWorld } from '../db/postgres';
 import { maybeAutoDock } from './jobService';
 import { hermes, pollHermes } from '../hermes/driver';
+import { maybeReturnToStandby } from './robotControlService';
 
 /**
  * Telemetry poller ตัวเดียว (spec §5.1) — poll ทุก 500 ms, broadcast ทุก 1000 ms
@@ -22,6 +23,7 @@ export function startTelemetryPoller(io: Server): void {
     if (hermes) await pollHermes();
     else w.sim.tick();
     w.tick();
+    await maybeReturnToStandby();
     await maybeAutoDock();
 
     const now = Date.now();

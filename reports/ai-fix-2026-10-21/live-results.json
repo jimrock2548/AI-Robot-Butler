@@ -1,0 +1,224 @@
+{
+  "date": "2026-10-21T02:31:49.502Z",
+  "realRobot": true,
+  "motionDispatched": false,
+  "status": {
+    "textReady": true,
+    "rulesReady": true,
+    "modelReady": true,
+    "modelConfigured": true,
+    "readiness": "model-and-rules",
+    "navigationOnly": true,
+    "voiceReady": false,
+    "voiceMode": "browser",
+    "webReady": true,
+    "simulated": false,
+    "mockConnected": false,
+    "commandsEnabled": true
+  },
+  "robot": {
+    "linkStatus": "ok",
+    "poiCount": 8,
+    "localizationQuality": 35,
+    "mappingEnabled": false,
+    "jobBefore": null,
+    "jobAfter": null
+  },
+  "passed": 18,
+  "total": 18,
+  "results": [
+    {
+      "text": "สวัสดี",
+      "kind": "chat",
+      "answer": "สวัสดีครับ อยากให้พาไปจุดไหน หรืออยากทราบตำแหน่งห้องไหนครับ?",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 65
+    },
+    {
+      "text": "ช่วยอะไรได้บ้าง",
+      "kind": "chat",
+      "answer": "ฉันช่วยนำทางไปจุดหมายในแผนที่ บอกตำแหน่ง ดูสถานะหุ่น และหยุดงานนำทางได้ครับ ลองพิมพ์ “มีจุดหมายอะไรบ้าง” หรือเลือกจากรายการบนจอ",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 58
+    },
+    {
+      "text": "ขอบคุณ",
+      "kind": "chat",
+      "answer": "ยินดีครับ หากต้องการไปจุดอื่น บอกชื่อจุดหมายได้เลย",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 60
+    },
+    {
+      "text": "ลาก่อน",
+      "kind": "chat",
+      "answer": "แล้วพบกันใหม่ครับ ขอให้เดินทางโดยสวัสดิภาพ",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 58
+    },
+    {
+      "text": "มีจุดหมายอะไรบ้าง",
+      "kind": "chat",
+      "answer": "จุดหมายที่มีในแผนที่: 1004, 1006, 1003, 1005, 1007, 1001, 1002, 1008 ครับ ต้องการไปจุดไหน?",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 63
+    },
+    {
+      "text": "หุ่นแบตเหลือเท่าไหร่",
+      "kind": "chat",
+      "answer": "แบตเตอรี่เหลือ 100% ครับ หุ่นอยู่ในสถานะรอคำสั่ง และเชื่อมต่อปกติ",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 59
+    },
+    {
+      "text": "เรียกแท็กซี่ให้หน่อย",
+      "kind": "chat",
+      "answer": "ตอนนี้ฉันให้บริการนำทางและข้อมูลจุดหมาย ยังเรียกแท็กซี่ จอง ซื้อ หรือชำระเงินไม่ได้ กรุณาติดต่อเจ้าหน้าที่ หรือเลือกจุดหมายที่มีในรายการครับ",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 57
+    },
+    {
+      "text": "พาไปที่นั่น",
+      "kind": "chat",
+      "answer": "กรุณาระบุชื่อจุดหมายให้ชัดเจน หรือเลือกจากรายการบนหน้าจอครับ",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 64
+    },
+    {
+      "text": "อย่าพาไปห้องประชุม",
+      "kind": "chat",
+      "answer": "รับทราบครับ ยังไม่เริ่มนำทาง กรุณาระบุจุดหมายเมื่อพร้อม",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 62
+    },
+    {
+      "text": "ห้องประชุมอยู่ชั้นไหน",
+      "kind": "chat",
+      "answer": "ยังไม่มีข้อมูลชั้นหรือเวลาเปิดปิดของจุดนี้ครับ กรุณาสอบถามเจ้าหน้าที่ ฉันช่วยบอกจุดหมายที่มีในแผนที่ได้",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 62
+    },
+    {
+      "text": "ห้องประชุมเปิดกี่โมง",
+      "kind": "chat",
+      "answer": "ยังไม่มีข้อมูลชั้นหรือเวลาเปิดปิดของจุดนี้ครับ กรุณาสอบถามเจ้าหน้าที่ ฉันช่วยบอกจุดหมายที่มีในแผนที่ได้",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 65
+    },
+    {
+      "text": "ขอติดต่อเจ้าหน้าที่",
+      "kind": "chat",
+      "answer": "ได้ครับ กรุณาแจ้งรายละเอียดไว้ในแชตนี้ เจ้าหน้าที่สามารถดูข้อความและรับช่วงตอบผ่านหน้าจอนี้ได้ครับ",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 58
+    },
+    {
+      "text": "ห้อง1004อยู่ไหน",
+      "kind": "chat",
+      "answer": "1004 อยู่ที่ x=1.88, y=5.40 เมตรบนแผนที่ครับ หากต้องการให้พาไป พิมพ์ “พาไป1004”",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 80
+    },
+    {
+      "text": "ช่วยบอกตำแหน่งห้อง1004หน่อย",
+      "kind": "chat",
+      "answer": "1004 อยู่ที่ x=1.88, y=5.40 เมตรบนแผนที่ครับ หากต้องการให้พาไป พิมพ์ “พาไป1004”",
+      "errors": [],
+      "passed": true,
+      "elapsedMs": 76
+    },
+    {
+      "text": "ช่วยพาไปห้อง1004หน่อย",
+      "kind": "dry-run",
+      "result": {
+        "replyText": "เข้าใจคำสั่งไป1004 — โหมดทดสอบ ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "navigate_to",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false,
+        "target": {
+          "id": "1722879a-d29f-4949-ad4a-989399926b5d",
+          "name": "1004",
+          "x": 1.879999995231628,
+          "y": 5.400000095367432,
+          "yaw": 0
+        }
+      },
+      "elapsedMs": 219,
+      "passed": true
+    },
+    {
+      "text": "ห้อง1004คือจุดหมายของผม ช่วยไปส่งหน่อย",
+      "kind": "dry-run",
+      "result": {
+        "replyText": "เข้าใจคำสั่งไป1004 — โหมดทดสอบ ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "navigate_to",
+        "confidence": 0.95,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "model",
+        "needsClarification": false,
+        "target": {
+          "id": "1722879a-d29f-4949-ad4a-989399926b5d",
+          "name": "1004",
+          "x": 1.879999995231628,
+          "y": 5.400000095367432,
+          "yaw": 0
+        }
+      },
+      "elapsedMs": 9712,
+      "passed": true
+    },
+    {
+      "text": "กลับจุดชาร์จ",
+      "kind": "dry-run",
+      "result": {
+        "replyText": "เข้าใจคำสั่งไปจุดชาร์จ — โหมดทดสอบ ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "return_to_dock",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false,
+        "target": {
+          "id": "DOCK",
+          "name": "จุดชาร์จ",
+          "x": -0.3194999992847443,
+          "y": 0,
+          "yaw": 0
+        }
+      },
+      "elapsedMs": 205,
+      "passed": true
+    },
+    {
+      "text": "พาไปที่นั่น",
+      "kind": "dry-run",
+      "result": {
+        "replyText": "กรุณาระบุชื่อจุดหมายให้ชัดเจน หรือเลือกจากรายการบนหน้าจอครับ",
+        "intent": "unknown",
+        "confidence": 1,
+        "rejected": true,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false
+      },
+      "elapsedMs": 41,
+      "passed": true
+    }
+  ]
+}

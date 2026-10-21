@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { analyzeRobotLanguage, matchRobotDestinations } from '../src/services/robotLanguage';
 import { classifyRobotTranscript } from '../src/services/robotIntent';
+import { config } from '../src/config';
 
 const catalog = [
   { code: 'a', nameTh: 'ห้องประชุม', nameEn: 'meeting room', aliases: ['ห้องเล็ก'] },
@@ -30,6 +31,8 @@ test('polite requests, aliases, negations and ambiguity use rules without waitin
 });
 test('semantic output is schema constrained and malformed or invented destinations fail closed', async () => {
   const original = globalThis.fetch;
+  const previousMode = config.ai.mode;
+  Object.assign(config.ai, { mode: 'local' });
   let output: unknown = { intent: 'navigate_to', confidence: 0.98, poiCode: 'a', speechAct: 'request', needsClarification: false };
   globalThis.fetch = async (_input, init) => {
     const body = JSON.parse(String(init?.body));
@@ -43,5 +46,5 @@ test('semantic output is schema constrained and malformed or invented destinatio
     await assert.rejects(classify, /ตรวจสอบไม่ได้/);
     output = { intent: 'navigate_to', destination: 'a' };
     await assert.rejects(classify, /ตรวจสอบไม่ได้/);
-  } finally { globalThis.fetch = original; }
+  } finally { globalThis.fetch = original; Object.assign(config.ai, { mode: previousMode }); }
 });

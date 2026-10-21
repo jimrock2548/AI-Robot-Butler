@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import type { RobotState, LiveRobotMap } from '@hermes/shared';
 import { API_URL, api } from './api';
+import { ageRobotState } from './robotFreshness';
 
 /**
  * สถานะหุ่นตัวเดียว (spec §5.1):
@@ -18,7 +19,11 @@ export function useRobotState(): {
   liveMap: LiveRobotMap | null;
   mapError: string | null;
 } {
-  const [state, setState] = useState<RobotState | null>(null);
+  const [sample, setSample] = useState<RobotState | null>(null);
+  const receivedAt = useRef(0);
+  const [clock, setClock] = useState(() => Date.now());
+  const setState = (value: RobotState) => { receivedAt.current = Date.now(); setSample(value); };
+  useEffect(() => { const timer = window.setInterval(() => setClock(Date.now()), 500); return () => window.clearInterval(timer); }, []);
   const [connection, setConnection] = useState<ConnectionState>('connecting');
   const [liveMap, setLiveMap] = useState<LiveRobotMap | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -90,6 +95,9 @@ export function useRobotState(): {
     socket.on('map:live-error', (error: { message: string }) => {
       if (!disposed) setMapError(error.message);
     });
+    socket.on('map:reset', () => {
+      if (!disposed) { setLiveMap(null); setMapError('กำลังรอแผนที่ SLAM ใหม่จากหุ่น'); }
+    });
     socket.on('disconnect', () => { if (!disposed) startPolling(); });
 
     socket.on('connect_error', () => {
@@ -110,5 +118,5 @@ export function useRobotState(): {
     };
   }, []);
 
-  return { state, connection, liveMap, mapError };
+  return { state: ageRobotState(sample, receivedAt.current, clock), connection, liveMap, mapError };
 }

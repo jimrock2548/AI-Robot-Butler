@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-21T06:54:27.971Z",
+  "realRobot": true,
+  "motionDispatched": false,
+  "target": {
+    "id": "b985c13d-1ad8-44ee-b2f9-2a2eae487ac9",
+    "name": "สำรองก่อนล้างแผนที่ · 2026-10-21T06:46:59.759Z",
+    "sha256": "50f6dc9c90a6b6b15b249dd71f20d566c3f1534c4f8e51b5ec096bb44925c1cd",
+    "source": "backup",
+    "createdAt": "2026-10-21T06:46:59.823Z",
+    "byteLength": 158077
+  },
+  "before": {
+    "x": -2.350003719329834,
+    "y": -4.899993896484375,
+    "width": 330,
+    "height": 146,
+    "resolution": 0.05000000074505806,
+    "mappingEnabled": true,
+    "poiCount": 0,
+    "wallCount": 0,
+    "quality": 0,
+    "gridSha256": "f3da3eaba89d43c85c3ea050723e7eb2beeeecc1437ed7b49ca437fa6840211f"
+  },
+  "applied": true,
+  "activation": {
+    "id": "b985c13d-1ad8-44ee-b2f9-2a2eae487ac9",
+    "backupId": "4e405155-44d2-4fff-bd9c-aee7b7e97059",
+    "needsLocalization": true,
+    "hardwareApplied": true,
+    "persistentOnRobot": false
+  },
+  "after": {
+    "x": -7.500003814697266,
+    "y": -11.449994087219238,
+    "width": 434,
+    "height": 360,
+    "resolution": 0.05000000074505806,
+    "mappingEnabled": false,
+    "poiCount": 5,
+    "wallCount": 18,
+    "quality": 92,
+    "gridSha256": "ebce72cc354eefc97adbc33132d57b03977661682fbdffaf35af10ec2cd5b3f1"
+  },
+  "binding": {
+    "archiveId": "b985c13d-1ad8-44ee-b2f9-2a2eae487ac9",
+    "needsLocalization": true,
+    "dockNeedsVerification": false
+  },
+  "currentMapBackupVerified": true,
+  "passed": true
+}

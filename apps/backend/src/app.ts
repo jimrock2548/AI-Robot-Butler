@@ -4,6 +4,7 @@ import cors from 'cors';
 import { config } from './config';
 import { authRouter } from './routes/auth';
 import { robotRouter } from './routes/robot';
+import { robotSettingsRouter } from './routes/robotSettings';
 import { jobsRouter } from './routes/jobs';
 import { mapsRouter } from './routes/maps';
 import { usersRouter } from './routes/users';
@@ -84,6 +85,7 @@ export function createApp(): express.Express {
 
   app.use('/api/auth', authRouter);
   app.use('/api/robot', robotRouter);
+  app.use('/api/robot', robotSettingsRouter);
   app.use('/api/jobs', jobsRouter);
   app.use('/api/maps', mapsRouter);
   app.use('/api/map-library', mapLibraryRouter);

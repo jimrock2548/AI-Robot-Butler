@@ -2,6 +2,7 @@ import { config } from '../config';
 import { getWorld } from '../db/memory';
 import { HermesClient } from './hermesClient';
 import { MockHermesClient } from './mockHermesClient';
+import { getMotionSettings } from '../services/motionSettings';
 
 export const hermes = config.robotMode === 'mock' ? new MockHermesClient() : config.robotMode === 'hermes' ? new HermesClient(config.robot.baseUrl, fetch, config.robot.readOnly) : null;
 export let hermesUptimeAvailable = false;
@@ -13,11 +14,15 @@ let lastManualPulseAt = 0;
 let manualPending: Promise<unknown> | null = null;
 let manualGeneration = 0;
 let limitsVerifiedAt = 0;
+let arrivalHandler: ((jobId: number) => void) | null = null;
+export function setArrivalHandler(handler: (jobId: number) => void) { arrivalHandler = handler; }
+export function invalidateMotionLimits() { limitsVerifiedAt = 0; }
 
 async function prepareMotion(): Promise<void> {
   if (hermes && config.robot.readOnly) throw new Error('Hermes is read-only: robot commands are disabled');
   if (!hermes || Date.now() - limitsVerifiedAt < 2000) return;
-  await hermes.configureMotionLimits(config.robot.maxLinearMps, config.robot.maxAngularRps);
+  const limits = getMotionSettings();
+  await hermes.configureMotionLimits(limits.linearMps, limits.angularRps);
   limitsVerifiedAt = Date.now();
 }
 
@@ -45,6 +50,7 @@ export async function pollHermes(): Promise<void> {
         w.handleArrival(job.destPoiCode);
         w.sim.mode = 'idle';
         w.sim.target = null;
+        arrivalHandler?.(job.id);
       }
       else {
         job.status = 'failed';

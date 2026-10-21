@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-21T06:18:29.971Z",
+  "motionDispatched": false,
+  "estopRequired": true,
+  "before": [
+    {
+      "at": "2026-10-21T06:18:29.979Z",
+      "link": "ok",
+      "lastSeenAt": "2026-10-21T06:18:29.686Z",
+      "mode": "stopped"
+    }
+  ]
+}

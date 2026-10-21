@@ -135,6 +135,21 @@ export interface RobotPoi {
   metadata?: Record<string, unknown>;
 }
 
+export interface RobotWall {
+  id: number;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+}
+
+export interface RobotMapArchive {
+  id: string;
+  name: string;
+  byteLength: number;
+  sha256: string;
+  createdAt: string;
+  source: 'robot' | 'upload' | 'backup';
+}
+
 export interface LiveRobotMap {
   x: number;
   y: number;
@@ -146,6 +161,7 @@ export interface LiveRobotMap {
   home: { x: number; y: number; yaw: number } | null;
   poiCount: number | null;
   pois?: RobotPoi[] | null;
+  walls?: RobotWall[] | null;
   laser?: { pose: { x: number; y: number; yaw: number }; laser_points: { distance: number; angle: number; valid: boolean }[] } | null;
   modelName: string | null;
   softwareVersion: string | null;

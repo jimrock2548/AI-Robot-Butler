@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import type { LibraryMap } from '@hermes/shared';
 import { api } from '../../../lib/api';
+import { RobotMapArchivePanel } from '../../../components/RobotMapArchivePanel';
 
 const template = { name: 'ห้องแลป', widthM: 12, heightM: 8,
   pois: [{ code: 'WELCOME', name: 'จุดต้อนรับ', x: 2, y: 2, headingDeg: 90 },
@@ -37,7 +38,8 @@ export default function MapLibraryPage() {
   const current = maps.find(m => m.id === selected);
   return <div className="flex flex-col gap-4">
     <h1 className="text-xl font-bold">คลังแผนที่และจุดประจำ</h1>
-    <p className="text-sm text-amber">บันทึกหลายสถานที่ เลือกดู และทดลองจุดประจำได้ที่นี่ การเลือกในคลังยังไม่โหลดแผนที่ SLAM หรือสั่งเดินบนหุ่นจริง</p>
+    <RobotMapArchivePanel />
+    <p className="text-sm text-amber">ส่วนแผนผัง JSON ด้านล่างใช้เลือกดูและเตรียมข้อมูล หากต้องการบันทึกหรือโหลดแผนที่จริงให้ใช้ส่วนไฟล์ STCM ด้านบน</p>
     {error && <p role="alert" className="text-red">{error}</p>}{notice && <p role="status">{notice}</p>}
     <div className="grid gap-4 lg:grid-cols-2">
       <section className="flex flex-col gap-3">

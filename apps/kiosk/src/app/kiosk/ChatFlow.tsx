@@ -12,6 +12,7 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
   const [error, setError] = useState('');
   const [destinations, setDestinations] = useState<KioskDestination[]>([]);
   const [simulated, setSimulated] = useState<boolean | null>(null);
+  const [aiReadiness, setAiReadiness] = useState<'model-and-rules' | 'rules-only' | 'unavailable' | null>(null);
   const [autoSpeak, setAutoSpeak] = useState(false);
   const [stopping, setStopping] = useState(false);
   const controller = useRef<AbortController | null>(null);
@@ -47,7 +48,7 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
   useEffect(() => {
     let live = true;
     const load = () => {
-      kioskAiStatus().then(s => { if (live) setSimulated(s.simulated); }).catch(() => {});
+      kioskAiStatus().then(s => { if (live) { setSimulated(s.simulated); setAiReadiness(s.readiness); } }).catch(() => { if (live) setAiReadiness(null); });
       kioskDestinations(lang).then(s => { if (live) setDestinations(s.items); }).catch(() => {});
     };
     load(); const timer = window.setInterval(load, 5000);
@@ -95,6 +96,9 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
         <h1>{session?.mode === 'staff' ? t('เจ้าหน้าที่กำลังดูแลคุณ', 'Staff is assisting you') : t('ให้ฉันพาไปไหมครับ?', 'Where shall we go?')}</h1>
         <p>{t('เลือกจุดหมาย พิมพ์ หรือกดพูด แล้วให้ฉันช่วยนำทาง', 'Choose a destination, type or speak to request navigation.')}</p>
         <span className="reception-badge">{simulated === null ? t('กำลังเชื่อมต่อ', 'Connecting') : simulated ? t('หุ่นจำลอง', 'Simulated robot') : t('เชื่อมกับหุ่นจริง', 'Live robot')}</span>
+        <span className="reception-badge" role="status">{aiReadiness === 'model-and-rules' ? t('AI Local พร้อม', 'Local AI ready')
+          : aiReadiness === 'rules-only' ? t('คำสั่งพื้นฐานพร้อม · LLM ยังไม่พร้อม', 'Basic commands ready · LLM unavailable')
+          : aiReadiness === 'unavailable' ? t('AI ยังไม่พร้อม', 'AI unavailable') : t('กำลังตรวจสถานะ AI', 'Checking AI readiness')}</span>
         <div className="reception-destinations">{destinations.map(p => <button disabled={busy || session?.mode === 'staff'} key={p.code} onClick={() => setInput(t(`พาไป${p.nameTh}`, `Take me to ${p.nameEn}`))}>{lang === 'th' ? p.nameTh : p.nameEn} ↗</button>)}</div>
         <button className="reception-button" disabled={busy || session?.mode === 'staff'} onClick={() => setInput(t('กลับจุดชาร์จ', 'Return to charging station'))}>{t('กลับจุดชาร์จ', 'Return to charger')}</button>
         <button className="reception-stop" disabled={stopping} onClick={() => void stopRobot()}>{t('หยุด / ยกเลิกงาน', 'Stop / cancel navigation')}</button>
@@ -120,6 +124,14 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
           {voice.speaking && <button className="reception-button" onClick={voice.stopSpeaking}>{t('หยุดเสียง', 'Stop speaking')}</button>}
         </div>
         <p className="reception-hint" role="status">{voice.notice || t('รับเสียงแล้วให้ตรวจข้อความก่อนกดส่ง', 'Review recognized text before sending.')}</p>
+        <details className="reception-hint">
+          <summary>{t('ตั้งค่าและตรวจสอบเสียงบนอุปกรณ์นี้', 'Voice settings on this device')}</summary>
+          <p>{t('รับเสียง', 'Recognition')}: {voice.supported ? 'รองรับ' : 'ไม่รองรับ'} · {voice.secure ? 'HTTPS / localhost พร้อม' : 'ต้องเปิด HTTPS / localhost เพื่อใช้ไมค์'}</p>
+          <label>{t('เสียงพูด', 'Voice')} <select aria-label="เลือกเสียงพูด" value={voice.voiceUri} onChange={e => voice.setVoiceUri(e.target.value)}><option value="">{t('อัตโนมัติตามภาษา', 'Automatic')}</option>{voice.voices.map(v => <option key={v.uri} value={v.uri}>{v.name} · {v.lang}</option>)}</select></label>
+          <label>{t('อัตราพูด', 'Speech rate')} <input aria-label="อัตราพูด" type="range" min="0.6" max="1.4" step="0.1" value={voice.rate} onChange={e => voice.setRate(Number(e.target.value))} />{voice.rate.toFixed(1)}×</label>
+          <button className="reception-button" type="button" onClick={() => voice.speak(t('สวัสดีครับ ฉันคือเฮอร์มีส ผู้ช่วยนำทางของคุณ', 'Hello, I am Hermes, your navigation assistant.'))}>{t('ทดสอบลำโพง', 'Test speaker')}</button>
+          <p>{t('ทดสอบไมค์ด้วยปุ่มกดพูดหรือฟังคำเรียก ข้อความจะปรากฏให้ตรวจสอบก่อนกดส่ง', 'Use Speak or Listen for wake word to test the microphone. Review the transcript before sending.')}</p>
+        </details>
         <form className="reception-compose" onSubmit={e => void send(e)}>
           <input aria-label={t('ข้อความหรือคำสั่งนำทาง', 'Message or navigation request')} maxLength={500} disabled={!credentials || busy || stopping} value={input} onChange={e => setInput(e.target.value)} placeholder={session?.mode === 'staff' ? t('พิมพ์คุยกับเจ้าหน้าที่…', 'Message staff…') : t('เช่น ช่วยพาไปห้องประชุมหน่อย', 'e.g. Please take me to the meeting room')} />
           <button disabled={!credentials || !input.trim() || busy || stopping}>{busy ? '…' : t('ส่ง', 'Send')}</button>

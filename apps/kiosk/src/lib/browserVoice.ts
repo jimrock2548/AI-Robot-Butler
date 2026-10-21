@@ -18,22 +18,31 @@ export function useBrowserVoice(lang: 'th' | 'en', onText: (text: string) => voi
   const [speaking, setSpeaking] = useState(false);
   const [notice, setNotice] = useState('');
   const [wakePhrase, setWakePhrase] = useState('สวัสดีเฮอร์มีส');
+  const [voices, setVoices] = useState<{ name: string; lang: string; uri: string }[]>([]);
+  const [voiceUri, setVoiceUri] = useState('');
+  const [rate, setRate] = useState(1);
+  const [secure, setSecure] = useState(false);
   const recognition = useRef<Recognition | null>(null);
   const callback = useRef(onText); callback.current = onText;
   const speakingRef = useRef(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   useEffect(() => {
     const w = window as VoiceWindow;
     setSupported(!!(w.SpeechRecognition ?? w.webkitSpeechRecognition));
-    return () => { if (recognition.current) { recognition.current.onend = null; recognition.current.abort(); } window.speechSynthesis?.cancel(); };
+    setSecure(window.isSecureContext);
+    const refresh = () => setVoices((window.speechSynthesis?.getVoices() ?? []).map(v => ({ name: v.name, lang: v.lang, uri: v.voiceURI })));
+    refresh(); window.speechSynthesis?.addEventListener?.('voiceschanged', refresh);
+    return () => { window.speechSynthesis?.removeEventListener?.('voiceschanged', refresh); if (recognition.current) { recognition.current.onend = null; recognition.current.abort(); } window.speechSynthesis?.cancel(); };
   }, []);
   const stop = () => {
     const current = recognition.current; recognition.current = null;
     if (current) { current.onresult = null; current.onend = null; current.onerror = null; current.abort(); }
     setListening(false);
   };
-  const stopSpeaking = () => { window.speechSynthesis?.cancel(); speakingRef.current = false; setSpeaking(false); };
+  const stopSpeaking = () => { utteranceRef.current = null; window.speechSynthesis?.cancel(); speakingRef.current = false; setSpeaking(false); };
   const start = (wakeMode: boolean) => {
     stop(); stopSpeaking();
+    if (!window.isSecureContext) { setNotice('เปิดไมค์ผ่าน HTTPS หรือ localhost บนอุปกรณ์นี้ก่อน'); return; }
     const Constructor = (window as VoiceWindow).SpeechRecognition ?? (window as VoiceWindow).webkitSpeechRecognition;
     if (!Constructor) { setNotice('เบราว์เซอร์นี้ไม่รองรับรับเสียง กรุณาพิมพ์ข้อความ'); return; }
     const r = new Constructor(); recognition.current = r;
@@ -62,13 +71,22 @@ export function useBrowserVoice(lang: 'th' | 'en', onText: (text: string) => voi
     stop(); stopSpeaking();
     if (!window.speechSynthesis) { setNotice('เบราว์เซอร์นี้ไม่รองรับเสียงพูด'); return; }
     const utterance = new SpeechSynthesisUtterance(text);
+    utteranceRef.current = utterance;
     utterance.lang = lang === 'th' ? 'th-TH' : 'en-US';
-    const voice = window.speechSynthesis.getVoices().find(v => v.lang.startsWith(lang));
-    if (voice) utterance.voice = voice;
+    const available = window.speechSynthesis.getVoices();
+    const voice = available.find(v => v.voiceURI === voiceUri) ?? available.find(v => v.lang.startsWith(lang));
+    if (voice) { utterance.voice = voice; utterance.lang = voice.lang; setNotice(''); }
     else setNotice('ยังไม่พบเสียงภาษานี้ในเครื่อง หากไม่มีเสียงให้ติดตั้งชุดเสียงของระบบ');
+    utterance.rate = rate;
     speakingRef.current = true; setSpeaking(true);
-    utterance.onend = utterance.onerror = () => { speakingRef.current = false; setSpeaking(false); };
-    window.speechSynthesis.speak(utterance);
+    utterance.onend = () => { if (utteranceRef.current !== utterance) return; utteranceRef.current = null; speakingRef.current = false; setSpeaking(false); };
+    utterance.onerror = event => {
+      if (utteranceRef.current !== utterance) return;
+      utteranceRef.current = null; speakingRef.current = false; setSpeaking(false);
+      if (event.error !== 'canceled' && event.error !== 'interrupted') setNotice(`พูดเสียงไม่ได้ (${event.error}) กรุณาตรวจลำโพง เลือกเสียงอื่น หรือเปิดเว็บบนอุปกรณ์ที่ใช้งานจริง`);
+    };
+    try { window.speechSynthesis.speak(utterance); }
+    catch { utteranceRef.current = null; speakingRef.current = false; setSpeaking(false); setNotice('เปิดเสียงพูดไม่ได้ กรุณาตรวจอุปกรณ์เสียงและเลือกเสียงอื่น'); }
   };
-  return { supported, listening, speaking, notice, wakePhrase, setWakePhrase, start, stop, speak, stopSpeaking };
+  return { supported, listening, speaking, notice, wakePhrase, setWakePhrase, start, stop, speak, stopSpeaking, voices, voiceUri, setVoiceUri, rate, setRate, secure };
 }

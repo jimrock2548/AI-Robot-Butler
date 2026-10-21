@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-21T04:27:37.942Z",
+  "realRobot": true,
+  "apply": true,
+  "motionDispatched": false,
+  "before": {
+    "quality": 83,
+    "poiCount": 1,
+    "wallCount": 18,
+    "speed": {
+      "linearMps": 0.1,
+      "angularRps": 0.3
+    }
+  },
+  "checks": [
+    {
+      "name": "real settings / map / walls readable",
+      "passed": true,
+      "elapsedMs": 0,
+      "detail": {
+        "limits": {
+          "linearMps": 0.1,
+          "angularRps": 0.3
+        },
+        "mappingEnabled": false,
+        "walls": 18
+      }
+    },
+    {
+      "name": "speed increase and verified restoration",
+      "passed": true,
+      "elapsedMs": 482,
+      "detail": {
+        "restored": {
+          "linearMps": 0.1,
+          "angularRps": 0.3
+        }
+      }
+    },
+    {
+      "name": "normal mode verified on hardware",
+      "passed": true,
+      "elapsedMs": 66,
+      "detail": {
+        "mode": "normal",
+        "mappingEnabled": false
+      }
+    },
+    {
+      "name": "POI create / update / delete keeps link",
+      "passed": true,
+      "elapsedMs": 954,
+      "detail": {
+        "originalPoiCount": 1
+      }
+    },
+    {
+      "name": "wall add / update / delete preserves original walls",
+      "passed": true,
+      "elapsedMs": 708,
+      "detail": {
+        "originalWallsPreserved": true
+      }
+    },
+    {
+      "name": "standby selection persists without dispatch",
+      "passed": true,
+      "elapsedMs": 509,
+      "detail": {
+        "dispatch": false,
+        "restoredPreviousSelection": true
+      }
+    },
+    {
+      "name": "STCM capture / download / upload / activate / pose restoration",
+      "passed": true,
+      "elapsedMs": 2611,
+      "detail": {
+        "archiveId": "3db59afa-6131-4ed3-9f66-89ccac52cb1d",
+        "uploadId": "5a57596f-ef73-40c3-9d03-3b113b0e6701",
+        "backupId": "d948d14e-5899-4884-adcd-350a43a90e32",
+        "restoredPose": {
+          "pitch": 0,
+          "roll": 0,
+          "x": 0.09409666061401367,
+          "y": 0.005744501948356628,
+          "yaw": -0.02069203183054924,
+          "z": 0
+        }
+      }
+    }
+  ],
+  "cleanupErrors": [],
+  "after": {
+    "linkStatus": "ok",
+    "currentJob": null,
+    "mode": "idle"
+  },
+  "afterMap": {
+    "quality": 83,
+    "poiCount": 1,
+    "wallCount": 18
+  },
+  "passed": 7
+}

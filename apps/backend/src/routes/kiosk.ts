@@ -90,11 +90,14 @@ kioskRouter.get('/ai-status', async (_req, res) => {
   if (config.ai.mode === 'local') {
     try { modelReady = (await fetch(new URL('/v1/models', config.ai.baseUrl), { signal: AbortSignal.timeout(1500) })).ok; } catch { /* model offline */ }
   }
-  res.json({ textReady: modelReady || config.ai.navigationOnly, modelReady, navigationOnly: config.ai.navigationOnly, voiceReady: false, voiceMode: 'browser', webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
+  const rulesReady = config.ai.navigationOnly;
+  res.json({ textReady: modelReady || rulesReady, rulesReady, modelReady, modelConfigured: config.ai.mode === 'local',
+    readiness: modelReady ? 'model-and-rules' : rulesReady ? 'rules-only' : 'unavailable',
+    navigationOnly: config.ai.navigationOnly, voiceReady: false, voiceMode: 'browser', webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
 });
 
 kioskRouter.post('/chat', async (req, res, next) => {
-  if (config.ai.mode !== 'local') {
+  if (config.ai.mode !== 'local' && !config.ai.navigationOnly) {
     res.status(503).json({ error: { code: 'ai_unavailable', message: 'ระบบสนทนายังไม่พร้อมใช้งาน' } });
     return;
   }

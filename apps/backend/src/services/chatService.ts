@@ -9,6 +9,7 @@ import { hermes } from '../hermes/driver';
 import { getLiveMap } from './liveMapService';
 import { analyzeRobotLanguage, matchRobotDestinations } from './robotLanguage';
 import { navigationScopeReply } from './navigationScope';
+import { navigationReply } from './navigationReplies';
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -154,8 +155,10 @@ export async function streamKioskChat(raw: unknown, emit: Emit, signal: AbortSig
       quick(lang === 'th' ? 'รับทราบครับ ยังไม่เริ่มนำทาง กรุณาระบุจุดหมายเมื่อพร้อม' : 'No navigation started. Please name a destination when ready.');
       return;
     }
+    const reply = await navigationReply(latest, lang);
+    if (reply) { quick(reply); return; }
     if (!language.stop && language.speechAct !== 'request' && !language.location && !language.status) {
-      quick(lang === 'th' ? 'สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ' : 'I can guide you to listed destinations, locate places, report robot status and cancel navigation. Choose a destination or contact staff.');
+      quick(lang === 'th' ? 'ยังไม่เข้าใจคำขอครับ กรุณาบอกชื่อจุดหมาย หรือถาม “มีจุดหมายอะไรบ้าง” หากต้องการความช่วยเหลือสามารถแจ้งเจ้าหน้าที่ในแชตนี้ได้' : 'I did not understand. Please name a destination or ask for available destinations. You can also ask staff for help here.');
       return;
     }
     if (!hermes && language.location) {
@@ -167,7 +170,7 @@ export async function streamKioskChat(raw: unknown, emit: Emit, signal: AbortSig
       return;
     }
   }
-  const proposed = routeByRules(latest) ?? await modelRoute(messages, lang, signal);
+  const proposed = routeByRules(latest) ?? (config.ai.navigationOnly ? 'database' : await modelRoute(messages, lang, signal));
   // A model cannot turn a general question or retrieved page into a robot command.
   const route = proposed === 'action' && !hermes && !actionWords.test(latest) && analyzeRobotLanguage(latest).speechAct !== 'request' ? 'chat' : proposed;
   emit({ type: 'route', route });

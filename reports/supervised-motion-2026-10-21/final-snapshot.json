@@ -1,0 +1,62 @@
+{
+  "at": "2026-10-21T06:20:28.015Z",
+  "state": {
+    "robotCode": "HX-01",
+    "linkStatus": "ok",
+    "lastSeenAt": "2026-10-21T06:20:27.585Z",
+    "mode": "stopped",
+    "telemetry": {
+      "batteryPct": 100,
+      "x": 1.71,
+      "y": 0.01,
+      "headingDeg": 112,
+      "speedMps": null,
+      "wifiDbm": null,
+      "cpuPct": null,
+      "uptimeSec": 456673,
+      "lidar": null,
+      "capturedAt": "2026-10-21T06:20:27.585Z"
+    },
+    "lock": {
+      "heldBy": null,
+      "userName": null,
+      "mode": null,
+      "expiresAt": null
+    },
+    "currentJob": null,
+    "simulated": false,
+    "mockConnected": false,
+    "commandsEnabled": true,
+    "motionLimits": {
+      "linearMps": 0.1,
+      "angularRps": 0.3
+    }
+  },
+  "map": {
+    "quality": 77,
+    "mappingEnabled": false,
+    "pois": [
+      {
+        "id": "14fc3fb4-8993-4612-8155-41a76fdc7110",
+        "name": "ลิฟต์ตัวที่ 2"
+      },
+      {
+        "id": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+        "name": "หน้าประตูห้อง"
+      },
+      {
+        "id": "6b7fff10-8234-4454-854d-7714e0494ec7",
+        "name": "ห้องน้ำ"
+      },
+      {
+        "id": "8206bb87-3102-4830-8962-4605b93a8b3c",
+        "name": "หน้าภาควิชา"
+      },
+      {
+        "id": "f9c15d6c-c6fa-4ca1-b68e-ffc62f5efef5",
+        "name": "ลิฟต์ตัวที่ 1"
+      }
+    ],
+    "dockingStatus": "not_on_dock"
+  }
+}

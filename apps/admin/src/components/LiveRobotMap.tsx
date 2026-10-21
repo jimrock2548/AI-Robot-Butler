@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useRobot } from '../lib/RobotContext';
 import { fmtAgeMs, fmtDateTime } from '../lib/format';
 import { useNow } from '../lib/useMe';
-import type { RobotPoi } from '@hermes/shared';
+import type { RobotPoi, RobotWall } from '@hermes/shared';
 
 /** Displays the robot's own SLAM coordinates, including negative map origins. */
-export function LiveRobotMap({ onSelect, selected, onPoiSelect, selectionRequest = 0 }: {
+export function LiveRobotMap({ onSelect, selected, onPoiSelect, selectionRequest = 0, draftWall }: {
   onSelect?: (point: { x: number; y: number }) => void;
   selected?: { x: number; y: number } | null;
   onPoiSelect?: (poi: RobotPoi) => void;
   selectionRequest?: number;
+  draftWall?: { start: RobotWall['start']; end: RobotWall['end'] } | null;
 }) {
   const { state, liveMap: map, mapError, connection } = useRobot();
   const [error, setError] = useState<string | null>(null);
@@ -140,6 +141,8 @@ export function LiveRobotMap({ onSelect, selected, onPoiSelect, selectionRequest
             </g>;
           })}
           {home && <g><circle cx={home.x} cy={home.y} r={6} fill="#157347" stroke="white" strokeWidth={2} /><title>แท่นชาร์จ</title></g>}
+          {map.walls?.map(wall => { const a = point(wall.start.x, wall.start.y), b = point(wall.end.x, wall.end.y); return <line key={`wall-${wall.id}`} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#b91c1c" strokeWidth={3 / Math.sqrt(zoom)} pointerEvents="none"><title>กำแพงเสมือน #{wall.id}</title></line>; })}
+          {draftWall && <line x1={point(draftWall.start.x, draftWall.start.y).x} y1={point(draftWall.start.x, draftWall.start.y).y} x2={point(draftWall.end.x, draftWall.end.y).x} y2={point(draftWall.end.x, draftWall.end.y).y} stroke="#0891b2" strokeWidth={3} strokeDasharray="5 3" pointerEvents="none" />}
           {robot && <g style={{ transform: `translate(${robot.x}px, ${robot.y}px) rotate(${-telemetry!.headingDeg}deg)`, transition: 'transform 450ms linear' }}>
             <circle r={7} fill="#12285A" stroke="white" strokeWidth={2} />
             <path d="M 16 0 L 5 -5 L 5 5 Z" fill="#C0182C" stroke="white" strokeWidth={1} />

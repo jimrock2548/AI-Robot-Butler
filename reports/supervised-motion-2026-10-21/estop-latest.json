@@ -1,0 +1,235 @@
+{
+  "at": "2026-10-21T06:07:58.450Z",
+  "case": "estop",
+  "approvedPoi": "หน้าประตูห้อง",
+  "supervised": true,
+  "samples": [
+    {
+      "at": "2026-10-21T06:07:59.321Z",
+      "x": 1.71,
+      "y": 0.01,
+      "heading": 90,
+      "mode": "docking",
+      "link": "ok",
+      "job": 43
+    },
+    {
+      "at": "2026-10-21T06:07:59.598Z",
+      "x": 1.71,
+      "y": 0.01,
+      "heading": 90,
+      "mode": "docking",
+      "link": "ok",
+      "job": 43
+    },
+    {
+      "at": "2026-10-21T06:07:59.865Z",
+      "x": 1.71,
+      "y": 0.01,
+      "heading": 90,
+      "mode": "docking",
+      "link": "ok",
+      "job": 43
+    },
+    {
+      "at": "2026-10-21T06:08:00.124Z",
+      "x": 1.7,
+      "y": 0.01,
+      "heading": 97,
+      "mode": "docking",
+      "link": "ok",
+      "job": 43
+    },
+    {
+      "at": "2026-10-21T06:08:00.386Z",
+      "x": 1.7,
+      "y": 0.01,
+      "heading": 97,
+      "mode": "docking",
+      "link": "ok",
+      "job": 43
+    },
+    {
+      "at": "2026-10-21T06:08:00.662Z",
+      "x": 1.68,
+      "y": 0.01,
+      "heading": 106,
+      "mode": "docking",
+      "link": "ok",
+      "job": 43
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": [],
+  "before": {
+    "state": {
+      "robotCode": "HX-01",
+      "linkStatus": "ok",
+      "lastSeenAt": "2026-10-21T06:07:58.446Z",
+      "mode": "idle",
+      "telemetry": {
+        "batteryPct": 100,
+        "x": 1.71,
+        "y": 0.01,
+        "headingDeg": 90,
+        "speedMps": null,
+        "wifiDbm": null,
+        "cpuPct": null,
+        "uptimeSec": 455924,
+        "lidar": null,
+        "capturedAt": "2026-10-21T06:07:58.446Z"
+      },
+      "lock": {
+        "heldBy": null,
+        "userName": null,
+        "mode": null,
+        "expiresAt": null
+      },
+      "currentJob": null,
+      "simulated": false,
+      "mockConnected": false,
+      "commandsEnabled": true,
+      "motionLimits": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      }
+    },
+    "quality": 76,
+    "settings": {
+      "desired": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "actual": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "bounds": {
+        "minLinearMps": 0.05,
+        "maxLinearMps": 0.5,
+        "minAngularRps": 0.1,
+        "maxAngularRps": 1
+      },
+      "mode": "normal",
+      "mappingEnabled": false,
+      "binding": {
+        "archiveId": "fa2f8262-0b90-4e95-9243-6816393bf686",
+        "needsLocalization": false
+      },
+      "standby": {
+        "poiId": null,
+        "updatedAt": "2026-10-21T06:07:40.686Z",
+        "mapSignature": "d12cb8209d090a4424ca64c4c8d827b688047a1d8b69eedc87f3f6803cdbfbfb",
+        "returnPolicy": "manual"
+      }
+    },
+    "poi": {
+      "id": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+      "metadata": {
+        "aliases": [],
+        "display_name": "หน้าประตูห้อง",
+        "type": "poi"
+      },
+      "pose": {
+        "x": 1.776379823684692,
+        "y": -0.02617776952683926,
+        "yaw": 1.570796370506287
+      }
+    }
+  },
+  "job": {
+    "id": 43,
+    "ref": "HX-0043",
+    "destPoiCode": "DOCK",
+    "destName": "แท่นชาร์จบนแผนที่หุ่น",
+    "source": "operator",
+    "status": "navigating",
+    "mapVersion": 0,
+    "distanceM": 1.94,
+    "remainingM": 1.94,
+    "etaSec": 20,
+    "progress": 0,
+    "requestedByName": "ผู้ดูแลระบบ",
+    "createdAt": "2026-10-21T06:07:59.256Z"
+  },
+  "movedBeforeStopM": 0.030000000000000027,
+  "rotatedBeforeStopDeg": 16,
+  "jobResult": {
+    "id": 43,
+    "ref": "HX-0043",
+    "destPoiCode": "DOCK",
+    "destName": "แท่นชาร์จบนแผนที่หุ่น",
+    "source": "operator",
+    "status": "stopped",
+    "mapVersion": 0,
+    "distanceM": 1.94,
+    "remainingM": null,
+    "etaSec": null,
+    "progress": 0,
+    "requestedByName": "ผู้ดูแลระบบ",
+    "createdAt": "2026-10-21T06:07:59.256Z",
+    "events": [
+      {
+        "id": 127,
+        "at": "2026-10-21T06:07:59.256Z",
+        "kind": "requested",
+        "detail": {
+          "source": "operator",
+          "dest": "DOCK",
+          "requestedBy": "ผู้ดูแลระบบ"
+        }
+      },
+      {
+        "id": 128,
+        "at": "2026-10-21T06:07:59.256Z",
+        "kind": "accepted",
+        "detail": {
+          "distanceM": 1.94
+        }
+      },
+      {
+        "id": 129,
+        "at": "2026-10-21T06:08:00.680Z",
+        "kind": "estop",
+        "detail": {
+          "by": "ผู้ดูแลระบบ"
+        }
+      }
+    ],
+    "cancelReason": "estop",
+    "departedAt": "2026-10-21T06:07:59.256Z",
+    "arrivedAt": null
+  },
+  "after": {
+    "robotCode": "HX-01",
+    "linkStatus": "ok",
+    "lastSeenAt": "2026-10-21T06:08:02.443Z",
+    "mode": "stopped",
+    "telemetry": {
+      "batteryPct": 100,
+      "x": 1.71,
+      "y": 0.01,
+      "headingDeg": 112,
+      "speedMps": null,
+      "wifiDbm": null,
+      "cpuPct": null,
+      "uptimeSec": 455928,
+      "lidar": null,
+      "capturedAt": "2026-10-21T06:08:02.443Z"
+    },
+    "lock": {
+      "heldBy": null,
+      "userName": null,
+      "mode": null,
+      "expiresAt": null
+    },
+    "currentJob": null,
+    "simulated": false,
+    "mockConnected": false,
+    "commandsEnabled": true,
+    "motionLimits": {
+      "linearMps": 0.1,
+      "angularRps": 0.3
+    }
+  }
+}

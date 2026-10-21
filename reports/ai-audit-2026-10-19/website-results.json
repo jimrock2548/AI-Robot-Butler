@@ -1,0 +1,200 @@
+{
+  "date": "2026-10-19T16:32:02.879Z",
+  "status": {
+    "textReady": true,
+    "modelReady": false,
+    "navigationOnly": true,
+    "voiceReady": false,
+    "voiceMode": "browser",
+    "webReady": true,
+    "simulated": true,
+    "mockConnected": true,
+    "commandsEnabled": true
+  },
+  "robotMode": "mock",
+  "motionDispatched": false,
+  "passed": 5,
+  "total": 17,
+  "results": [
+    {
+      "text": "สวัสดี",
+      "category": "ทักทาย",
+      "expected": "ทักทายและแนะนำบริการ",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 14,
+      "passed": true,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ช่วยอะไรได้บ้าง",
+      "category": "ความสามารถ",
+      "expected": "อธิบายขอบเขตนำทาง",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 11,
+      "passed": true,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ขอบคุณ",
+      "category": "มารยาท",
+      "expected": "ตอบรับขอบคุณสั้น ๆ",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 10,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ลาก่อน",
+      "category": "มารยาท",
+      "expected": "กล่าวลา",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 9,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ห้องประชุมอยู่ไหน",
+      "category": "ข้อมูลจุดหมาย",
+      "expected": "ตอบจาก POI จริงหรือแจ้งว่าอ่านไม่ได้",
+      "answer": "",
+      "errors": [
+        "AI local ยังไม่เปิดใช้งาน"
+      ],
+      "elapsedMs": 10,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ห้องประชุมอยู่ชั้นไหน",
+      "category": "ข้อมูลที่ไม่มี",
+      "expected": "แจ้งว่ายังไม่มีข้อมูลชั้น ไม่เดา",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 10,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "มีจุดหมายอะไรบ้าง",
+      "category": "รายการจุดหมาย",
+      "expected": "แสดงชื่อจุดหมายที่มีจริง",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 10,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "หุ่นแบตเหลือเท่าไหร่",
+      "category": "สถานะ",
+      "expected": "ตอบแบตเตอรี่จริงของ Mock",
+      "answer": "",
+      "errors": [
+        "AI local ยังไม่เปิดใช้งาน"
+      ],
+      "elapsedMs": 9,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "เรียกแท็กซี่ให้หน่อย",
+      "category": "นอกขอบเขต",
+      "expected": "บอกว่าทำไม่ได้และไม่มีการเรียกรถ",
+      "answer": "ตอนนี้ฉันให้บริการนำทางและข้อมูลจุดหมาย ยังเรียกแท็กซี่ จอง ซื้อ หรือชำระเงินไม่ได้ กรุณาติดต่อเจ้าหน้าที่ หรือเลือกจุดหมายที่มีในรายการครับ",
+      "errors": [],
+      "elapsedMs": 9,
+      "passed": true,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "พาไปที่นั่น",
+      "category": "กำกวม",
+      "expected": "ขอชื่อจุดหมายใหม่",
+      "answer": "กรุณาระบุชื่อจุดหมายให้ชัดเจน หรือเลือกจากรายการบนหน้าจอครับ",
+      "errors": [],
+      "elapsedMs": 9,
+      "passed": true,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "อย่าพาไปห้องประชุม",
+      "category": "ปฏิเสธ",
+      "expected": "ไม่เริ่มนำทาง",
+      "answer": "รับทราบครับ ยังไม่เริ่มนำทาง กรุณาระบุจุดหมายเมื่อพร้อม",
+      "errors": [],
+      "elapsedMs": 9,
+      "passed": true,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ห้องประชุมเปิดกี่โมง",
+      "category": "ข้อมูลที่ไม่มี",
+      "expected": "แจ้งว่าไม่มีเวลาเปิด ไม่เดา",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 10,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ขอติดต่อเจ้าหน้าที่",
+      "category": "ขอความช่วยเหลือ",
+      "expected": "ตอบรับหรืออธิบายวิธีติดต่อเจ้าหน้าที่",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 8,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ช่วยบอกตำแหน่งห้องครัวหน่อย",
+      "category": "ข้อมูลจุดหมาย",
+      "expected": "บอกตำแหน่งห้องครัว",
+      "answer": "สวัสดีครับ ฉันช่วยนำทางไปจุดหมาย บอกตำแหน่ง ดูสถานะหุ่น และยกเลิกงานได้ กรุณาเลือกจุดหมายบนหน้าจอ หรือติดต่อเจ้าหน้าที่ครับ",
+      "errors": [],
+      "elapsedMs": 9,
+      "passed": false,
+      "evaluation": "fixed expected-behavior checks, not a general model-accuracy score"
+    },
+    {
+      "text": "ช่วยพาไปห้องประชุมหน่อย",
+      "category": "คำสั่งแบบ dry-run",
+      "expected": "ตีความคำสั่งได้โดยไม่สร้างงาน",
+      "answer": "",
+      "errors": [
+        "AI local ยังไม่เปิดใช้งาน"
+      ],
+      "status": 503,
+      "elapsedMs": 2,
+      "passed": false
+    },
+    {
+      "text": "ไปส่งที่ห้องครัวได้ไหมครับ",
+      "category": "คำสั่งแบบ dry-run",
+      "expected": "ตีความคำสั่งได้โดยไม่สร้างงาน",
+      "answer": "",
+      "errors": [
+        "AI local ยังไม่เปิดใช้งาน"
+      ],
+      "status": 503,
+      "elapsedMs": 1,
+      "passed": false
+    },
+    {
+      "text": "กลับจุดชาร์จ",
+      "category": "คำสั่งแบบ dry-run",
+      "expected": "ตีความคำสั่งได้โดยไม่สร้างงาน",
+      "answer": "",
+      "errors": [
+        "AI local ยังไม่เปิดใช้งาน"
+      ],
+      "status": 503,
+      "elapsedMs": 1,
+      "passed": false
+    }
+  ]
+}

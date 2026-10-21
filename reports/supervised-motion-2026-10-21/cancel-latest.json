@@ -1,0 +1,263 @@
+{
+  "at": "2026-10-21T05:49:14.160Z",
+  "case": "cancel",
+  "approvedPoi": "หน้าประตูห้อง",
+  "supervised": true,
+  "samples": [
+    {
+      "at": "2026-10-21T05:49:15.365Z",
+      "x": 0.1,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:15.651Z",
+      "x": 0.1,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:15.926Z",
+      "x": 0.13,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:16.190Z",
+      "x": 0.13,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:16.464Z",
+      "x": 0.18,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:16.740Z",
+      "x": 0.18,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:17.013Z",
+      "x": 0.22,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:17.294Z",
+      "x": 0.22,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    },
+    {
+      "at": "2026-10-21T05:49:17.567Z",
+      "x": 0.27,
+      "y": 0,
+      "heading": 0,
+      "mode": "navigating",
+      "link": "ok",
+      "job": 37
+    }
+  ],
+  "passed": true,
+  "cleanupErrors": [],
+  "before": {
+    "state": {
+      "robotCode": "HX-01",
+      "linkStatus": "ok",
+      "lastSeenAt": "2026-10-21T05:49:13.894Z",
+      "mode": "idle",
+      "telemetry": {
+        "batteryPct": 100,
+        "x": 0.1,
+        "y": 0,
+        "headingDeg": 0,
+        "speedMps": null,
+        "wifiDbm": null,
+        "cpuPct": null,
+        "uptimeSec": 454800,
+        "lidar": null,
+        "capturedAt": "2026-10-21T05:49:13.894Z"
+      },
+      "lock": {
+        "heldBy": null,
+        "userName": null,
+        "mode": null,
+        "expiresAt": null
+      },
+      "currentJob": null,
+      "simulated": false,
+      "mockConnected": false,
+      "commandsEnabled": true,
+      "motionLimits": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      }
+    },
+    "quality": 78,
+    "settings": {
+      "desired": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "actual": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "bounds": {
+        "minLinearMps": 0.05,
+        "maxLinearMps": 0.5,
+        "minAngularRps": 0.1,
+        "maxAngularRps": 1
+      },
+      "mode": "normal",
+      "mappingEnabled": false,
+      "binding": {
+        "archiveId": "fa2f8262-0b90-4e95-9243-6816393bf686",
+        "needsLocalization": false
+      },
+      "standby": {
+        "poiId": null,
+        "updatedAt": "2026-10-21T04:27:40.608Z",
+        "mapSignature": "720345a01ec508fbe8b721a09998c18a99ff85a1995c84c8cbcc81a8c56230d0",
+        "returnPolicy": "manual"
+      }
+    },
+    "poi": {
+      "id": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+      "metadata": {
+        "aliases": [],
+        "display_name": "หน้าประตูห้อง",
+        "type": "poi"
+      },
+      "pose": {
+        "x": 1.776379823684692,
+        "y": -0.02617776952683926,
+        "yaw": 1.570796370506287
+      }
+    }
+  },
+  "job": {
+    "id": 37,
+    "ref": "HX-0037",
+    "destPoiCode": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+    "destName": "หน้าประตูห้อง",
+    "source": "operator",
+    "status": "navigating",
+    "mapVersion": 0,
+    "distanceM": 1.68,
+    "remainingM": 1.68,
+    "etaSec": 17,
+    "progress": 0,
+    "requestedByName": "ผู้ดูแลระบบ",
+    "createdAt": "2026-10-21T05:49:15.301Z"
+  },
+  "movedBeforeStopM": 0.17,
+  "jobResult": {
+    "id": 37,
+    "ref": "HX-0037",
+    "destPoiCode": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+    "destName": "หน้าประตูห้อง",
+    "source": "operator",
+    "status": "cancelled",
+    "mapVersion": 0,
+    "distanceM": 1.68,
+    "remainingM": null,
+    "etaSec": null,
+    "progress": 0,
+    "requestedByName": "ผู้ดูแลระบบ",
+    "createdAt": "2026-10-21T05:49:15.301Z",
+    "events": [
+      {
+        "id": 109,
+        "at": "2026-10-21T05:49:15.302Z",
+        "kind": "requested",
+        "detail": {
+          "source": "operator",
+          "dest": "610dcd65-bc53-406c-969b-2d2296c5cc50",
+          "requestedBy": "ผู้ดูแลระบบ"
+        }
+      },
+      {
+        "id": 110,
+        "at": "2026-10-21T05:49:15.302Z",
+        "kind": "accepted",
+        "detail": {
+          "distanceM": 1.68
+        }
+      },
+      {
+        "id": 111,
+        "at": "2026-10-21T05:49:17.586Z",
+        "kind": "cancelled",
+        "detail": {
+          "reason": "ทดสอบหยุดแบบมีผู้ดูแล ณ หน้าประตูห้อง",
+          "by": "ผู้ดูแลระบบ"
+        }
+      }
+    ],
+    "cancelReason": "ทดสอบหยุดแบบมีผู้ดูแล ณ หน้าประตูห้อง",
+    "departedAt": "2026-10-21T05:49:15.301Z",
+    "arrivedAt": null
+  },
+  "after": {
+    "robotCode": "HX-01",
+    "linkStatus": "ok",
+    "lastSeenAt": "2026-10-21T05:49:19.454Z",
+    "mode": "idle",
+    "telemetry": {
+      "batteryPct": 100,
+      "x": 0.31,
+      "y": 0,
+      "headingDeg": 0,
+      "speedMps": null,
+      "wifiDbm": null,
+      "cpuPct": null,
+      "uptimeSec": 454805,
+      "lidar": null,
+      "capturedAt": "2026-10-21T05:49:19.454Z"
+    },
+    "lock": {
+      "heldBy": null,
+      "userName": null,
+      "mode": null,
+      "expiresAt": null
+    },
+    "currentJob": null,
+    "simulated": false,
+    "mockConnected": false,
+    "commandsEnabled": true,
+    "motionLimits": {
+      "linearMps": 0.1,
+      "angularRps": 0.3
+    }
+  },
+  "speedRestored": true
+}

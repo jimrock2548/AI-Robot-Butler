@@ -3,6 +3,7 @@ import { config } from '../config';
 import { ApiError } from '../errors';
 import { getWorld, type JobRow, type UserRow } from '../db/memory';
 import { hermes, hermesSpeedAvailable, hermesUptimeAvailable } from '../hermes/driver';
+import { getMotionSettings } from './motionSettings';
 
 /**
  * ประกอบ RobotState — แหล่งความจริงเดียวของสถานะหุ่น (spec §6, §5.3)
@@ -70,7 +71,7 @@ export function buildRobotState(): RobotState {
     simulated: !hermes || config.robotMode === 'mock',
     mockConnected: config.robotMode === 'mock',
     commandsEnabled: !hermes || !config.robot.readOnly,
-    motionLimits: hermes ? { linearMps: config.robot.maxLinearMps, angularRps: config.robot.maxAngularRps } : null,
+    motionLimits: hermes ? getMotionSettings() : null,
   };
 }
 
@@ -84,7 +85,7 @@ export function jobSummary(job: JobRow): JobSummary {
   if (active) {
     const d = w.sim.distanceToTarget();
     remainingM = d === null ? null : Math.max(0, Math.round(d * 100) / 100);
-    etaSec = remainingM === null ? null : Math.max(0, Math.ceil(remainingM / 0.6));
+    etaSec = remainingM === null ? null : Math.max(0, Math.ceil(remainingM / (hermes ? getMotionSettings().linearMps : 0.6)));
     progress =
       job.distanceM && job.distanceM > 0 && remainingM !== null
         ? Math.min(1, Math.max(0, 1 - remainingM / job.distanceM))

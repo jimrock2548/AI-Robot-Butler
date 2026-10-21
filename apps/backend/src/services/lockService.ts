@@ -2,6 +2,7 @@ import { config } from '../config';
 import { ApiError } from '../errors';
 import { getWorld, type UserRow } from '../db/memory';
 import { jobSummary, requireRobotLink } from './robotService';
+import { assertRobotAvailable, isDispatching } from './robotActivity';
 
 /**
  * Control lock — บังคับฝั่ง server ทั้งหมด (spec §6.2)
@@ -14,6 +15,8 @@ import { jobSummary, requireRobotLink } from './robotService';
 
 export function acquireLock(user: UserRow, mode: 'manual', ip?: string): void {
   requireRobotLink();
+  assertRobotAvailable();
+  if (isDispatching()) throw new ApiError(409, 'job_in_progress', 'กำลังส่งคำสั่งนำทาง');
   const w = getWorld();
   const active = w.activeJob();
 

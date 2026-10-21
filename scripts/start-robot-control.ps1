@@ -1,7 +1,8 @@
 param(
     [ValidateSet('backend', 'admin', 'kiosk')]
     [string]$Service = 'backend',
-    [switch]$LocalAI
+    [switch]$LocalAI,
+    [switch]$WithoutAI
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,7 +17,7 @@ $env:HERMES_READ_ONLY = 'false'
 $env:HERMES_AUTO_DOCK = 'false'
 $env:HERMES_MAX_LINEAR_MPS = '0.1'
 $env:HERMES_MAX_ANGULAR_RPS = '0.3'
-$env:AI_MODE = if ($LocalAI) { 'local' } else { 'off' }
+$env:AI_MODE = if ($WithoutAI) { 'off' } else { 'local' }
 $env:PORT = '4000'
 $env:CORS_ORIGIN = 'http://localhost:3000'
 $env:NEXT_PUBLIC_API_URL = 'http://localhost:4000'

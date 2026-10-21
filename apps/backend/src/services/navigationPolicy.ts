@@ -1,8 +1,11 @@
 import type { LiveRobotMap } from '@hermes/shared';
 import { ApiError } from '../errors';
 import { config } from '../config';
+import { assertLocalizationConfirmed, assertDockVerified } from './robotActivity';
 
 export function validateLiveNavigation(map: LiveRobotMap, target: { x: number; y: number; isDock: boolean }): void {
+  assertLocalizationConfirmed();
+  if (target.isDock) assertDockVerified();
   const capturedAt = Date.parse(map.capturedAt);
   if (!Number.isFinite(capturedAt) || Date.now() - capturedAt > 5000) throw new ApiError(409, 'map_stale', 'ข้อมูลแผนที่เก่าเกินไป');
   if (map.mappingEnabled !== false) throw new ApiError(409, 'mapping_active', 'ต้องเปลี่ยนหุ่นจากโหมดสร้างแผนที่เป็นโหมดระบุตำแหน่งก่อนนำทาง');

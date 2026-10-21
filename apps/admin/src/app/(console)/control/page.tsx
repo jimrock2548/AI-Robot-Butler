@@ -10,6 +10,7 @@ import { LiveRobotMap } from '../../../components/LiveRobotMap';
 import { Joystick } from '../../../components/Joystick';
 import { Reported } from '../../../components/Reported';
 import { RobotOperatingMode } from '../../../components/RobotOperatingMode';
+import { RobotSettings } from '../../../components/RobotSettings';
 import {
   fmtAgeMs,
   fmtDurationSec,
@@ -126,6 +127,7 @@ export default function ControlPage() {
       <div className="xl:col-span-2">
         <RobotOperatingMode connected={!!state && (!state.simulated || !!state.mockConnected) && state.linkStatus === 'ok' && connection !== 'connecting'}
           canSelect={me?.role === 'admin' || me?.role === 'operator'} />
+        {realRobot && <div className="mt-4"><RobotSettings /></div>}
       </div>
       {/* แผนที่ + joystick */}
       <section className="flex flex-col gap-4 min-w-0">

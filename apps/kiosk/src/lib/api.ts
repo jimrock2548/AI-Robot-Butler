@@ -58,7 +58,7 @@ export function kioskCancel() {
 }
 
 export function kioskAiStatus() {
-  return req<{ textReady: boolean; voiceReady: boolean; webReady: boolean; simulated: boolean; mockConnected?: boolean }>('/kiosk/ai-status');
+  return req<{ textReady: boolean; rulesReady: boolean; modelReady: boolean; modelConfigured: boolean; readiness: 'model-and-rules' | 'rules-only' | 'unavailable'; voiceReady: boolean; webReady: boolean; simulated: boolean; mockConnected?: boolean }>('/kiosk/ai-status');
 }
 
 export interface KioskChatMessage { role: 'user' | 'assistant'; content: string }

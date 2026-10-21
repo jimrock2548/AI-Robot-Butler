@@ -1,0 +1,14 @@
+{
+  "at": "2026-10-21T06:55:58.956Z",
+  "passed": true,
+  "realBackend": true,
+  "canvas": {
+    "width": 434,
+    "height": 360,
+    "colors": 105
+  },
+  "poiCount": 5,
+  "wallCount": 18,
+  "robotWrites": 0,
+  "errors": []
+}

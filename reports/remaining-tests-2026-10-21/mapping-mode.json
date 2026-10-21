@@ -1,0 +1,107 @@
+{
+  "at": "2026-10-21T05:29:00.690Z",
+  "stationaryOnly": true,
+  "motionDispatched": false,
+  "checks": [
+    {
+      "name": "enable mapping and read back from real robot",
+      "passed": true
+    },
+    {
+      "name": "return to normal and read back from real robot",
+      "passed": true
+    },
+    {
+      "name": "restore pre-test map and pose",
+      "passed": true,
+      "backupId": "fa2f8262-0b90-4e95-9243-6816393bf686"
+    }
+  ],
+  "cleanupErrors": [],
+  "before": {
+    "speed": {
+      "linearMps": 0.5,
+      "angularRps": 0.6
+    },
+    "standby": {
+      "poiId": null,
+      "updatedAt": "2026-10-21T04:27:40.608Z",
+      "mapSignature": "720345a01ec508fbe8b721a09998c18a99ff85a1995c84c8cbcc81a8c56230d0",
+      "returnPolicy": "manual"
+    },
+    "pose": {
+      "pitch": 0,
+      "roll": 0,
+      "x": 0.1014723196054746,
+      "y": -0.007347306275209733,
+      "yaw": 0.006066857156486804,
+      "z": 0
+    }
+  },
+  "after": {
+    "state": {
+      "robotCode": "HX-01",
+      "linkStatus": "ok",
+      "lastSeenAt": "2026-10-21T05:29:03.597Z",
+      "mode": "idle",
+      "telemetry": {
+        "batteryPct": 100,
+        "x": 0.1,
+        "y": 0,
+        "headingDeg": 0,
+        "speedMps": null,
+        "wifiDbm": null,
+        "cpuPct": null,
+        "uptimeSec": 453589,
+        "lidar": null,
+        "capturedAt": "2026-10-21T05:29:03.597Z"
+      },
+      "lock": {
+        "heldBy": null,
+        "userName": null,
+        "mode": null,
+        "expiresAt": null
+      },
+      "currentJob": null,
+      "simulated": false,
+      "mockConnected": false,
+      "commandsEnabled": true,
+      "motionLimits": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      }
+    },
+    "settings": {
+      "desired": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "actual": {
+        "linearMps": 0.5,
+        "angularRps": 0.6
+      },
+      "bounds": {
+        "minLinearMps": 0.05,
+        "maxLinearMps": 0.5,
+        "minAngularRps": 0.1,
+        "maxAngularRps": 1
+      },
+      "mode": "normal",
+      "mappingEnabled": false,
+      "binding": {
+        "archiveId": "fa2f8262-0b90-4e95-9243-6816393bf686",
+        "needsLocalization": false
+      },
+      "standby": {
+        "poiId": null,
+        "updatedAt": "2026-10-21T04:27:40.608Z",
+        "mapSignature": "720345a01ec508fbe8b721a09998c18a99ff85a1995c84c8cbcc81a8c56230d0",
+        "returnPolicy": "manual"
+      }
+    },
+    "localizationQuality": 78,
+    "poiCount": 5,
+    "wallCount": 18
+  },
+  "passed": 3
+}

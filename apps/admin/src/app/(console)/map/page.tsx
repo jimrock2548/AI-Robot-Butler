@@ -6,7 +6,7 @@ import { api, ApiError } from '../../../lib/api';
 import { useRobot } from '../../../lib/RobotContext';
 import { useMe } from '../../../lib/useMe';
 import { PlanRenderer } from '../../../components/PlanRenderer';
-import { RobotMapEditor } from '../../../components/RobotMapEditor';
+import { RobotMapWorkspace } from '../../../components/RobotMapWorkspace';
 import { fmtDateTime } from '../../../lib/format';
 
 /**
@@ -197,7 +197,7 @@ export default function MapPage() {
 
   if (state && (!state.simulated || state.mockConnected)) return <div className="flex flex-col gap-4">
     <h1 className="font-sans font-semibold text-ink leading-heading">แผนที่สดและจุด POI</h1>
-    <section className="bg-surface border border-line rounded-[3px] p-4"><RobotMapEditor /></section>
+    <section className="bg-surface border border-line rounded-[3px] p-4"><RobotMapWorkspace /></section>
   </div>;
 
   return (

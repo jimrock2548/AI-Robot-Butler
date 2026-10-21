@@ -28,6 +28,7 @@ export async function classifyRobotTranscript(raw: unknown, signal?: AbortSignal
     }
     if (language.location && matches.length === 1) return rule('where_is', matches[0].code);
   }
+  if (config.ai.mode !== 'local') throw new ApiError(503, 'ai_unavailable', 'คำขอนี้ต้องใช้โมเดล AI ซึ่งยังไม่เปิดใช้งาน กรุณาเลือกจุดหมายบนจอหรือระบุชื่อจุดให้ชัดเจน');
   const schema = { type: 'object', additionalProperties: false,
     properties: { intent: { type: 'string', enum: intents }, confidence: { type: 'number', minimum: 0, maximum: 1 },
       poiCode: { enum: [null, ...catalog.map(poi => poi.code)] }, speechAct: { type: 'string', enum: speechActs }, needsClarification: { type: 'boolean' } },
@@ -64,6 +65,13 @@ export async function classifyRobotTranscript(raw: unknown, signal?: AbortSignal
     if (typeof content !== 'string') throw new Error('Missing output');
     const decision = outputSchema.parse(JSON.parse(content));
     if (decision.poiCode && !catalog.some(p => p.code === decision.poiCode)) throw new Error('Unknown POI');
+    if (['navigate_to', 'where_is'].includes(decision.intent)
+      && (!decision.poiCode || matches.length !== 1 || matches[0].code !== decision.poiCode || decision.needsClarification)) {
+      return { ...decision, intent: 'unknown', poiCode: null, needsClarification: true, decisionSource: 'model' };
+    }
+    if (decision.intent === 'navigate_to' && decision.speechAct !== 'request') {
+      return { ...decision, intent: 'unknown', poiCode: null, needsClarification: true, decisionSource: 'model' };
+    }
     return { ...decision, decisionSource: 'model' };
   } catch { throw new ApiError(502, 'ai_invalid_output', 'โมเดลส่งผลลัพธ์ที่ตรวจสอบไม่ได้'); }
 }

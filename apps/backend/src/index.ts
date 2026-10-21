@@ -9,6 +9,7 @@ import { setMapIo } from './routes/maps';
 import { initPostgresWorld } from './db/postgres';
 import { hermes } from './hermes/driver';
 import { startLiveMapPoller } from './services/liveMapService';
+import { initializeRobotControl } from './services/robotControlService';
 
 async function main(): Promise<void> {
   if (config.robotMode === 'hermes' && !config.robot.readOnly && config.dbMode !== 'pg') throw new Error('Hermes movement requires DB_MODE=pg');
@@ -23,6 +24,7 @@ async function main(): Promise<void> {
   }
   if (config.dbMode === 'pg') await initPostgresWorld();
   else await initWorld({ demoMap: config.robotMode === 'sim' });
+  await initializeRobotControl();
   const world = getWorld();
   if (hermes) world.sim.lastTelemetryAt = 0;
   console.log(

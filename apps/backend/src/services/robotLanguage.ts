@@ -14,7 +14,7 @@ const abilityQuestion = /^(?:หุ่น|คุณ).*?(?:สามารถ|ท
 export function analyzeRobotLanguage(text: string): RobotLanguage {
   const value = normalizeRobotText(text);
   const result = { speechAct: 'other' as SpeechAct, stop: false, dock: /จุดชาร์จ|แท่นชาร์จ|ที่ชาร์จ|สถานีชาร์จ|charging\s+(?:station|dock)|charger|\bdock\b/iu.test(value),
-    location: /อยู่(?:ที่)?ไหน|อยู่ตรงไหน|where\s+is|where\s+can\s+i\s+find/iu.test(value),
+    location: /อยู่(?:ที่)?ไหน|อยู่ตรงไหน|(?:บอก|ขอดู|แสดง).*ตำแหน่ง|where\s+is|where\s+can\s+i\s+find|(?:tell|show).*location/iu.test(value),
     status: /แบต|สถานะหุ่น|battery|robot\s+status/iu.test(value) };
   if (negative.test(value)) return { ...result, speechAct: 'negated' };
   if (hypothetical.test(value)) return { ...result, speechAct: 'hypothetical' };
