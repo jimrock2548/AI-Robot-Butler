@@ -1,0 +1,75 @@
+{
+  "at": "2026-10-23T09:14:21.311Z",
+  "passed": true,
+  "initial": {
+    "navigationOnly": true
+  },
+  "final": {
+    "navigationOnly": true
+  },
+  "realBackend": true,
+  "postgresVerifiedInFreshProcesses": true,
+  "motionDispatched": false,
+  "jobBefore": null,
+  "jobAfter": null,
+  "checks": [
+    {
+      "name": "Admin switch and live kiosk mode update; fresh process reads persisted unrestricted setting",
+      "passed": true
+    },
+    {
+      "name": "General question uses the real local model",
+      "passed": true,
+      "text": "ช่วยเขียนคำอวยพรวันเกิดสั้น ๆ ให้เพื่อนหน่อย",
+      "route": "chat",
+      "answer": "ยินดีด้วยวันเกิด! 🎉\n\nขออวยพรให้เพื่อนมีความสุขตลอดไป มีสุขภาพแข็งแรง และเจอคนดีๆ ในชีวิตเสมอ นะครับ! 🌸✨",
+      "sources": []
+    },
+    {
+      "name": "Web question uses live search and returns sources",
+      "passed": true,
+      "text": "ข่าวล่าสุด NASA",
+      "route": "web",
+      "answer": "ข่าวล่าสุดของ NASA ที่น่าสนใจช่วงนี้คือ:\n\n1.  **ยาน VIPER ลงจอดบนดวงจันทร์:** NASA เลือก Blue Origin นำยาน VIPER ขึ้นดวงจันทร์ โดยยานนี้มีความสามารถพิเศษที่จะทำภารกิจที่ยาวนานขึ้นและปลอดภัยกว่ายานสำรวจทั่วไป [1]\n2.  **ภาพถ่ายโลกความละเอียดสูง:** จากภารกิจ Artemis II ซึ่งกำลังมุ่งหน้าสู่ดวงจันทร์ NASA ได้เผยแพร่ภาพถ่ายโลกความละเอียดสูงครั้งแรก (ภาพที่เห็นรายละเอียดของอาคารและถนนบนพื้นโลก) [1]\n3.  **การสื่อสารข้ามอวกาศ:** ลูกเรือ Artemis II ได้ทำการโทรข้ามอวกาศสำเร็จก่อนกลับโลก ซึ่งเป็นการทดสอบความแม่นยำของระบบสื่อสารในอวกาศ [1]\n4.  **ภาพดาวเทียม:** มีภาพถ่ายดาวเทียมจาก NASA ชี้ให้เห็นรายละเอียดของวัตถุท้องฟ้าและปรากฏการณ์ธรรมชาติบนโลก [1]\n\nหากสนใจข้อมูลเจาะจงด้านใดเพิ่มเติม สามารถสอบถามได้เลยนะครับ!",
+      "sources": [
+        {
+          "title": "NASA ข่าว อัพเดท เรื่องราวล่าสุด ของหน่วยงานอวกาศระดับโลก - Spaceth.co",
+          "url": "https://spaceth.co/tag/nasa/",
+          "snippet": "NASA เลือก Blue Origin นำยาน VIPER ลงจอดบนดวงจันทร์ รอดถูกแยกส่วนหลังโดนตัดงบ · Nattanon Dungsunenarn September 23, 2025 September 23, 2025 ...",
+          "retrievedAt": "2026-10-23T09:14:01.345Z"
+        },
+        {
+          "title": "บทความและข่าว “นาซา” ล่าสุด วันนี้ | ไทยรัฐออนไลน์",
+          "url": "https://www.thairath.co.th/tags/%E0%B8%99%E0%B8%B2%E0%B8%8B%E0%B8%B2",
+          "snippet": "นาซาเผยภาพถ่ายโลกความละเอียดสูงครั้งแรก จากลูกเรือ Artemis II ระหว่างมุ่งหน้าสู่ดวงจันทร์. 04 เม.ย. 2569 05:15 น. นาซาเผยภาพถ่ายโลกความละเอียดสูงครั้งแรก จาก ...",
+          "retrievedAt": "2026-10-23T09:14:01.345Z"
+        },
+        {
+          "title": "NASA ข่าวล่าสุด | สถานีวิทยุโทรทัศน์กองทัพบก TV5HD",
+          "url": "https://thaitv5hd.com/tag/NASA",
+          "snippet": "ข่าว · NASA อดส่งลูกบอลโลกไปดวงจันทร์ หลังสหรัฐร่วงบอลโลก · ภาพดาวเทียม NASA ชี้ชัด! · ลูกเรือ Artemis II โทรข้ามอวกาศ ก่อนกลับโลก · 54 ปีที่รอคอย NASA เผยภาพโลก ...",
+          "retrievedAt": "2026-10-23T09:14:01.345Z"
+        },
+        {
+          "title": "\"นาซา\"ไขปริศนา\"พลังงานมืด\" ภารกิจใหม่ความลับ\"จักรวาล\" | TNN ข่าวค่ำ",
+          "url": "https://www.facebook.com/TNN16LIVE/videos/%E0%B8%99%E0%B8%B2%E0%B8%8B%E0%B8%B2%E0%B9%84%E0%B8%82%E0%B8%9B%E0%B8%A3%E0%B8%B4%E0%B8%A8%E0%B8%99%E0%B8%B2%E0%B8%9E%E0%B8%A5%E0%B8%B1%E0%B8%87%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A1%E0%B8%B7%E0%B8%94-%E0%B8%A0%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%B4%E0%B8%88%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A5%E0%B8%B1%E0%B8%9A%E0%B8%88%E0%B8%B1%E0%B8%81%E0%B8%A3%E0%B8%A7%E0%B8%B2%E0%B8%A5-tnn-%E0%B8%82%E0%B9%88%E0%B8%B2%E0%B8%A7%E0%B8%84%E0%B9%88%E0%B8%B3-31-%E0%B8%AA%E0%B8%84-69%E0%B8%AD%E0%B8%87%E0%B8%84%E0%B9%8C%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%AB%E0%B8%B2/1546526540014347/",
+          "snippet": "31 ส.ค. 2569 ... \"นาซา\"ไขปริศนา\"พลังงานมืด\" ภารกิจใหม่ความลับ\"จักรวาล\" | TNN ข่าวค่ำ | 31 ส.ค. 69 องค์การบริหารการบินและอวกาศแห่งชาติสหรัฐฯ หรือ นาซา ...",
+          "retrievedAt": "2026-10-23T09:14:01.345Z"
+        }
+      ]
+    },
+    {
+      "name": "Switching restriction on immediately limits general questions",
+      "passed": true,
+      "text": "ช่วยเขียนคำอวยพรวันเกิดสั้น ๆ ให้เพื่อนหน่อย",
+      "route": "database",
+      "answer": "ยังไม่เข้าใจคำขอครับ กรุณาบอกชื่อจุดหมาย หรือถาม “มีจุดหมายอะไรบ้าง” หากต้องการความช่วยเหลือสามารถแจ้งเจ้าหน้าที่ในแชตนี้ได้",
+      "sources": []
+    },
+    {
+      "name": "Admin page reload retains the saved choice",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

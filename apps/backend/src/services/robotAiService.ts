@@ -11,6 +11,7 @@ import { buildRobotState } from './robotService';
 import { analyzeRobotLanguage, matchRobotDestinations, readPoiAliases } from './robotLanguage';
 import { classifyRobotTranscript } from './robotIntent';
 import { navigationScopeReply } from './navigationScope';
+import { readAiSettings } from './aiSettings';
 
 const inputSchema = z.object({ transcript: z.string().trim().min(1).max(500), lang: z.enum(['th', 'en']).default('th'), dryRun: z.boolean().default(false) });
 export interface RobotAiResult {
@@ -34,7 +35,16 @@ interface Dependencies {
   loadMap: () => Promise<LiveRobotMap>;
   classify: typeof classifyTranscript;
 }
-const defaults: Dependencies = { loadMap: () => getLiveMap(true), classify: classifyRobotTranscript };
+const defaults: Dependencies = {
+  loadMap: async () => {
+    try { return await getLiveMap(true); }
+    catch (error) {
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(503, 'robot_map_unavailable', 'อ่านแผนที่จากหุ่นไม่ได้ กรุณาตรวจการเชื่อมต่อหุ่นก่อนสั่งนำทาง');
+    }
+  },
+  classify: classifyRobotTranscript,
+};
 
 /** Operator text only: the model selects known IDs, the backend owns all coordinates and motion rules. */
 export async function handleRobotAiCommand(raw: unknown, requester: JobRequester, signal?: AbortSignal, dependencies: Dependencies = defaults): Promise<RobotAiResult> {
@@ -54,7 +64,7 @@ export async function handleRobotAiCommand(raw: unknown, requester: JobRequester
       decisionSource: decision.decisionSource, needsClarification: decision.needsClarification ?? false, ...extra };
   };
   if (signal?.aborted) throw new ApiError(503, 'ai_cancelled', 'ยกเลิกคำขอแล้ว');
-  const scopeReply = config.ai.navigationOnly ? navigationScopeReply(transcript, lang) : null;
+  const scopeReply = readAiSettings().navigationOnly ? navigationScopeReply(transcript, lang) : null;
   if (scopeReply) return finish({ intent: 'unknown', confidence: 1, poiCode: null, decisionSource: 'rules' }, scopeReply, true);
   if (language.stop) {
     const decision: AiDecision = { intent: 'cancel_job', confidence: 1, poiCode: null, speechAct: 'request', decisionSource: 'rules' };

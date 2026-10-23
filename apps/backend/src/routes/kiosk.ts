@@ -9,6 +9,7 @@ import { getWorld } from '../db/memory';
 import { handleKioskIntent } from '../services/aiService';
 import { streamKioskChat } from '../services/chatService';
 import { config } from '../config';
+import { readAiSettings } from '../services/aiSettings';
 import { hermes } from '../hermes/driver';
 import { getLiveMap } from '../services/liveMapService';
 import { handleRobotAiCommand } from '../services/robotAiService';
@@ -90,14 +91,15 @@ kioskRouter.get('/ai-status', async (_req, res) => {
   if (config.ai.mode === 'local') {
     try { modelReady = (await fetch(new URL('/v1/models', config.ai.baseUrl), { signal: AbortSignal.timeout(1500) })).ok; } catch { /* model offline */ }
   }
-  const rulesReady = config.ai.navigationOnly;
+  const { navigationOnly } = readAiSettings();
+  const rulesReady = navigationOnly;
   res.json({ textReady: modelReady || rulesReady, rulesReady, modelReady, modelConfigured: config.ai.mode === 'local',
     readiness: modelReady ? 'model-and-rules' : rulesReady ? 'rules-only' : 'unavailable',
-    navigationOnly: config.ai.navigationOnly, voiceReady: false, voiceMode: 'browser', webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
+    navigationOnly, voiceReady: false, voiceMode: 'browser', webReady, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', commandsEnabled: !hermes || !config.robot.readOnly });
 });
 
 kioskRouter.post('/chat', async (req, res, next) => {
-  if (config.ai.mode !== 'local' && !config.ai.navigationOnly) {
+  if (config.ai.mode !== 'local' && !readAiSettings().navigationOnly) {
     res.status(503).json({ error: { code: 'ai_unavailable', message: 'ระบบสนทนายังไม่พร้อมใช้งาน' } });
     return;
   }

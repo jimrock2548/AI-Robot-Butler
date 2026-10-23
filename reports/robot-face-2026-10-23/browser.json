@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-23T01:23:41.193Z",
+  "passed": true,
+  "checks": [
+    "Reference face is the default /ai screen",
+    "Voice transcript opens chat for review without submitting",
+    "Thinking and speaking expressions follow chat and TTS state",
+    "Choosing POI fills a draft without dispatch",
+    "face-portrait face, chat and stop control fit viewport",
+    "face-mobile face, chat and stop control fit viewport",
+    "face-short face, chat and stop control fit viewport",
+    "Staff takeover opens conversation automatically",
+    "Reduced motion disables face animations"
+  ],
+  "backendRequests": 0,
+  "robotRequests": 0,
+  "speechAPIs": "UI stubs; no acoustic test",
+  "errors": []
+}

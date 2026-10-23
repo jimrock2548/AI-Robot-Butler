@@ -1,0 +1,180 @@
+{
+  "at": "2026-10-23T08:59:46.906Z",
+  "model": "qwen3.5-2b",
+  "realModel": true,
+  "realSearch": true,
+  "robotMap": "fixture, not live hardware",
+  "motionDispatched": false,
+  "passed": 10,
+  "total": 10,
+  "results": [
+    {
+      "mode": "navigation-only",
+      "text": "สวัสดี",
+      "route": "database",
+      "answer": "สวัสดีครับ อยากให้พาไปจุดไหน หรืออยากทราบตำแหน่งห้องไหนครับ?",
+      "sources": [],
+      "passed": true,
+      "elapsedMs": 5
+    },
+    {
+      "mode": "navigation-only",
+      "text": "ช่วยเขียนคำอวยพรวันเกิดสั้น ๆ ให้เพื่อนหน่อย",
+      "route": "database",
+      "answer": "ยังไม่เข้าใจคำขอครับ กรุณาบอกชื่อจุดหมาย หรือถาม “มีจุดหมายอะไรบ้าง” หากต้องการความช่วยเหลือสามารถแจ้งเจ้าหน้าที่ในแชตนี้ได้",
+      "sources": [],
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "mode": "navigation-only",
+      "text": "ข่าวล่าสุด NASA",
+      "route": "database",
+      "answer": "ยังไม่เข้าใจคำขอครับ กรุณาบอกชื่อจุดหมาย หรือถาม “มีจุดหมายอะไรบ้าง” หากต้องการความช่วยเหลือสามารถแจ้งเจ้าหน้าที่ในแชตนี้ได้",
+      "sources": [],
+      "passed": true,
+      "elapsedMs": 0
+    },
+    {
+      "mode": "general-chat-enabled",
+      "text": "ช่วยเขียนคำอวยพรวันเกิดสั้น ๆ ให้เพื่อนหน่อย",
+      "route": "chat",
+      "answer": "ยินดีด้วย! 🎉\n\nขออวยพรวันเกิดให้เพื่อนมีความสุขและสดใสเสมอไปนะครับ! 🌟🎂🎈\n\n*(หมายเหตุ: เนื่องจากผมเป็น AI จึงไม่สามารถรับวันเกิดหรือชื่อเพื่อนจากคุณได้โดยตรง แต่ผมยินดีช่วยคิดคำอวยพรสั้นๆ ตามสไตล์ที่คุณต้องการครับ)*",
+      "sources": [],
+      "passed": true,
+      "elapsedMs": 4598
+    },
+    {
+      "mode": "general-chat-enabled",
+      "text": "ข่าวล่าสุด NASA",
+      "route": "web",
+      "answer": "ข่าวล่าสุดจาก NASA เรื่องการส่งยาน **VIPER** ลงจอดบนดวงจันทร์ โดยถูกเลือกเป็นยาน VIPER ของ Blue Origin [1]\n\nอย่างไรก็ตาม มีข้อมูลขัดแย้งกันเล็กน้อย:\n*   **รายงานล่าสุด (Sep 2025):** บ่งชี้ว่ายาน VIPER ถูกส่งลงจอดและรอดพ้นจากการถูกแยกส่วนหลังโดนตัดงบ [1]\n*   **รายงานอื่น (Jul 2026):** มีข่าวจาก TV5HD และ Infoquest ที่ระบุว่า NASA ยังไม่ได้ส่งยานลงจอด และมีการพูดถึงการส่งลูกบอลโลกไปดวงจันทร์ที่อาจเป็นข่าวเก่า [2][3]\n\nเนื่องจากข่าวบางชิ้นอาจเป็นข้อมูลเก่าหรือมีการตีความต่างกัน จึงขอแนะนำให้ตรวจสอบแหล่งข่าวหลักอย่าง NASA หรือ Space.com สำหรับรายละเอียดที่อัปเดตที่สุดครับ [1]",
+      "sources": [
+        {
+          "title": "NASA ข่าว อัพเดท เรื่องราวล่าสุด ของหน่วยงานอวกาศระดับโลก - Spaceth.co",
+          "url": "https://spaceth.co/tag/nasa/",
+          "snippet": "NASA เลือก Blue Origin นำยาน VIPER ลงจอดบนดวงจันทร์ รอดถูกแยกส่วนหลังโดนตัดงบ · Nattanon Dungsunenarn September 23, 2025 September 23, 2025 ...",
+          "retrievedAt": "2026-10-23T08:59:29.837Z"
+        },
+        {
+          "title": "บทความและข่าว “นาซา” ล่าสุด วันนี้ | ไทยรัฐออนไลน์",
+          "url": "https://www.thairath.co.th/tags/%E0%B8%99%E0%B8%B2%E0%B8%8B%E0%B8%B2",
+          "snippet": "นาซาเผยภาพถ่ายโลกความละเอียดสูงครั้งแรก จากลูกเรือ Artemis II ระหว่างมุ่งหน้าสู่ดวงจันทร์. 04 เม.ย. 2569 05:15 น. นาซาเผยภาพถ่ายโลกความละเอียดสูงครั้งแรก จาก ...",
+          "retrievedAt": "2026-10-23T08:59:29.837Z"
+        },
+        {
+          "title": "NASA ข่าวล่าสุด | สถานีวิทยุโทรทัศน์กองทัพบก TV5HD",
+          "url": "https://thaitv5hd.com/tag/NASA",
+          "snippet": "ข่าว · NASA อดส่งลูกบอลโลกไปดวงจันทร์ หลังสหรัฐร่วงบอลโลก · ภาพดาวเทียม NASA ชี้ชัด! · ลูกเรือ Artemis II โทรข้ามอวกาศ ก่อนกลับโลก · 54 ปีที่รอคอย NASA เผยภาพโลก ...",
+          "retrievedAt": "2026-10-23T08:59:29.837Z"
+        },
+        {
+          "title": "NASA : สำนักข่าวอินโฟเควสท์",
+          "url": "https://www.infoquest.co.th/tag/nasa",
+          "snippet": "ชิ้นส่วนจรวด SpaceX พุ่งชนดวงจันทร์ด้วยความเร็วเกือบ 8,700 กม./ชม. นาซาเร่งเก็บข้อมูล-ยันไม่กระทบโลก. 05 ส.ค. 69 16:43 น.",
+          "retrievedAt": "2026-10-23T08:59:29.837Z"
+        }
+      ],
+      "passed": true,
+      "elapsedMs": 15590
+    },
+    {
+      "mode": "command-preview-fixture-catalog",
+      "text": "ช่วยพาไปหน้าประตูห้องหน่อย",
+      "result": {
+        "replyText": "เข้าใจคำสั่งไปหน้าประตูห้อง — โหมดทดสอบ ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "navigate_to",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false,
+        "target": {
+          "id": "610d0000-0000-4000-8000-000000000001",
+          "name": "หน้าประตูห้อง",
+          "x": 1.77,
+          "y": -0.02,
+          "yaw": 1.57
+        }
+      },
+      "passed": true,
+      "elapsedMs": 2
+    },
+    {
+      "mode": "command-preview-fixture-catalog",
+      "text": "ไปส่งที่หน้าประตูห้องได้ไหมครับ",
+      "result": {
+        "replyText": "เข้าใจคำสั่งไปหน้าประตูห้อง — โหมดทดสอบ ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "navigate_to",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false,
+        "target": {
+          "id": "610d0000-0000-4000-8000-000000000001",
+          "name": "หน้าประตูห้อง",
+          "x": 1.77,
+          "y": -0.02,
+          "yaw": 1.57
+        }
+      },
+      "passed": true,
+      "elapsedMs": 0
+    },
+    {
+      "mode": "command-preview-fixture-catalog",
+      "text": "กลับจุดชาร์จ",
+      "result": {
+        "replyText": "เข้าใจคำสั่งไปจุดชาร์จ — โหมดทดสอบ ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "return_to_dock",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false,
+        "target": {
+          "id": "DOCK",
+          "name": "จุดชาร์จ",
+          "x": 0,
+          "y": 0,
+          "yaw": 0
+        }
+      },
+      "passed": true,
+      "elapsedMs": 1
+    },
+    {
+      "mode": "command-preview-fixture-catalog",
+      "text": "หยุด",
+      "result": {
+        "replyText": "ทดสอบคำสั่งหยุด — ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "cancel_job",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false
+      },
+      "passed": true,
+      "elapsedMs": 0
+    },
+    {
+      "mode": "command-preview-fixture-catalog",
+      "text": "พาไปที่นั่น",
+      "result": {
+        "replyText": "ต้องการไปจุดไหนครับ? กรุณาระบุชื่อ POI ที่มีอยู่บนแผนที่",
+        "intent": "unknown",
+        "confidence": 0.95,
+        "rejected": true,
+        "dryRun": true,
+        "decisionSource": "model",
+        "needsClarification": true,
+        "candidates": [],
+        "reason": "destination_unclear"
+      },
+      "passed": true,
+      "elapsedMs": 4494
+    }
+  ]
+}

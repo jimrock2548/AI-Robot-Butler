@@ -4,6 +4,7 @@ import { getWorld } from '../db/memory';
 import { classifyTranscript } from '../services/aiService';
 import { config } from '../config';
 import { handleRobotAiCommand } from '../services/robotAiService';
+import { readAiSettings, updateAiSettings } from '../services/aiSettings';
 
 /**
  * AI — Phase 2 (Qwen บน Jetson)
@@ -17,7 +18,21 @@ aiRouter.get('/status', async (_req, res) => {
   if (config.ai.mode === 'local') {
     try { modelReady = (await fetch(new URL('/v1/models', config.ai.baseUrl), { signal: AbortSignal.timeout(1500) })).ok; } catch { /* offline */ }
   }
-  res.json({ mode: config.ai.mode, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', model: config.ai.mode === 'local' ? config.ai.model : null, modelReady });
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ mode: config.ai.mode, simulated: config.robotMode !== 'hermes', mockConnected: config.robotMode === 'mock', model: config.ai.mode === 'local' ? config.ai.model : null, modelReady, ...readAiSettings() });
+});
+
+aiRouter.get('/settings', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(readAiSettings());
+});
+aiRouter.put('/settings', requireRole('admin'), async (req, res, next) => {
+  try {
+    const before = readAiSettings();
+    const settings = await updateAiSettings(req.body);
+    getWorld().addAudit(req.user!.id, 'ai.settings.update', 'ai', { before, after: settings }, req.ip);
+    res.json(settings);
+  } catch (error) { next(error); }
 });
 
 aiRouter.post('/command', requireRole('operator', 'admin'), async (req, res, next) => {

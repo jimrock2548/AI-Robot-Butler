@@ -10,6 +10,7 @@ import { getLiveMap } from './liveMapService';
 import { analyzeRobotLanguage, matchRobotDestinations } from './robotLanguage';
 import { navigationScopeReply } from './navigationScope';
 import { navigationReply } from './navigationReplies';
+import { readAiSettings } from './aiSettings';
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -141,14 +142,15 @@ async function streamModel(messages: { role: 'system' | 'user' | 'assistant'; co
 export async function streamKioskChat(raw: unknown, emit: Emit, signal: AbortSignal): Promise<void> {
   const { messages, lang } = requestSchema.parse(raw);
   const latest = messages.at(-1)!.content;
+  const { navigationOnly } = readAiSettings();
   const scopeReply = navigationScopeReply(latest, lang);
-  if (config.ai.navigationOnly && scopeReply) {
+  if (navigationOnly && scopeReply) {
     emit({ type: 'route', route: 'chat' });
     emit({ type: 'delta', text: scopeReply });
     emit({ type: 'done' });
     return;
   }
-  if (config.ai.navigationOnly) {
+  if (navigationOnly) {
     const language = analyzeRobotLanguage(latest);
     const quick = (text: string) => { emit({ type: 'route', route: 'database' }); emit({ type: 'delta', text }); emit({ type: 'done' }); };
     if (['negated', 'hypothetical', 'quoted'].includes(language.speechAct)) {
@@ -170,7 +172,7 @@ export async function streamKioskChat(raw: unknown, emit: Emit, signal: AbortSig
       return;
     }
   }
-  const proposed = routeByRules(latest) ?? (config.ai.navigationOnly ? 'database' : await modelRoute(messages, lang, signal));
+  const proposed = routeByRules(latest) ?? (navigationOnly ? 'database' : await modelRoute(messages, lang, signal));
   // A model cannot turn a general question or retrieved page into a robot command.
   const route = proposed === 'action' && !hermes && !actionWords.test(latest) && analyzeRobotLanguage(latest).speechAct !== 'request' ? 'chat' : proposed;
   emit({ type: 'route', route });
@@ -205,7 +207,8 @@ export async function streamKioskChat(raw: unknown, emit: Emit, signal: AbortSig
   }
 
   const w = getWorld();
-  const publicPois = hermes ? (await getLiveMap()).pois?.filter(poi => poi.metadata?.is_public !== false).map(poi => ({
+  // General chat and web answers must remain available when the robot/map is offline.
+  const publicPois = route !== 'database' ? [] : hermes ? (await getLiveMap()).pois?.filter(poi => poi.metadata?.is_public !== false).map(poi => ({
     code: poi.id, nameTh: poi.metadata?.display_name, nameEn: poi.metadata?.display_name, pose: poi.pose,
   })) ?? [] : w.publishedPois().filter((poi) => poi.isPublic).map((poi) => ({
     code: poi.code, nameTh: poi.nameTh, nameEn: poi.nameEn, zone: poi.zone,

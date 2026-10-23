@@ -206,7 +206,7 @@ export default function KioskPage() {
   }
 
   return (
-    <div className="kiosk fixed inset-0 bg-surface flex flex-col overflow-hidden select-none">
+    <div className={`kiosk fixed inset-0 bg-surface flex flex-col overflow-hidden select-none ${scene === 'voice' ? 'kiosk-face-mode' : ''}`}>
       {/* header: โลโก้ + สลับภาษา (RBT-05) */}
       <header
         className="flex items-center justify-between shrink-0"
@@ -239,7 +239,7 @@ export default function KioskPage() {
       </header>
 
       {/* body — ฉาก */}
-      <main className="flex-1 min-h-0 flex flex-col" style={{ padding: u(4) }}>
+      <main className="flex-1 min-h-0 flex flex-col" style={{ padding: scene === 'voice' ? 0 : u(4) }}>
         {scene === 'idle' && (
           <IdleScene
             t={t}

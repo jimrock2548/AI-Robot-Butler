@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { AiConversation, AiRejection, JobSummary, Lang } from '@hermes/shared';
 import { config } from '../config';
+import { readAiSettings } from './aiSettings';
 import { ApiError } from '../errors';
 import { getWorld } from '../db/memory';
 import { cancelJob, createJob } from './jobService';
@@ -132,7 +133,7 @@ export async function classifyTranscript(raw: unknown, requestSignal?: AbortSign
 export async function handleKioskIntent(raw: unknown, classify = classifyTranscript, requestSignal?: AbortSignal): Promise<AiResult> {
   const { transcript, lang } = transcriptSchema.parse(raw);
   const startedAt = Date.now();
-  const scopeReply = config.ai.navigationOnly ? navigationScopeReply(transcript, lang) : null;
+  const scopeReply = readAiSettings().navigationOnly ? navigationScopeReply(transcript, lang) : null;
   if (scopeReply) return reject(transcript, lang, { intent: 'unknown', confidence: 1, poiCode: null }, 'outside_navigation_scope', startedAt, scopeReply);
   // An explicit stop command must not wait for LLM inference.
   const immediateStop = /^(?:หยุด|ยกเลิก|หยุดเดิน|หยุดนำทาง|stop|cancel|stop navigation|cancel navigation)[.!\s]*$/iu.test(transcript);

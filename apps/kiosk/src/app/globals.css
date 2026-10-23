@@ -65,3 +65,90 @@ body {
 .reception-voice { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }.reception-voice>input { border:1px solid #bed1c7; padding:8px; border-radius:12px; width:180px; font-size:.75em; }.reception-voice label { display:flex; gap:8px; font-size:.7em; }.reception-hint { color:#60746a; font-size:.62em; }.reception-error { color:#ad3522; font-size:.8em; }
 .reception-shell button:disabled { opacity:.45; cursor:not-allowed; }.reception-shell button:focus-visible,.reception-shell input:focus-visible { outline:3px solid #dc9f27; outline-offset:2px; }
 @media(max-width:760px) { .reception-body { grid-template-columns:1fr; overflow:auto; }.reception-guide { flex-direction:row; flex-wrap:wrap; padding:12px; justify-content:center; overflow:visible; }.reception-avatar { display:none; }.reception-guide h1 { font-size:1em; }.reception-guide p { display:none; }.reception-destinations { flex-direction:row; flex-wrap:wrap; }.reception-chat { min-height:420px; overflow:visible; }.reception-turns { max-height:45vh; }.reception-stop { width:auto; } }
+
+/* Robot display: the supplied white, winking face on a nearly black screen. */
+.kiosk-face-mode { background:#080a0d; }
+.kiosk-face-mode>header { position:absolute; top:23px; right:32px; z-index:5; padding:0!important; }
+.kiosk-face-mode>header>span { display:none; }
+.kiosk-face-mode>header>div { height:32px!important; border-color:#35383d; border-radius:8px; overflow:hidden; }
+.kiosk-face-mode>header button { font-size:12px!important; padding:0 12px!important; color:#a6abb2; background:transparent; }
+.kiosk-face-mode>header button[aria-pressed="true"] { background:#303339; color:#fff; }
+.robot-interface { --robot-white:#f5f3ec; --robot-muted:#989da6; background:#080a0d; color:var(--robot-white); border-radius:0; font-size:16px; }
+.robot-interface .reception-header { flex:none; min-height:78px; padding:18px 32px; gap:24px; border:0; background:transparent; }
+.robot-wordmark { margin-right:auto; }
+.robot-interface .robot-wordmark strong { display:flex; align-items:center; gap:9px; color:var(--robot-white); font-size:19px; letter-spacing:.17em; font-family:var(--font-archivo),sans-serif; }
+.robot-interface .robot-wordmark>span { margin-top:4px; font-size:8px; color:var(--robot-muted); letter-spacing:.22em; }
+.robot-interface .robot-wordmark-dot { color:#d4ec96; font-size:8px; }
+.robot-connection { display:flex; align-items:center; gap:8px; color:#afb4bc; font-size:12px; }
+.robot-link-dot { width:6px; height:6px; border-radius:50%; background:#747983; }
+.robot-link-dot[data-ready="true"] { background:#c9e69b; box-shadow:0 0 10px #c9e69226; }
+.robot-interface .reception-button { min-height:44px; padding:10px 15px; border:1px solid #33373f; border-radius:12px; color:#e2e3e5; background:#191c22; font-size:13px; }
+.robot-interface .robot-home { min-height:34px; margin-right:118px; padding:6px 12px; background:transparent; border-color:#30343b; font-size:11px; }
+.robot-stage { display:grid; grid-template-columns:minmax(0,1fr); flex:1; min-height:0; }
+.robot-face-stage { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:0; min-width:0; padding:0 32px 24px; }
+.robot-face-touch { display:flex; justify-content:center; align-items:center; width:min(100%,1000px); flex:0 1 auto; min-height:0; border:0; padding:0; color:var(--robot-white); background:transparent; border-radius:48%; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.robot-face { display:block; width:100%; max-height:52dvh; overflow:visible; filter:drop-shadow(0 0 3px #ffffff15); }
+.robot-eye-awake,.robot-speaking-mouth,.robot-thinking-dots { display:none; }
+.robot-face-features { transform-origin:400px 240px; animation:robot-float 7s ease-in-out infinite; }
+.robot-eye-open { transform-box:fill-box; transform-origin:center; animation:robot-blink 8s infinite; }
+.robot-sparkle { transform-box:fill-box; transform-origin:center; animation:robot-twinkle 5s ease-in-out infinite; }
+.mood-listening .robot-eye-wink,.mood-speaking .robot-eye-wink,.mood-staff .robot-eye-wink { display:none; }
+.mood-listening .robot-eye-awake,.mood-speaking .robot-eye-awake,.mood-staff .robot-eye-awake { display:block; }
+.mood-listening { color:#dceebf; }.mood-listening .robot-face-features { animation:robot-listen 2s ease-in-out infinite; }
+.mood-thinking .robot-thinking-dots { display:block; }.robot-thinking-dots circle { animation:robot-dot 1.2s ease-in-out infinite; }.robot-thinking-dots circle:nth-child(2) { animation-delay:.2s; }.robot-thinking-dots circle:nth-child(3) { animation-delay:.4s; }
+.mood-speaking .robot-mouth { display:none; }.mood-speaking .robot-speaking-mouth { display:block; transform-box:fill-box; transform-origin:center; animation:robot-talk .35s ease-in-out infinite alternate; }
+.mood-error { color:#edc5aa; }.mood-error .robot-sparkle { display:none; }
+.robot-greeting { text-align:center; margin:4px 0 25px; max-width:600px; }
+.robot-eyebrow { display:block; margin-bottom:9px; color:#949aa4; font:10px var(--font-archivo),sans-serif; letter-spacing:.23em; }
+.robot-greeting h1 { margin:0; font-size:clamp(20px,2.5vw,32px); font-weight:500; letter-spacing:-.025em; line-height:1.5; }
+.robot-greeting p { max-width:520px; margin:8px auto 0; color:var(--robot-muted); font-size:clamp(12px,1.25vw,15px); line-height:1.7; }
+.robot-primary-actions { display:flex; align-items:center; justify-content:center; gap:12px; flex-shrink:0; }
+.robot-talk { display:flex; align-items:center; justify-content:center; gap:10px; min-height:52px; padding:13px 24px; border:1px solid #e4f3bc; border-radius:14px; background:#d9ecb0; color:#1c2414; font-size:15px; font-weight:600; }
+.robot-talk svg { width:20px; height:20px; }.robot-talk.is-listening { background:#edf7d6; }
+.robot-interface .robot-open-chat { display:flex; align-items:center; gap:20px; min-height:52px; padding:13px 22px; background:#13161c; font-size:14px; }
+.robot-footer { display:flex; align-items:center; justify-content:space-between; flex-shrink:0; min-height:68px; padding:12px 32px; border-top:1px solid #202329; font-size:11px; color:#9399a2; }
+.robot-footer>span { letter-spacing:.03em; }.robot-footer-divider { margin:0 10px; color:#484e56; }
+.robot-footer>div { display:flex; flex-wrap:wrap; align-items:center; gap:8px 16px; }.robot-ai-scope { color:#c3d3ac; font-size:11px; }
+.robot-interface .reception-stop { display:flex; align-items:center; gap:8px; width:auto; min-height:44px; padding:9px 15px; border-radius:10px; border-color:#754b46; background:#281b1b; color:#f2b5a8; font-size:13px; }
+.robot-interface .reception-stop>span { font-size:10px; }
+.robot-interface.chat-open .robot-stage { grid-template-columns:minmax(0,1fr) minmax(360px,44%); }
+.chat-open .robot-face-stage { padding:0 24px 24px; }.chat-open .robot-face { max-height:40dvh; }
+.chat-open .robot-primary-actions { flex-wrap:wrap; }.chat-open .robot-greeting h1 { font-size:clamp(20px,2vw,28px); }
+.robot-interface .reception-chat { min-height:0; overflow:auto; margin:6px 24px 20px 0; padding:22px; border:1px solid #30343c; border-radius:22px; background:#11141a; gap:12px; }
+.robot-interface .reception-chat[hidden] { display:none; }
+.robot-interface .reception-chat-title { align-items:center; flex-shrink:0; border-color:#2b3038; }.robot-interface .reception-chat-title strong { font-size:19px; font-weight:500; }.robot-interface .reception-chat-title .robot-eyebrow { font-size:9px; }
+.robot-chat-tools { display:flex; justify-content:space-between; align-items:center; gap:8px; }.robot-interface .reception-badge { padding:5px 0; color:#aebd97; background:transparent; font-size:11px; }
+.robot-destination-picker { border:1px solid #303640; border-radius:12px; font-size:13px; }.robot-destination-picker>summary { padding:12px 14px; cursor:pointer; }.robot-destination-picker>summary>span { float:right; }.robot-interface .reception-destinations { padding:0 12px 12px; gap:6px; }.robot-interface .reception-destinations button { border-color:#333a44; background:#1e232b; color:#e7e8eb; font-size:13px; min-height:44px; }
+.robot-interface .reception-turns { flex:1 0 140px; min-height:140px; max-height:none; overflow:auto; gap:12px; }
+.robot-interface .reception-welcome { background:#1b2029; padding:17px; color:#b9bfc8; font-size:14px; line-height:1.8; }
+.robot-interface .reception-turn { background:#1e242d; border-color:#303844; font-size:14px; line-height:1.7; }.robot-interface .reception-turn.user { background:#d9ecb0; border-color:#d9ecb0; color:#202917; }.robot-interface .reception-turn.staff { background:#342d21; border-color:#6f5f3f; }
+.robot-interface .reception-voice { flex-shrink:0; }.robot-interface .reception-voice>input { width:145px; background:#1b2028; color:#eee; border-color:#3a434f; font-size:12px; }.robot-interface .reception-voice label { font-size:12px; }
+.robot-interface .reception-hint { color:#a0a8b3; font-size:11px; line-height:1.7; }.robot-interface .reception-hint summary { cursor:pointer; }.robot-interface .reception-hint[open] { display:grid; gap:8px; }.robot-interface .reception-hint label { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }.robot-interface select { max-width:100%; padding:7px; color:#eee; background:#1e242c; border:1px solid #404954; border-radius:8px; }
+.robot-interface .reception-compose { flex-shrink:0; }.robot-interface .reception-compose input { min-height:48px; border-color:#3c4552; background:#0c1016; color:#f5f3ec; font-size:14px; }.robot-interface .reception-compose button { background:#d9ecb0; color:#202917; padding:10px 17px; font-size:14px; }
+.robot-interface .reception-error { padding:12px; color:#ffd0c3; background:#382522; border-radius:10px; }
+.robot-interface button:focus-visible,.robot-interface input:focus-visible,.robot-interface summary:focus-visible { outline:2px solid #d9ecb0; outline-offset:4px; }
+@keyframes robot-blink { 0%,43%,47%,100% { transform:scaleY(1); } 45% { transform:scaleY(.08); } }
+@keyframes robot-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+@keyframes robot-twinkle { 0%,100% { opacity:.8; transform:scale(.9); } 50% { opacity:1; transform:scale(1.15); } }
+@keyframes robot-listen { 0%,100% { transform:scale(1); } 50% { transform:scale(1.025); } }
+@keyframes robot-dot { 0%,80%,100% { opacity:.25; } 40% { opacity:1; } }
+@keyframes robot-talk { to { transform:scaleY(.4); } }
+@media (max-width:850px) {
+  .robot-interface.chat-open .robot-stage { grid-template-columns:minmax(0,1fr); position:relative; }
+  .robot-interface.chat-open .reception-chat { position:absolute; inset:0 16px 12px; margin:0; z-index:2; background:#11141afc; }
+  .robot-interface .reception-header { padding:18px 20px; gap:12px; }.kiosk-face-mode>header { right:20px; }
+  .robot-interface .robot-home { margin-right:94px; }.robot-connection { display:none; }
+  .robot-face-stage { padding:0 16px 24px; }.robot-footer { padding:10px 20px; }
+}
+@media (max-width:480px) {
+  .robot-interface .robot-wordmark strong { font-size:15px; }.robot-interface .robot-wordmark>span { font-size:6px; }.robot-interface .robot-home { font-size:10px; padding:5px 8px; }
+  .robot-face { max-height:42dvh; }.robot-greeting { margin-bottom:20px; }.robot-primary-actions { flex-direction:column; gap:10px; width:100%; }.robot-primary-actions>button { width:min(100%,290px); }
+  .robot-footer>span { max-width:140px; font-size:10px; }.robot-footer-divider { display:none; }.robot-footer>span>span+span { display:none; }
+  .robot-footer>div { flex-direction:column; align-items:flex-start; gap:4px; font-size:10px; }.robot-ai-scope { font-size:10px; }
+  .robot-interface .reception-chat { padding:16px; }.robot-interface .reception-voice { gap:6px; }
+}
+@media (max-height:600px) and (min-width:851px) {
+  .robot-interface .reception-header { min-height:64px; padding-top:12px; padding-bottom:12px; }.kiosk-face-mode>header { top:16px; }
+  .robot-face { max-height:42dvh; }.robot-greeting { margin:0 0 12px; }.robot-greeting h1 { font-size:22px; }.robot-greeting p { margin-top:4px; }.robot-eyebrow { margin-bottom:4px; }.robot-face-stage { padding-bottom:12px; }.robot-footer { min-height:60px; }
+}
+@media (prefers-reduced-motion:reduce) { .robot-face * { animation:none!important; }.robot-interface * { scroll-behavior:auto!important; } }

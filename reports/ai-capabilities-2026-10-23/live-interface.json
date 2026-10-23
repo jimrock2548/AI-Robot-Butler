@@ -1,0 +1,78 @@
+{
+  "at": "2026-10-23T09:02:12.562Z",
+  "status": {
+    "textReady": true,
+    "rulesReady": true,
+    "modelReady": true,
+    "modelConfigured": true,
+    "readiness": "model-and-rules",
+    "navigationOnly": true,
+    "voiceReady": false,
+    "voiceMode": "browser",
+    "webReady": true,
+    "simulated": false,
+    "mockConnected": false,
+    "commandsEnabled": true
+  },
+  "robot": {
+    "linkStatus": "dead",
+    "simulated": false,
+    "jobBefore": null,
+    "jobAfter": null
+  },
+  "motionDispatched": false,
+  "results": [
+    {
+      "content": "สวัสดี",
+      "httpStatus": 200,
+      "route": "database",
+      "answer": "สวัสดีครับ อยากให้พาไปจุดไหน หรืออยากทราบตำแหน่งห้องไหนครับ?",
+      "errors": []
+    },
+    {
+      "content": "ช่วยเขียนคำอวยพรวันเกิดสั้น ๆ ให้เพื่อนหน่อย",
+      "httpStatus": 200,
+      "route": "database",
+      "answer": "ยังไม่เข้าใจคำขอครับ กรุณาบอกชื่อจุดหมาย หรือถาม “มีจุดหมายอะไรบ้าง” หากต้องการความช่วยเหลือสามารถแจ้งเจ้าหน้าที่ในแชตนี้ได้",
+      "errors": []
+    },
+    {
+      "content": "ข่าวล่าสุด NASA",
+      "httpStatus": 200,
+      "route": "database",
+      "answer": "ยังไม่เข้าใจคำขอครับ กรุณาบอกชื่อจุดหมาย หรือถาม “มีจุดหมายอะไรบ้าง” หากต้องการความช่วยเหลือสามารถแจ้งเจ้าหน้าที่ในแชตนี้ได้",
+      "errors": []
+    }
+  ],
+  "commands": [
+    {
+      "transcript": "หยุด",
+      "status": 200,
+      "result": {
+        "replyText": "ทดสอบคำสั่งหยุด — ไม่ส่งคำสั่งให้หุ่น",
+        "intent": "cancel_job",
+        "confidence": 1,
+        "rejected": false,
+        "dryRun": true,
+        "decisionSource": "rules",
+        "needsClarification": false
+      }
+    },
+    {
+      "transcript": "ช่วยพาไปหน้าประตูห้องหน่อย",
+      "status": 503,
+      "result": {
+        "error": {
+          "code": "robot_map_unavailable",
+          "message": "อ่านแผนที่จากหุ่นไม่ได้ กรุณาตรวจการเชื่อมต่อหุ่นก่อนสั่งนำทาง"
+        }
+      }
+    }
+  ],
+  "browser": {
+    "passed": true,
+    "answer": "สวัสดีครับ อยากให้พาไปจุดไหน หรืออยากทราบตำแหน่งห้องไหนครับ?",
+    "apiStubs": false,
+    "errors": []
+  }
+}

@@ -3,6 +3,7 @@ dist/
 .next/
 .next-offline-demo*/
 .next-ai*/
+.next-face*/
 out/
 *.log
 .env

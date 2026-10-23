@@ -5,6 +5,7 @@ import type { AiConversation, AiRejection } from '@hermes/shared';
 import { api } from '../../../lib/api';
 import { fmtDateTime } from '../../../lib/format';
 import { ReceptionMonitor } from '../../../components/ReceptionMonitor';
+import { AiScopeSettings } from '../../../components/AiScopeSettings';
 
 /**
  * AI (Phase 2 — Qwen บน Jetson) — spec §8.7
@@ -32,6 +33,7 @@ export default function AiPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <AiScopeSettings modelReady={status?.modelReady ?? null} />
       <ReceptionMonitor />
       <div>
         <h1 className="font-sans font-semibold text-ink leading-heading">AI local · สถานะและประวัติ</h1>
