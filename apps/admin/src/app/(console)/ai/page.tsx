@@ -56,7 +56,7 @@ export default function AiPage() {
         </p>
       </section>
 
-      <a href="http://localhost:3001/ai" target="_blank" rel="noopener noreferrer" className="btn btn-primary self-start">เปิดเว็บผู้ช่วย AI ↗</a>
+      <a href={process.env.NEXT_PUBLIC_KIOSK_AI_URL ?? 'http://localhost:3001/ai'} target="_blank" rel="noopener noreferrer" className="btn btn-primary self-start">เปิดเว็บผู้ช่วย AI ↗</a>
 
       <section className="bg-surface border border-line rounded-[3px] p-4">
         <h2 className="text-sm font-semibold text-ink-2 mb-3">

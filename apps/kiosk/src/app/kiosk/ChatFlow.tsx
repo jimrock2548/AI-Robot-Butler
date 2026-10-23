@@ -23,7 +23,7 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
   const credentialsRef = useRef<typeof credentials>(null);
   const seenSpeech = useRef(new Set<string>());
   const bottom = useRef<HTMLDivElement | null>(null);
-  const voice = useBrowserVoice(lang, text => { setInput(text); setChatOpen(true); });
+  const voice = useBrowserVoice(lang, text => { setChatOpen(true); void sendQuestion(text); });
   const t = (th: string, en: string) => lang === 'th' ? th : en;
   const apply = (next: ReceptionSession) => setSession(old => !old || next.id !== old.id || next.revision >= old.revision ? next : old);
   const create = async () => {
@@ -65,8 +65,8 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
     if (autoSpeak) voice.speak(latest.content);
   }, [session, autoSpeak]);
   useEffect(() => { if (session?.mode === 'staff') { controller.current?.abort(); setChatOpen(true); } }, [session?.mode]);
-  const send = async (event: React.FormEvent) => {
-    event.preventDefault(); const question = input.trim();
+  const sendQuestion = async (text: string) => {
+    const question = text.trim();
     if (!question || !credentials || busy || stopping) return;
     voice.stop(); voice.stopSpeaking(); setBusy(true); setInput(''); setError('');
     const request = new AbortController(); controller.current = request;
@@ -106,7 +106,7 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
         </button>
         <div className="robot-greeting"><span className="robot-eyebrow">{mood === 'idle' ? 'NICE TO SEE YOU' : mood.toUpperCase()}</span><h1 role="status">{faceStatus}</h1><p>{voice.notice || t('กดพูด หรือพิมพ์จุดหมาย แล้วให้ผมช่วยนำทาง', 'Speak or type your destination. I will help you get there.')}</p></div>
         <div className="robot-primary-actions">
-          <button type="button" className={`robot-talk ${voice.listening ? 'is-listening' : ''}`} disabled={!voice.supported || busy || stopping} onClick={() => voice.listening ? voice.stop() : voice.start(false)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" /></svg>{voice.listening ? t('หยุดฟัง', 'Stop listening') : t('พูดกับเฮอร์มีส', 'Talk to Hermes')}</button>
+          <button type="button" className={`robot-talk ${voice.listening ? 'is-listening' : ''}`} disabled={!voice.supported || !credentials || busy || stopping} onClick={() => voice.listening ? voice.stop() : voice.start(false)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3m-4 0h8" /></svg>{voice.listening ? t('หยุดฟัง', 'Stop listening') : t('พูดกับเฮอร์มีส', 'Talk to Hermes')}</button>
           <button type="button" className="reception-button robot-open-chat" aria-expanded={chatOpen} aria-controls="robot-conversation" onClick={() => setChatOpen(open => !open)}>{chatOpen ? t('ดูใบหน้าเต็มจอ', 'Show full face') : t('พิมพ์ข้อความ / จุดหมาย', 'Type / destinations')} <span aria-hidden="true">↗</span></button>
         </div>
       </section>
@@ -126,22 +126,22 @@ export function ChatFlow({ lang, onClose, onJob }: { lang: Lang; onClose: () => 
         </div>
         {error && <p role="alert" className="reception-error">{error}</p>}
         <div className="reception-voice">
-          <button className="reception-button" disabled={!voice.supported || busy} onClick={() => voice.listening ? voice.stop() : voice.start(false)}>{voice.listening ? t('ปิดไมค์', 'Stop listening') : t('กดพูด', 'Speak')}</button>
-          <button className="reception-button" disabled={!voice.supported || busy || !voice.wakePhrase.trim()} onClick={() => voice.start(true)}>{t('ฟังคำเรียก', 'Listen for wake word')}</button>
+          <button className="reception-button" disabled={!voice.supported || !credentials || busy || stopping} onClick={() => voice.listening ? voice.stop() : voice.start(false)}>{voice.listening ? t('ปิดไมค์', 'Stop listening') : t('กดพูด', 'Speak')}</button>
+          <button className="reception-button" disabled={!voice.supported || !credentials || busy || stopping || !voice.wakePhrase.trim()} onClick={() => voice.start(true)}>{t('ฟังคำเรียก', 'Listen for wake word')}</button>
           <input aria-label="คำเรียกหุ่น" maxLength={50} value={voice.wakePhrase} onChange={e => { voice.stop(); voice.setWakePhrase(e.target.value); }} />
           <label><input type="checkbox" checked={autoSpeak} onChange={e => { setAutoSpeak(e.target.checked); if (!e.target.checked) voice.stopSpeaking(); }} />{t('อ่านคำตอบ', 'Speak replies')}</label>
           {voice.speaking && <button className="reception-button" onClick={voice.stopSpeaking}>{t('หยุดเสียง', 'Stop speaking')}</button>}
         </div>
-        <p className="reception-hint" role="status">{voice.notice || t('รับเสียงแล้วให้ตรวจข้อความก่อนกดส่ง', 'Review recognized text before sending.')}</p>
+        <p className="reception-hint" role="status">{voice.notice || t('พูดจบแล้วระบบจะส่งข้อความอัตโนมัติ', 'Your message is sent automatically when you finish speaking.')}</p>
         <details className="reception-hint">
           <summary>{t('ตั้งค่าและตรวจสอบเสียงบนอุปกรณ์นี้', 'Voice settings on this device')}</summary>
           <p>{t('รับเสียง', 'Recognition')}: {voice.supported ? 'รองรับ' : 'ไม่รองรับ'} · {voice.secure ? 'HTTPS / localhost พร้อม' : 'ต้องเปิด HTTPS / localhost เพื่อใช้ไมค์'}</p>
           <label>{t('เสียงพูด', 'Voice')} <select aria-label="เลือกเสียงพูด" value={voice.voiceUri} onChange={e => voice.setVoiceUri(e.target.value)}><option value="">{t('อัตโนมัติตามภาษา', 'Automatic')}</option>{voice.voices.map(v => <option key={v.uri} value={v.uri}>{v.name} · {v.lang}</option>)}</select></label>
           <label>{t('อัตราพูด', 'Speech rate')} <input aria-label="อัตราพูด" type="range" min="0.6" max="1.4" step="0.1" value={voice.rate} onChange={e => voice.setRate(Number(e.target.value))} />{voice.rate.toFixed(1)}×</label>
           <button className="reception-button" type="button" onClick={() => voice.speak(t('สวัสดีครับ ฉันคือเฮอร์มีส ผู้ช่วยนำทางของคุณ', 'Hello, I am Hermes, your navigation assistant.'))}>{t('ทดสอบลำโพง', 'Test speaker')}</button>
-          <p>{t('ทดสอบไมค์ด้วยปุ่มกดพูดหรือฟังคำเรียก ข้อความจะปรากฏให้ตรวจสอบก่อนกดส่ง', 'Use Speak or Listen for wake word to test the microphone. Review the transcript before sending.')}</p>
+          <p>{t('ทดสอบไมค์ด้วยปุ่มกดพูดหรือฟังคำเรียก เมื่อพูดจบข้อความจะถูกส่งอัตโนมัติ', 'Use Speak or Listen for wake word to test the microphone. The message is sent automatically when you finish speaking.')}</p>
         </details>
-        <form className="reception-compose" onSubmit={e => void send(e)}>
+        <form className="reception-compose" onSubmit={e => { e.preventDefault(); void sendQuestion(input); }}>
           <input aria-label={t('ข้อความหรือคำสั่งนำทาง', 'Message or navigation request')} maxLength={500} disabled={!credentials || busy || stopping} value={input} onChange={e => setInput(e.target.value)} placeholder={session?.mode === 'staff' ? t('พิมพ์คุยกับเจ้าหน้าที่…', 'Message staff…') : t('เช่น ช่วยพาไปห้องประชุมหน่อย', 'e.g. Please take me to the meeting room')} />
           <button disabled={!credentials || !input.trim() || busy || stopping}>{busy ? '…' : t('ส่ง', 'Send')}</button>
           {busy && <button type="button" onClick={() => controller.current?.abort()}>{t('ยกเลิก', 'Cancel')}</button>}

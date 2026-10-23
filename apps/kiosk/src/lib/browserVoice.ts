@@ -48,7 +48,7 @@ export function useBrowserVoice(lang: 'th' | 'en', onText: (text: string) => voi
     const r = new Constructor(); recognition.current = r;
     r.lang = lang === 'th' ? 'th-TH' : 'en-US'; r.continuous = wakeMode; r.interimResults = false;
     const gate = new WakeGate(wakePhrase);
-    setNotice(wakeMode ? `เรียก “${wakePhrase}” ก่อนพูดคำสั่ง` : 'พูดคำสั่ง แล้วตรวจข้อความก่อนกดส่ง');
+    setNotice(wakeMode ? `เรียก “${wakePhrase}” ก่อนพูดคำสั่ง` : 'พูดคำสั่ง ระบบจะส่งเมื่อพูดจบ');
     r.onresult = event => {
       if (recognition.current !== r || speakingRef.current) return;
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -60,7 +60,7 @@ export function useBrowserVoice(lang: 'th' | 'en', onText: (text: string) => voi
           if (result.command === null) { setNotice(`ยังไม่รับคำสั่ง กรุณาเรียก “${wakePhrase}” ก่อน`); continue; }
           text = result.command;
         }
-        if (text) { callback.current(text.slice(0, 500)); setNotice('รับเสียงแล้ว ตรวจข้อความและกดส่ง'); r.abort(); break; }
+        if (text) { stop(); setNotice('รับเสียงแล้ว กำลังส่งข้อความ'); callback.current(text.slice(0, 500)); break; }
       }
     };
     r.onerror = e => { if (recognition.current !== r) return; setListening(false); if (e.error !== 'aborted') setNotice(`รับเสียงไม่ได้ (${e.error}) ตรวจสิทธิ์ไมค์และอินเทอร์เน็ต หรือใช้การพิมพ์`); };

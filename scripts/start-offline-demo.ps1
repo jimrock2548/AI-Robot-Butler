@@ -17,6 +17,7 @@ $env:CORS_ORIGIN = 'http://localhost:3010'
 $env:KIOSK_TOKEN = 'offline-demo-device-token'
 $env:API_URL = 'http://localhost:4010'
 $env:NEXT_PUBLIC_API_URL = 'http://localhost:4010'
+$env:NEXT_PUBLIC_KIOSK_AI_URL = 'http://localhost:3011/ai'
 $env:ADMIN_DIST_DIR = '.next-offline-demo'
 $env:KIOSK_DIST_DIR = '.next-offline-demo'
 switch ($Service) {
