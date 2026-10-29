@@ -5,7 +5,7 @@ import { hermes } from '../hermes/driver';
 import { getWorld } from '../db/memory';
 import { getLiveMap } from '../services/liveMapService';
 import { applySpeed, applyOperatingMode, readControlSettings, storeArchive, captureMap, archiveBytes, activateMap,
-  confirmPose, writeWall, configureStandby, returnToStandby, listMapArchives, requireIdleRobot, startNewMap, verifyNewMapDock } from '../services/robotControlService';
+  confirmPose, writeWall, configureStandby, returnToStandby, listMapArchives, requireIdleRobot, startNewMap, verifyNewMapDock, readArchiveProtection, deleteMapArchive } from '../services/robotControlService';
 import { withMaintenance } from '../services/robotActivity';
 import { ApiError } from '../errors';
 
@@ -30,6 +30,16 @@ robotSettingsRouter.put('/operating-mode', requireRole('operator', 'admin'), asy
 });
 robotSettingsRouter.get('/map-archives', async (_req, res, next) => {
   try { res.json(await listMapArchives()); } catch (e) { next(e); }
+});
+robotSettingsRouter.get('/map-archives/protection', async (_req, res, next) => {
+  try { res.setHeader('Cache-Control', 'no-store'); res.json(await readArchiveProtection()); } catch (e) { next(e); }
+});
+robotSettingsRouter.delete('/map-archives/:id', requireRole('admin'), async (req, res, next) => {
+  try {
+    const item = await deleteMapArchive(uuid.parse(req.params.id));
+    audit(req.user!.id, 'map.archive.delete', { id: item.id, name: item.name, sha256: item.sha256 }, req.ip);
+    res.status(204).end();
+  } catch (e) { next(e); }
 });
 robotSettingsRouter.post('/map/clear', requireRole('admin'), async (req, res, next) => {
   try {

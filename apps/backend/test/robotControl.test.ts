@@ -42,6 +42,7 @@ globalThis.fetch = (async (input, init) => {
   if (path.endsWith('/speed')) return Response.json({ vx: 0, vy: 0 });
   if (path.endsWith('/runtime')) return Response.json(10);
   if (path.endsWith('/actions') && method === 'POST') { actions++; return Response.json({ action_id: actions }); }
+  if (path.endsWith('/actions/:current') && method === 'DELETE') return new Response(null, { status: 204 });
   if (path.includes('/actions/') && method === 'GET') return Response.json({ action_id: actions, state: { status: externalBusy ? 1 : 4, result: 0 } });
   throw new Error('Unexpected test request: ' + method + ' ' + path);
 }) as typeof fetch;
@@ -51,7 +52,7 @@ const map: LiveRobotMap = { x: -2, y: -2, width: 10, height: 10, resolution: 1, 
   capturedAt: new Date().toISOString(), pois: [{ id: poiId, pose: { x: 1, y: 2, yaw: 0 }, metadata: { display_name: 'จุดประจำ' } }] };
 HermesClient.prototype.inspectMap = async () => {
   if (unreadableMapReads > 0) { unreadableMapReads--; throw new Error('Grid replacement in progress'); }
-  return { ...map, mappingEnabled: mapping, walls, capturedAt: new Date().toISOString() };
+  return { ...map, mappingEnabled: mapping, walls, capturedAt: new Date(Date.now()).toISOString() };
 };
 const { initWorld, getWorld } = await import('../src/db/memory');
 const { createApp } = await import('../src/app');
@@ -63,6 +64,8 @@ const { acquireLock } = await import('../src/services/lockService');
 const { hermes, pollHermes } = await import('../src/hermes/driver');
 const { getDocument, putDocument } = await import('../src/services/documentStore');
 const { getLiveMap, invalidateLiveMap } = await import('../src/services/liveMapService');
+const { pendingStandbyReturn, cancelPendingStandbyReturn } = await import('../src/services/standbyReturnSchedule');
+const { handleRobotAiCommand } = await import('../src/services/robotAiService');
 
 test('real-device control contracts: limits, maps, localization, walls, standby and permissions', async t => {
   await initWorld({ demoMap: false }); await control.initializeRobotControl();
@@ -154,17 +157,65 @@ test('real-device control contracts: limits, maps, localization, walls, standby 
       await control.applyOperatingMode('normal'); assert.equal(mapping, false); assert.equal(actions, 0);
     });
     await t.test('standby returns once after arrival, never loops, and rejects a changed map', async () => {
+      const realNow = Date.now; let clock = realNow(); Date.now = () => clock;
+      try {
       await control.configureStandby({ poiId, returnPolicy: 'after_job' });
       assert.equal(actions, 0, 'enabling the policy must not move immediately');
       w.sim.lastTelemetryAt = Date.now();
       await createJob('USER', 'operator', { id: w.users[0].id, name: 'test' }, { target: { code: 'USER', nameTh: 'user destination', x: 2, y: 2, headingDeg: 0, isDock: false, isPublic: false } });
       await pollHermes(); await control.maybeReturnToStandby();
+      assert.equal(actions, 1, 'arrival must not return immediately');
+      clock += 4999; w.sim.lastTelemetryAt = clock; await control.maybeReturnToStandby(); assert.equal(actions, 1);
+      clock++; w.sim.lastTelemetryAt = clock; await control.maybeReturnToStandby();
       assert.equal(actions, 2); assert.equal(w.activeJob()?.source, 'auto');
       assert.equal(w.activeJob()?.destPoiCode, 'STANDBY:' + poiId);
       await pollHermes(); await control.maybeReturnToStandby(); assert.equal(actions, 2);
       map.cellsBase64 = Buffer.alloc(100, 126).toString('base64');
       await assert.rejects(control.returnToStandby({ id: 1, name: 'test' }), /แผนที่เปลี่ยน/);
       assert.equal(actions, 2);
+      } finally { Date.now = realNow; w.sim.lastTelemetryAt = Date.now(); cancelPendingStandbyReturn(); }
+    });
+    await t.test('stop, disconnection and manual takeover cancel the waiting return permanently', async () => {
+      const realNow = Date.now; let clock = realNow(); Date.now = () => clock;
+      const baseActions = actions;
+      const arrive = async () => {
+        w.sim.lastTelemetryAt = clock;
+        await createJob('USER', 'operator', { id: w.users[0].id, name: 'test' }, { target: { code: 'USER', nameTh: 'user', x: 2, y: 2, headingDeg: 0, isDock: false, isPublic: false } });
+        await pollHermes(); assert.ok(pendingStandbyReturn());
+      };
+      try {
+        await control.configureStandby({ poiId, returnPolicy: 'after_job' });
+        await arrive();
+        await handleRobotAiCommand({ transcript: 'หยุด', dryRun: false }, { id: null, name: 'visitor' });
+        assert.equal(pendingStandbyReturn(), null);
+        clock += 6000; w.sim.lastTelemetryAt = clock; await control.maybeReturnToStandby(); assert.equal(actions, baseActions + 1);
+        await arrive(); w.sim.lastTelemetryAt = clock - 6000;
+        await control.maybeReturnToStandby(); assert.equal(pendingStandbyReturn(), null);
+        clock += 6000; w.sim.lastTelemetryAt = clock; await control.maybeReturnToStandby(); assert.equal(actions, baseActions + 2);
+        await arrive(); acquireLock(w.users[0], 'manual'); assert.equal(pendingStandbyReturn(), null);
+        w.lock = null; w.sim.mode = 'idle'; clock += 6000; w.sim.lastTelemetryAt = clock;
+        await control.maybeReturnToStandby(); assert.equal(actions, baseActions + 3);
+        await arrive(); clock += 5000; w.sim.lastTelemetryAt = clock;
+        await control.maybeReturnToStandby(); assert.equal(w.activeJob()?.source, 'auto');
+        const stopped = await handleRobotAiCommand({ transcript: 'หยุด', dryRun: false }, { id: null, name: 'visitor' });
+        assert.equal(stopped.rejected, false); assert.equal(w.activeJob(), undefined);
+        clock += 6000; w.sim.lastTelemetryAt = clock;
+        await control.maybeReturnToStandby(); assert.equal(actions, baseActions + 5, 'stopped standby return must never restart');
+        await arrive(); clock += 5000; w.sim.lastTelemetryAt = clock;
+        const inspect = hermes!.inspectMap;
+        let releaseRead!: () => void, startedRead!: () => void;
+        const blockedRead = new Promise<void>(resolve => { releaseRead = resolve; });
+        const reading = new Promise<void>(resolve => { startedRead = resolve; });
+        hermes!.inspectMap = async () => { startedRead(); await blockedRead; return inspect.call(hermes); };
+        try {
+          const returning = control.maybeReturnToStandby();
+          await reading;
+          await handleRobotAiCommand({ transcript: 'หยุด', dryRun: false }, { id: null, name: 'visitor' });
+          releaseRead(); await returning;
+          assert.equal(actions, baseActions + 6, 'stop during map verification must prevent delayed dispatch');
+        } finally { releaseRead(); hermes!.inspectMap = inspect; }
+        await control.configureStandby({ poiId, returnPolicy: 'manual' });
+      } finally { cancelPendingStandbyReturn(); Date.now = realNow; w.sim.lastTelemetryAt = Date.now(); }
     });
     await t.test('unauthenticated writes and invalid archives cannot reach robot mutations', async () => {
       const count = calls.length;

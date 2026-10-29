@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-29T06:22:25.147Z",
+  "passed": true,
+  "gestureRestrictionSimulated": true,
+  "realIPadAudioTest": false,
+  "backendRequests": 0,
+  "robotRequests": 0,
+  "checks": [
+    "Silent WebKit block times out without leaving the face stuck speaking",
+    "Real click path invokes speech synchronously and retries the pending AI answer",
+    "Subsequent complete answers auto-read once across conversation polling",
+    "Automatic reading is on by default and user can disable it",
+    "Unavailable language produces an actionable Thai voice error",
+    "Explicit not-allowed error asks for a user gesture and keeps retry available",
+    "Accepted navigation keeps chat mounted and reads acknowledgement once on the escort screen",
+    "Confirmed arrival is announced once and the waiting-return stop button is visible",
+    "After five seconds arrival automatically returns to the same AI conversation without repeating the acknowledgement"
+  ],
+  "errors": []
+}

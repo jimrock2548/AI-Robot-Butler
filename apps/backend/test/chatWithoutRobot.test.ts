@@ -7,6 +7,7 @@ const { config } = await import('../src/config');
 const { streamKioskChat } = await import('../src/services/chatService');
 const { initWorld, getWorld } = await import('../src/db/memory');
 const { handleRobotAiCommand } = await import('../src/services/robotAiService');
+const { hermes } = await import('../src/hermes/driver');
 Object.assign(config.ai, { navigationOnly: false, mode: 'local' });
 
 test('general chat and web answers do not read an offline hardware map or dispatch motion', async () => {
@@ -33,10 +34,13 @@ test('general chat and web answers do not read an offline hardware map or dispat
 
 test('navigation preview reports an unavailable robot map as 503 and creates no job', async () => {
   const original = globalThis.fetch;
+  const originalInspect = hermes!.inspectMap;
+  // The SDK captures fetch at construction; replace its map reader to avoid touching a connected robot.
+  hermes!.inspectMap = async () => { throw new Error('Robot unavailable'); };
   globalThis.fetch = async () => { throw new Error('Robot unavailable'); };
   try {
     await assert.rejects(handleRobotAiCommand({ transcript: 'พาไปหน้าประตูห้อง', lang: 'th', dryRun: true }, { id: 1, name: 'test' }),
       (error: any) => error.status === 503 && error.code === 'robot_map_unavailable');
     assert.equal(getWorld().jobs.length, 0);
-  } finally { globalThis.fetch = original; }
+  } finally { globalThis.fetch = original; hermes!.inspectMap = originalInspect; }
 });

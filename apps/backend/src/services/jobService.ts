@@ -7,6 +7,7 @@ import { abortHermesJob, emergencyStopHermes, hermes, startHermesJob } from '../
 import { persistWorld } from '../db/postgres';
 import { validateLiveNavigation } from './navigationPolicy';
 import { assertRobotAvailable, setDispatching } from './robotActivity';
+import { cancelPendingStandbyReturn } from './standbyReturnSchedule';
 
 /**
  * งานนำทาง — หนึ่ง job ต่อหนึ่งเวลา (spec §6.2 ข้อ 4)
@@ -41,6 +42,7 @@ export async function createJob(
   assertRobotAvailable();
   const w = getWorld();
   if (jobCommandPending) throw new ApiError(409, 'job_in_progress', 'กำลังรอหุ่นยนต์ยืนยันคำสั่งก่อนหน้า');
+  if (!(source === 'auto' && destPoiCode.startsWith('STANDBY:'))) cancelPendingStandbyReturn();
   const existing = w.activeJob();
   if (existing) {
     throw new ApiError(409, 'job_in_progress', 'มีงานนำทางกำลังทำงานอยู่แล้ว', { job: jobSummary(existing) });
@@ -144,6 +146,7 @@ export async function cancelJob(
 
 /** E-Stop — ข้ามทุกกฎ: ไม่ต้องถือ lock, ยกเลิก job + ปลด lock ทันที (spec §6.2 ข้อ 3) */
 export async function estop(user: UserRow, ip?: string): Promise<void> {
+  cancelPendingStandbyReturn();
   if (hermes && config.robot.readOnly) throw new ApiError(403, 'robot_read_only', 'โหมดอ่านอย่างเดียว — ใช้ปุ่มหยุดฉุกเฉินบนตัวหุ่น');
   const w = getWorld();
   let robotError: unknown = null;

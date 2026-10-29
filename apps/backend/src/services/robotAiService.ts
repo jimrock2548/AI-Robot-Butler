@@ -12,6 +12,7 @@ import { analyzeRobotLanguage, matchRobotDestinations, readPoiAliases } from './
 import { classifyRobotTranscript } from './robotIntent';
 import { navigationScopeReply } from './navigationScope';
 import { readAiSettings } from './aiSettings';
+import { cancelPendingStandbyReturn } from './standbyReturnSchedule';
 
 const inputSchema = z.object({ transcript: z.string().trim().min(1).max(500), lang: z.enum(['th', 'en']).default('th'), dryRun: z.boolean().default(false) });
 export interface RobotAiResult {
@@ -67,11 +68,14 @@ export async function handleRobotAiCommand(raw: unknown, requester: JobRequester
   const scopeReply = readAiSettings().navigationOnly ? navigationScopeReply(transcript, lang) : null;
   if (scopeReply) return finish({ intent: 'unknown', confidence: 1, poiCode: null, decisionSource: 'rules' }, scopeReply, true);
   if (language.stop) {
+    if (!dryRun) cancelPendingStandbyReturn();
     const decision: AiDecision = { intent: 'cancel_job', confidence: 1, poiCode: null, speechAct: 'request', decisionSource: 'rules' };
     if (dryRun) return finish(decision, t('ทดสอบคำสั่งหยุด — ไม่ส่งคำสั่งให้หุ่น', 'Stop preview only; no command sent.'));
     commandEpoch[channel]++;
     const w = getWorld();
-    if (channel === 'kiosk' && w.activeJob() && !['kiosk_touch', 'kiosk_voice'].includes(w.activeJob()!.source)) {
+    const active = w.activeJob();
+    const automaticStandby = active?.source === 'auto' && active.destPoiCode.startsWith('STANDBY:');
+    if (channel === 'kiosk' && active && !automaticStandby && !['kiosk_touch', 'kiosk_voice'].includes(active.source)) {
       return finish(decision, 'หุ่นกำลังทำงานของเจ้าหน้าที่ จอผู้ช่วยหยุดงานนี้ไม่ได้', true);
     }
     if (w.activeJob()) await cancelJob(w.activeJob()!.id, { id: requester.id, displayName: requester.name ?? 'ผู้ควบคุม AI' }, 'หยุดจาก AI local', requester.ip);
@@ -140,7 +144,9 @@ export async function handleRobotAiCommand(raw: unknown, requester: JobRequester
         code: target.id, nameTh: target.name, x: target.x, y: target.y, headingDeg: target.yaw * 180 / Math.PI,
         isDock: decision.intent === 'return_to_dock', isPublic: false,
       }, allowDispatch: () => epoch === commandEpoch[channel] && !signal?.aborted && getWorld().lock?.mode !== 'manual' });
-      return finish(decision, `หุ่นยืนยันคำสั่งไป${target.name}แล้ว`, false, { job, target });
+      return finish(decision, decision.intent === 'navigate_to'
+        ? t('ได้ครับ ตามผมมาได้เลยครับ', 'Of course. Please follow me.')
+        : t(`หุ่นยืนยันคำสั่งไป${target.name}แล้ว`, `The robot has accepted the command to go to ${target.name}.`), false, { job, target });
     } catch (error) {
       if (error instanceof ApiError) return finish(decision, error.message, true, { target });
       throw error;

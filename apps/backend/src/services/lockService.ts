@@ -1,5 +1,6 @@
 import { config } from '../config';
 import { ApiError } from '../errors';
+import { cancelPendingStandbyReturn } from './standbyReturnSchedule';
 import { getWorld, type UserRow } from '../db/memory';
 import { jobSummary, requireRobotLink } from './robotService';
 import { assertRobotAvailable, isDispatching } from './robotActivity';
@@ -53,6 +54,7 @@ export function acquireLock(user: UserRow, mode: 'manual', ip?: string): void {
   };
 
   if (mode === 'manual') {
+    cancelPendingStandbyReturn();
     w.sim.releaseToIdle();
     w.sim.mode = 'manual';
   }

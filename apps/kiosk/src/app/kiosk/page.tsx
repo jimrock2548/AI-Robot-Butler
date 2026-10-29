@@ -26,6 +26,8 @@ const u = (n: number) => `calc(${n} * var(--u))`;
 export default function KioskPage() {
   const [lang, setLang] = useState<Lang>('th');
   const [scene, setScene] = useState<Scene>('idle');
+  const [chatStarted, setChatStarted] = useState(false);
+  useEffect(() => { if (scene === 'voice') setChatStarted(true); }, [scene]);
   const [dests, setDests] = useState<KioskDestination[] | null>(null);
   const [job, setJob] = useState<JobSummary | null>(null);
   const [session, setSession] = useState<KioskSession | null>(null);
@@ -43,7 +45,7 @@ export default function KioskPage() {
   const t = useCallback((th: string, en: string) => (lang === 'th' ? th : en), [lang]);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('chat') === '1') setScene('voice');
+    if (new URLSearchParams(window.location.search).get('chat') === '1') { setChatStarted(true); setScene('voice'); }
     const id = Number(window.sessionStorage.getItem('hermes.kioskJobId'));
     if (!Number.isSafeInteger(id) || id <= 0) return;
     kioskSession(id, 'th').then((restored) => {
@@ -94,6 +96,7 @@ export default function KioskPage() {
         const j = await kioskEscort(d.code, lang);
         window.sessionStorage.setItem('hermes.kioskJobId', String(j.id));
         setJob(j);
+        setChatStarted(true);
         setScene('escort');
       } catch (e) {
         if (!fail(e)) {
@@ -117,7 +120,7 @@ export default function KioskPage() {
       window.sessionStorage.removeItem('hermes.kioskJobId');
       setJob(null);
       setSession(null);
-      setScene('idle');
+      setScene('voice');
       setNotice(t('ยกเลิกแล้ว — ผมพร้อมพาไปอีกครั้ง', 'Cancelled — ready to go again'));
     } catch (e) {
       if (!fail(e)) setError(t('หยุดไม่สำเร็จ ลองอีกครั้ง', 'Could not stop — try again'));
@@ -132,8 +135,14 @@ export default function KioskPage() {
     setSession(null);
     setError(null);
     setNotice(null);
-    setScene('idle');
+    setScene('voice');
   }, []);
+
+  useEffect(() => {
+    if (scene !== 'arrived') return;
+    const timer = window.setTimeout(goHome, 5000);
+    return () => window.clearTimeout(timer);
+  }, [scene, goHome]);
 
   const voiceJob = useCallback((nextJob: JobSummary) => {
     window.sessionStorage.setItem('hermes.kioskJobId', String(nextJob.id));
@@ -264,9 +273,12 @@ export default function KioskPage() {
           <EscortScene t={t} job={job} session={session} onStop={() => void stop()} busy={busy} />
         )}
         {scene === 'arrived' && (
-          <ArrivedScene t={t} destName={job?.destName ?? ''} onHome={goHome} />
+          <ArrivedScene t={t} destName={job?.destName ?? ''} onHome={goHome} onStop={() => void stop()} busy={busy} />
         )}
-        {scene === 'voice' && <ChatFlow lang={lang} onClose={goHome} onJob={voiceJob} />}
+        {chatStarted && <div className="flex-1 min-h-0 flex-col" style={{ display: scene === 'voice' ? 'flex' : 'none' }}>
+          {/* Preserve the conversation/audio while displaying navigation so acknowledgement is not cancelled. */}
+          <ChatFlow lang={lang} onClose={goHome} onJob={voiceJob} allowSpeech={scene === 'voice' || ((scene === 'escort' || scene === 'arrived') && !busy)} arrivalJobId={scene === 'arrived' && job && job.source !== 'auto' && job.destPoiCode !== 'DOCK' && !job.destPoiCode.startsWith('STANDBY:') ? job.id : null} />
+        </div>}
       </main>
     </div>
   );
@@ -508,7 +520,7 @@ function EscortScene({ t, job, session, onStop, busy }: { t: T; job: JobSummary;
   );
 }
 
-function ArrivedScene({ t, destName, onHome }: { t: T; destName: string; onHome: () => void }) {
+function ArrivedScene({ t, destName, onHome, onStop, busy }: { t: T; destName: string; onHome: () => void; onStop: () => void; busy: boolean }) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center">
       <div
@@ -532,8 +544,10 @@ function ArrivedScene({ t, destName, onHome }: { t: T; destName: string; onHome:
         className="bg-navy text-white font-display font-bold rounded active:bg-navy-2"
         style={{ width: '80%', height: u(10), fontSize: u(3.2) }}
       >
-        {t('กลับหน้าแรก', 'Back to home')}
+        {t('กลับไปคุยกับ AI', 'Back to AI chat')}
       </button>
+      <button type="button" className="bg-red text-white rounded px-6 py-3" onClick={onStop} disabled={busy}>{t('หยุด / ยกเลิกกลับจุดประจำ', 'Stop / cancel standby return')}</button>
+      <p className="text-ink-2" style={{ fontSize: u(2) }}>{t('หากเปิดกลับจุดประจำอัตโนมัติ ระบบจะรออย่างน้อย 5 วินาทีหลังถึงจุดหมายก่อนกลับ', 'If automatic standby return is enabled, the robot waits at least 5 seconds after arrival before returning.')}</p>
     </div>
   );
 }

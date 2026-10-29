@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('backend', 'admin', 'kiosk')]
+    [ValidateSet('backend', 'admin', 'kiosk', 'https')]
     [string]$Service = 'backend',
     [switch]$LocalAI,
     [switch]$WithoutAI
@@ -24,6 +24,7 @@ $env:NEXT_PUBLIC_API_URL = 'http://localhost:4000'
 $env:API_URL = 'http://localhost:4000'
 
 switch ($Service) {
+    'https' { node scripts/ipad-https-proxy.mjs }
     'backend' { pnpm --filter @hermes/backend dev }
     'admin' { pnpm --filter @hermes/admin dev }
     'kiosk' { pnpm --filter @hermes/kiosk dev }

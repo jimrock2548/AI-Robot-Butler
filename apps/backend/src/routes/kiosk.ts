@@ -9,6 +9,7 @@ import { getWorld } from '../db/memory';
 import { handleKioskIntent } from '../services/aiService';
 import { streamKioskChat } from '../services/chatService';
 import { config } from '../config';
+import { cancelPendingStandbyReturn } from '../services/standbyReturnSchedule';
 import { readAiSettings } from '../services/aiSettings';
 import { hermes } from '../hermes/driver';
 import { getLiveMap } from '../services/liveMapService';
@@ -228,6 +229,7 @@ kioskRouter.get('/session/:jobId', (req, res, next) => {
 /** POST /api/kiosk/cancel — ผู้มาเยือนกดปุ่มหยุด (RBT-06) */
 kioskRouter.post('/cancel', async (req, res, next) => {
   try {
+    cancelPendingStandbyReturn();
     if (hermes) {
       const result = await handleRobotAiCommand({ transcript: 'หยุด', lang: 'th' }, KIOSK_REQUESTER);
       if (result.rejected) { res.status(409).json({ error: { code: 'cancel_rejected', message: result.replyText } }); return; }

@@ -50,6 +50,7 @@ test('authenticated kiosk chat dispatches a robot POI, GET session never stops m
     assert.equal(response.status, 200);
     const events = (await response.text()).trim().split('\n').map(line => JSON.parse(line));
     const job = events.find(event => event.type === 'done')?.job;
+    assert.equal(events.filter(event => event.type === 'delta').map(event => event.text).join(''), 'ได้ครับ ตามผมมาได้เลยครับ');
     assert.equal(job?.source, 'kiosk_voice'); assert.equal(job?.destPoiCode, poiId);
     assert.equal(mutations.length, 1);
     assert.equal(mutations[0].body.action_name, 'slamtec.agent.actions.MoveToAction');
@@ -65,5 +66,11 @@ test('authenticated kiosk chat dispatches a robot POI, GET session never stops m
     const stopped = await realFetch(base + '/cancel', { method: 'POST', headers, body: '{}' });
     assert.equal(stopped.status, 200); assert.equal(w.activeJob(), undefined);
     assert.equal(mutations[1].method, 'DELETE');
+    map.localizationQuality = 0; w.sim.lastTelemetryAt = Date.now();
+    const blocked = await realFetch(base + '/chat', { method: 'POST', headers, body: JSON.stringify({ lang: 'th', messages: [{ role: 'user', content: 'พาไปหน้าประตู' }] }) });
+    const blockedEvents = (await blocked.text()).trim().split('\n').map(line => JSON.parse(line));
+    assert.ok(!blockedEvents.find(event => event.type === 'done')?.job);
+    assert.ok(!blockedEvents.filter(event => event.type === 'delta').map(event => event.text).join('').includes('ตามผมมา'));
+    assert.equal(mutations.length, 2, 'rejected navigation must not dispatch or promise an escort');
   } finally { server.close(); globalThis.fetch = realFetch; }
 });

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { AiConversation, AiRejection, JobSummary, Lang } from '@hermes/shared';
 import { config } from '../config';
 import { readAiSettings } from './aiSettings';
+import { cancelPendingStandbyReturn } from './standbyReturnSchedule';
 import { ApiError } from '../errors';
 import { getWorld } from '../db/memory';
 import { cancelJob, createJob } from './jobService';
@@ -177,7 +178,7 @@ export async function handleKioskIntent(raw: unknown, classify = classifyTranscr
       const job = await createJob(poi.code, 'kiosk_voice', { id: null, name: 'จอหุ่น (AI)' }, { requirePublic: true });
       recordConversation(transcript, lang, decision, job.id, startedAt);
       return { transcript, intent: decision.intent, rejected: false, job,
-        replyText: t(`กำลังพาไป${poi.nameTh}`, `Taking you to ${poi.nameEn}`) };
+        replyText: t('ได้ครับ ตามผมมาได้เลยครับ', 'Of course. Please follow me.') };
     } catch (error) {
       if (error instanceof ApiError) {
         return deny(error.code, 'ยังเริ่มนำทางไม่ได้ กรุณาลองใหม่หรือแจ้งเจ้าหน้าที่', 'I cannot start navigation. Please try again or ask staff.');
@@ -187,6 +188,7 @@ export async function handleKioskIntent(raw: unknown, classify = classifyTranscr
   }
 
   if (decision.intent === 'cancel_job') {
+    cancelPendingStandbyReturn();
     const active = w.activeJob();
     if (!active || !['kiosk_touch', 'kiosk_voice'].includes(active.source)) {
       return deny('no_kiosk_job', 'ไม่มีงานของจอหุ่นที่หยุดได้', 'There is no kiosk job to stop.');

@@ -4,6 +4,17 @@ import type { Prisma } from '@prisma/client';
 
 const memory = new Map<string, { kind: string; data: unknown }>();
 const writes = new Map<string, Promise<void>>();
+/** One atomic deletion for related documents, serialized with writes to any of their IDs. */
+export async function deleteDocuments(documents: { id: string; kind: string }[]): Promise<void> {
+  if (!documents.length) return;
+  const ids = [...new Set(documents.map(item => item.id))];
+  const pending = Promise.all(ids.map(id => writes.get(id)?.catch(() => {}))).then(async () => {
+    if (config.dbMode === 'pg') await prisma.service_documents.deleteMany({ where: { OR: documents } });
+    else for (const item of documents) if (memory.get(item.id)?.kind === item.kind) memory.delete(item.id);
+  });
+  for (const id of ids) writes.set(id, pending);
+  try { await pending; } finally { for (const id of ids) if (writes.get(id) === pending) writes.delete(id); }
+}
 export async function putDocument<T>(id: string, kind: string, data: T): Promise<void> {
   const value = JSON.parse(JSON.stringify(data)) as Prisma.InputJsonValue;
   const pending = (writes.get(id) ?? Promise.resolve()).catch(() => {}).then(async () => {

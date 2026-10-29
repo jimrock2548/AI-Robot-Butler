@@ -4,13 +4,14 @@ import type { LiveRobotMap, RobotMapArchive, RobotWall } from '@hermes/shared';
 import { hermes, invalidateMotionLimits, setArrivalHandler } from '../hermes/driver';
 import { getWorld } from '../db/memory';
 import { ApiError } from '../errors';
-import { getDocument, listDocuments, putDocument } from './documentStore';
+import { getDocument, listDocuments, putDocument, deleteDocuments } from './documentStore';
 import { getMotionSettings, speedBounds, updateMotionSettings } from './motionSettings';
 import { requireRobotLink, linkStatus } from './robotService';
-import { setLocalizationRequired, withMaintenance, setHardwareIdleCheck, setDockVerificationRequired } from './robotActivity';
+import { setLocalizationRequired, withMaintenance, beginMaintenance, setHardwareIdleCheck, setDockVerificationRequired } from './robotActivity';
 import { invalidateLiveMap } from './liveMapService';
 import { createJob } from './jobService';
 import { config } from '../config';
+import { cancelPendingStandbyReturn, scheduleStandbyReturn, pendingStandbyReturn, isStandbyReturnCurrent, claimStandbyReturn } from './standbyReturnSchedule';
 
 export const speedInput = z.object({ linearMps: z.number().finite().min(speedBounds.minLinearMps).max(speedBounds.maxLinearMps),
   angularRps: z.number().finite().min(speedBounds.minAngularRps).max(speedBounds.maxAngularRps) }).strict();
@@ -21,7 +22,6 @@ export const standbyInput = z.object({ poiId: z.string().uuid().nullable(), retu
   .refine(v => v.returnPolicy === 'manual' || v.poiId !== null, 'กำหนดจุดประจำก่อนเปิดกลับอัตโนมัติ');
 type Binding = { archiveId: string | null; needsLocalization: boolean; dockNeedsVerification?: boolean; resetBackupId?: string };
 type Standby = z.infer<typeof standbyInput> & { mapSignature: string; updatedAt: string };
-let pendingReturn: number | null = null;
 let standbyBusy = false;
 
 export function requireIdleRobot() {
@@ -56,7 +56,7 @@ export async function applySpeed(raw: unknown) {
 }
 export async function applyOperatingMode(mode: 'normal' | 'exploration') {
   return withMaintenance(requireIdleRobot, async () => {
-    pendingReturn = null;
+    cancelPendingStandbyReturn();
     if (mode === 'exploration') await captureMap('สำรองก่อนเปิดสร้างแผนที่', 'backup');
     return hermes!.setOperatingMode(mode);
   });
@@ -71,7 +71,7 @@ export async function startNewMap(raw: unknown, actor: { id: number | null; ip?:
     await archiveBytes(backup.id);
     const binding: Binding = { archiveId: null, needsLocalization: true, dockNeedsVerification: true, resetBackupId: backup.id };
     await putDocument('robot-active-map', 'robot-binding', binding);
-    setLocalizationRequired(true); setDockVerificationRequired(true); pendingReturn = null;
+    setLocalizationRequired(true); setDockVerificationRequired(true); cancelPendingStandbyReturn();
     await putDocument('robot-standby', 'robot-standby', { poiId: null, returnPolicy: 'manual', mapSignature: '', updatedAt: new Date().toISOString() });
     getWorld().addAudit(actor.id, 'robot.map.clear.begin', backup.id, { backupId: backup.id }, actor.ip);
     invalidateLiveMap();
@@ -129,6 +129,24 @@ export async function archiveBytes(id: string) {
   if (bytes.length !== item.byteLength || createHash('sha256').update(bytes).digest('hex') !== item.sha256) throw new ApiError(500, 'map_corrupt', 'ไฟล์แผนที่ไม่ผ่านการตรวจความถูกต้อง');
   return { item, bytes };
 }
+export async function readArchiveProtection() {
+  const binding = await getDocument<Binding>('robot-active-map', 'robot-binding');
+  return { activeArchiveId: binding?.archiveId ?? null,
+    recoveryArchiveId: binding?.resetBackupId && (binding.needsLocalization || binding.dockNeedsVerification) ? binding.resetBackupId : null };
+}
+export async function deleteMapArchive(id: string) {
+  // Share the activation/clear gate, but do not contact hardware: unused files can be removed offline.
+  const release = beginMaintenance(() => {});
+  try {
+    const item = await getDocument<RobotMapArchive>(id, 'robot-map-archive');
+    if (!item) throw new ApiError(404, 'not_found', 'ไม่พบไฟล์แผนที่');
+    const protection = await readArchiveProtection();
+    if (id === protection.activeArchiveId) throw new ApiError(409, 'map_archive_active', 'แผนที่นี้เป็นไฟล์ที่โหลดใช้อยู่ กรุณาโหลดแผนที่อื่นก่อนลบ');
+    if (id === protection.recoveryArchiveId) throw new ApiError(409, 'map_archive_recovery', 'ไฟล์นี้ยังจำเป็นสำหรับกู้คืนหลังล้างแผนที่ กรุณาตั้งแผนที่ ตำแหน่ง และแท่นชาร์จให้เสร็จก่อนลบ');
+    await deleteDocuments([{ id, kind: 'robot-map-archive' }, { id: id + ':blob', kind: 'robot-map-blob' }]);
+    return item;
+  } finally { release(); }
+}
 export async function activateMap(id: string) {
   return withMaintenance(requireIdleRobot, async () => {
     const { item, bytes } = await archiveBytes(id);
@@ -140,7 +158,7 @@ export async function activateMap(id: string) {
       if (previous?.resetBackupId !== id) throw error;
       backup = { id };
     }
-    pendingReturn = null;
+    cancelPendingStandbyReturn();
     // Persist the interlock BEFORE touching hardware. An interrupted upload remains blocked after restart.
     const binding: Binding = { archiveId: id, needsLocalization: true, dockNeedsVerification: previous?.dockNeedsVerification === true, resetBackupId: previous?.resetBackupId };
     await putDocument('robot-active-map', 'robot-binding', binding);
@@ -198,12 +216,12 @@ export async function configureStandby(raw: unknown) {
     const poi = map.pois.find(p => p.id === value.poiId);
     if (value.poiId && (!poi?.pose || ![poi.pose.x, poi.pose.y, poi.pose.yaw].every(Number.isFinite))) throw new ApiError(422, 'unknown_poi', 'ไม่พบจุดประจำบนหุ่น');
     const result: Standby = { ...value, mapSignature: mapSignature(map), updatedAt: new Date().toISOString() };
-    pendingReturn = null;
+    cancelPendingStandbyReturn();
     await putDocument('robot-standby', 'robot-standby', result);
     return result;
   });
 }
-export async function returnToStandby(requester: { id: number | null; name: string | null; ip?: string }) {
+export async function returnToStandby(requester: { id: number | null; name: string | null; ip?: string }, allowDispatch?: () => boolean) {
   requireIdleRobot();
   const setting = await getDocument<Standby>('robot-standby', 'robot-standby');
   if (!setting?.poiId) throw new ApiError(409, 'no_standby', 'ยังไม่ได้ตั้งจุดประจำ');
@@ -211,25 +229,33 @@ export async function returnToStandby(requester: { id: number | null; name: stri
   if (mapSignature(map) !== setting.mapSignature) throw new ApiError(409, 'standby_map_changed', 'แผนที่เปลี่ยนแล้ว กรุณาตั้งจุดประจำใหม่');
   const poi = map.pois?.find(p => p.id === setting.poiId);
   if (!poi?.pose) throw new ApiError(409, 'standby_missing', 'จุดประจำถูกลบหรืออ่านไม่ได้');
+  if (allowDispatch && !allowDispatch()) throw new ApiError(409, 'standby_cancelled', 'ยกเลิกการกลับจุดประจำที่รออยู่แล้ว');
   return createJob('STANDBY:' + poi.id, requester.id === null ? 'auto' : 'operator', requester, { target: { code: 'STANDBY:' + poi.id,
     nameTh: 'จุดประจำ: ' + String(poi.metadata?.display_name ?? poi.id), x: poi.pose.x, y: poi.pose.y,
-    headingDeg: poi.pose.yaw * 180 / Math.PI, isDock: false, isPublic: false } });
+    headingDeg: poi.pose.yaw * 180 / Math.PI, isDock: false, isPublic: false }, allowDispatch });
 }
 export async function maybeReturnToStandby() {
-  if (pendingReturn === null || standbyBusy) return;
-  const jobId = pendingReturn; pendingReturn = null; standbyBusy = true;
+  const plan = pendingStandbyReturn();
+  if (!plan || standbyBusy) return;
+  const jobId = plan.jobId; standbyBusy = true;
   try {
     const w = getWorld(), job = w.jobs.find(j => j.id === jobId);
     const setting = await getDocument<Standby>('robot-standby', 'robot-standby');
-    if (!job || job.status !== 'arrived' || job.source === 'auto' || job.destPoiCode === 'DOCK' || job.destPoiCode.startsWith('STANDBY:') || setting?.returnPolicy !== 'after_job') return;
+    if (!isStandbyReturnCurrent(plan)) return;
+    if (!job || job.status !== 'arrived' || job.source === 'auto' || job.destPoiCode === 'DOCK' || job.destPoiCode.startsWith('STANDBY:') || setting?.returnPolicy !== 'after_job' || !setting.poiId || w.jobs.some(j => j.id > jobId)) {
+      cancelPendingStandbyReturn(); return;
+    }
     requireIdleRobot();
-    await returnToStandby({ id: null, name: 'กลับจุดประจำหลังจบงาน' });
+    if (Date.now() < plan.returnAt || !claimStandbyReturn(plan)) return;
+    await returnToStandby({ id: null, name: 'กลับจุดประจำหลังจบงาน' }, () => isStandbyReturnCurrent(plan));
   } catch (error) {
+    if (isStandbyReturnCurrent(plan)) cancelPendingStandbyReturn();
     getWorld().addAudit(null, 'robot.standby.skipped', String(jobId), { reason: String(error) });
     // Consume once: no surprise movement later when link/quality recovers.
   } finally { standbyBusy = false; }
 }
 export async function initializeRobotControl() {
+  cancelPendingStandbyReturn();
   setHardwareIdleCheck(config.robotMode === 'hermes' ? async () => {
     const action = await hermes!.currentAction();
     if (action && action.state?.status !== 4) throw new ApiError(409, 'external_robot_action', 'หุ่นมีคำสั่งทำงานอยู่จากอุปกรณ์อื่น กรุณาสิ้นสุดงานก่อนตั้งค่า');
@@ -240,6 +266,6 @@ export async function initializeRobotControl() {
   const binding = await getDocument<Binding>('robot-active-map', 'robot-binding');
   setLocalizationRequired(binding?.needsLocalization === true);
   setDockVerificationRequired(binding?.dockNeedsVerification === true);
-  setArrivalHandler(jobId => { pendingReturn = jobId; });
+  setArrivalHandler(scheduleStandbyReturn);
 }
 export async function listMapArchives() { return listDocuments<RobotMapArchive>('robot-map-archive'); }

@@ -3,15 +3,20 @@ import { useEffect, useState } from 'react';
 import type { RobotMapArchive } from '@hermes/shared';
 import { api, API_URL } from '../lib/api';
 import { useRobot } from '../lib/RobotContext';
-import type { ControlSettings } from './RobotSettings';
+import { useMe } from '../lib/useMe';
 
 export function RobotMapArchivePanel() {
   const { state } = useRobot();
+  const me = useMe();
   const [maps, setMaps] = useState<RobotMapArchive[]>([]), [active, setActive] = useState<string | null>(null);
+  const [recovery, setRecovery] = useState<string | null>(null), [protectionReady, setProtectionReady] = useState(false);
   const [name, setName] = useState('แผนที่ห้องแลป'), [busy, setBusy] = useState(false), [message, setMessage] = useState('');
   const load = async () => {
     setMaps(await api<RobotMapArchive[]>('/robot/map-archives'));
-    try { const s = await api<ControlSettings>('/robot/settings'); setActive(s.binding?.archiveId ?? null); } catch { /* Saved files remain available while offline. */ }
+    try {
+      const protection = await api<{ activeArchiveId: string | null; recoveryArchiveId: string | null }>('/robot/map-archives/protection');
+      setActive(protection.activeArchiveId); setRecovery(protection.recoveryArchiveId); setProtectionReady(true);
+    } catch { setProtectionReady(false); /* The list remains readable; the backend also checks protection on delete. */ }
   };
   useEffect(() => { void load().catch(e => setMessage(e.message)); }, []);
   const idle = state?.linkStatus === 'ok' && state.commandsEnabled && state.mode === 'idle' && !state.currentJob && !state.lock.mode;
@@ -42,12 +47,15 @@ export function RobotMapArchivePanel() {
     </div>
     <p className="text-sm text-amber">การโหลดแผนที่จะสำรองของเดิมและรีเซ็ตตำแหน่งหุ่น ต้องระบุตำแหน่ง/ทิศใหม่ที่หน้าแผนที่ก่อนนำทาง ไฟล์ในคลังเก็บถาวรในฐานข้อมูล ส่วนแผนที่ที่โหลดบนหุ่นอาจต้องโหลดใหม่หลังรีสตาร์ตหุ่น</p>
     <div className="grid gap-2 lg:grid-cols-2">{maps.map(map => <article key={map.id} className="border border-line rounded p-3 space-y-2">
-      <strong>{map.name}{active === map.id ? ' · โหลดล่าสุด' : ''}</strong>
+      <strong>{map.name}{active === map.id ? ' · โหลดใช้อยู่' : recovery === map.id ? ' · สำรองสำหรับกู้คืน' : ''}</strong>
       <p className="text-xs">{(map.byteLength / 1024).toFixed(1)} KB · {new Date(map.createdAt).toLocaleString('th-TH')} · {map.source === 'backup' ? 'สำรองอัตโนมัติ' : map.source === 'robot' ? 'บันทึกจากหุ่น' : 'อัปโหลด'}</p>
-      <div className="flex gap-2"><button className="btn btn-sm" disabled={busy} onClick={() => void act(() => download(map), 'ดาวน์โหลดไฟล์แล้ว')}>ดาวน์โหลด STCM</button>
+      <div className="flex gap-2 flex-wrap"><button className="btn btn-sm" disabled={busy} onClick={() => void act(() => download(map), 'ดาวน์โหลดไฟล์แล้ว')}>ดาวน์โหลด STCM</button>
         <button className="btn btn-sm" disabled={busy || !idle} onClick={() => {
           if (window.confirm(`โหลด “${map.name}” บนหุ่นจริง? ระบบจะสำรองแผนที่ปัจจุบันและปิดโหมดสร้างแผนที่ให้ ตำแหน่งจะถูกรีเซ็ตและต้องระบุตำแหน่งใหม่`)) void act(() => api(`/robot/map-archives/${map.id}/activate`, { method: 'POST', body: '{}' }), 'โหลดแผนที่แล้ว ไปหน้าแผนที่ → ระบุตำแหน่งหุ่น ก่อนนำทาง');
-        }}>โหลดบนหุ่น</button></div>
+        }}>โหลดบนหุ่น</button>
+        {me?.role === 'admin' && <button className="btn btn-sm text-red" aria-label={`ลบแผนที่ ${map.name}`} disabled={busy || !protectionReady || active === map.id || recovery === map.id} title={active === map.id ? 'โหลดแผนที่อื่นก่อนลบไฟล์นี้' : recovery === map.id ? 'ยังต้องเก็บไฟล์นี้ไว้กู้คืน' : 'ลบไฟล์ออกจากคลังถาวร'} onClick={() => {
+          if (window.confirm(`ลบแผนที่ “${map.name}” ออกจากคลังถาวร? ไฟล์นี้จะกู้คืนไม่ได้ การลบไฟล์ในคลังไม่ล้างแผนที่บนหุ่น`)) void act(() => api(`/robot/map-archives/${map.id}`, { method: 'DELETE' }), 'ลบไฟล์แผนที่ออกจากคลังแล้ว');
+        }}>ลบแผนที่</button>}</div>
     </article>)}</div>
     {!maps.length && <p>ยังไม่มีไฟล์แผนที่ในคลัง</p>}
     {message && <p role="status">{message}</p>}

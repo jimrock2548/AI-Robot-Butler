@@ -1,0 +1,16 @@
+{
+  "at": "2026-10-29T03:08:45.010Z",
+  "passed": true,
+  "fixtureId": "e0e56f2f-3d65-48e2-b436-e0f779617d8e",
+  "realPostgres": true,
+  "cancelSendsNoDelete": true,
+  "confirmationDeletesOnlyFixture": true,
+  "metadataAndBlobDeleted": true,
+  "reloadRemainsDeleted": true,
+  "protection": {
+    "activeArchiveId": "c59b6e7e-e762-4dcc-9d79-45a43fa74027",
+    "recoveryArchiveId": null
+  },
+  "robotMutationRequests": 0,
+  "errors": []
+}

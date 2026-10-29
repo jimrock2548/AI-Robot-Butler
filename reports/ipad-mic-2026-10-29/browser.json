@@ -1,0 +1,24 @@
+{
+  "at": "2026-10-29T03:51:59.421Z",
+  "passed": true,
+  "https": "https://192.168.1.24:3443/ai",
+  "tlsChainAndIpValidated": true,
+  "publicCertificateDownload": true,
+  "adminApiBlocked": true,
+  "browserTrustBypassUsedInTest": true,
+  "realIPadTest": false,
+  "realAudioTest": false,
+  "apiFixtures": true,
+  "robotRequests": 0,
+  "checks": [
+    "LAN HTTP shows trusted HTTPS setup and never starts recognition",
+    "Safari-prefixed recognizer denial explains site permission and exits listening",
+    "Constructor/start exceptions are handled without breaking chat",
+    "Separate permission check releases audio tracks and does not submit chat",
+    "Unavailable Safari recognition service gives Siri guidance",
+    "Existing automatic send after speech remains unchanged",
+    "Wake word still gates speech commands",
+    "Unavailable recognition offers Safari and keyboard dictation"
+  ],
+  "errors": []
+}
